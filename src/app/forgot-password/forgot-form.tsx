@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
-import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import {
@@ -17,18 +18,17 @@ export function ForgotPasswordForm() {
 
   if (state?.status === "ok") {
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/15 px-3 py-2 text-sm text-pitch-200 inline-flex items-start gap-2">
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>
-            {state.emailDelivered
-              ? "Reset link sent to the email on file. Check your inbox — it expires in one hour."
-              : "Reset link generated. Email delivery is not configured on this server, so please ask the admin for the link."}
-          </span>
+          <span>Identity confirmed. Continue to choose a new password — the link expires in one hour.</span>
         </div>
-        <p className="text-xs text-subtle">
-          You can close this page now.
-        </p>
+        <Link href={state.url}>
+          <Button size="lg" className="w-full">
+            Set new password
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </Link>
       </div>
     );
   }

@@ -21,7 +21,7 @@ const resetSchema = z.object({
 });
 
 export type ForgotState =
-  | { status: "ok"; emailDelivered: boolean }
+  | { status: "ok"; url: string }
   | { status: "name_mismatch" }
   | { status: "error"; error: string }
   | undefined;
@@ -42,10 +42,11 @@ async function getBaseUrl() {
 /**
  * Public: request a password reset using only first + last name.
  *
- * We look up the matching player and email the link to the email
- * stored on that player's account. We require an unambiguous match
- * (exactly one player and a linked user account); zero or multiple
- * matches return name_mismatch so we don't leak account info either way.
+ * If we find an unambiguous match (exactly one player with a linked
+ * account), we generate a fresh token and return its URL so the user
+ * can set a new password immediately on the same device. Zero or
+ * multiple matches return name_mismatch so we don't leak account
+ * existence either way.
  */
 export async function requestPasswordResetAction(
   _: ForgotState,
@@ -71,13 +72,11 @@ export async function requestPasswordResetAction(
     take: 2, // we only care whether it's exactly 1
   });
 
-  // 0 matches, >1 matches, or no linked user account → ask admin.
   if (matches.length !== 1 || !matches[0].user) {
     return { status: "name_mismatch" };
   }
 
-  const player = matches[0];
-  const user = player.user!;
+  const user = matches[0].user!;
 
   const token = generateToken();
   await db.passwordResetToken.create({
@@ -89,27 +88,12 @@ export async function requestPasswordResetAction(
     },
   });
 
-  const baseUrl = await getBaseUrl();
-  const resetUrl = buildPasswordResetUrl(baseUrl, token);
-
-  const text = [
-    `Hi ${player.firstName},`,
-    "",
-    "We received a request to reset your Veteranos password.",
-    "Open the link below to choose a new password. It expires in one hour.",
-    "",
-    resetUrl,
-    "",
-    "If this was not you, you can ignore this email.",
-  ].join("\n");
-
-  const result = await sendEmail({
-    to: user.email,
-    subject: "Reset your Veteranos password",
-    text,
-  });
-
-  return { status: "ok", emailDelivered: result.delivered };
+  // Return the relative URL so the form can redirect the user straight
+  // to the reset-password page on this device.
+  return {
+    status: "ok",
+    url: `/reset-password?token=${encodeURIComponent(token)}`,
+  };
 }
 
 /** Admin-triggered: generate a reset token for a specific user and email it. */
