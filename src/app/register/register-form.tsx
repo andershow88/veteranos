@@ -1,13 +1,30 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { registerAction } from "@/server/auth-actions";
 
 export function RegisterForm({ token }: { token: string }) {
   const [state, action, pending] = useActionState(registerAction, undefined);
+
+  if (state?.ok === "registered_no_login") {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/15 px-3 py-2 text-sm text-pitch-200 inline-flex items-start gap-2">
+          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>
+            Player registered. You don&apos;t have a login yet — an admin can set one up for you, or you can re-register with email and password later.
+          </span>
+        </div>
+        <Link href="/">
+          <Button size="lg" className="w-full">Continue to overview</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form action={action} className="space-y-5">
@@ -28,19 +45,24 @@ export function RegisterForm({ token }: { token: string }) {
             <Input id="lastName" name="lastName" required />
           </div>
         </div>
+      </Section>
+
+      <Section title="Login (optional)">
+        <p className="text-[11px] text-subtle">
+          Set email + password if you want to log in yourself. Leave both blank to be added as a roster-only player; an admin can set up your login later.
+        </p>
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email *</Label>
-          <Input id="email" name="email" type="email" autoComplete="email" required />
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" name="email" type="email" autoComplete="email" />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="password">Password *</Label>
+          <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             name="password"
             type="password"
             autoComplete="new-password"
             minLength={6}
-            required
           />
         </div>
       </Section>
@@ -79,7 +101,7 @@ export function RegisterForm({ token }: { token: string }) {
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        Create account
+        Register
       </Button>
 
       <p className="text-[11px] text-subtle text-center">

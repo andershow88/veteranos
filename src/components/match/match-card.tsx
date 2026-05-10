@@ -17,9 +17,13 @@ type CurrentPlayerCtx = {
 export function MatchCard({
   view,
   currentPlayer,
+  showDetailsLink = true,
 }: {
   view: MatchView;
   currentPlayer: CurrentPlayerCtx;
+  /** Whether to render the "Match details" link in the card footer.
+   * Pass false when the card is itself displayed inside the match-detail page. */
+  showDetailsLink?: boolean;
 }) {
   const totalPlaying = view.attendees.length + view.replacements.filter((r) => r.replacement).length;
 
@@ -166,14 +170,27 @@ export function MatchCard({
           </Section>
         )}
 
-        {currentPlayer.role === "ADMIN" && (
-          <div className="flex items-center justify-end pt-2">
-            <Link
-              href={`/admin/matches/${view.id}`}
-              className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
-            >
-              Admin →
-            </Link>
+        {(showDetailsLink || currentPlayer.role === "ADMIN") && (
+          <div className="flex items-center justify-between pt-2">
+            {showDetailsLink ? (
+              <Link
+                href={`/matches/${view.id}`}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-pitch-300 hover:text-pitch-200 transition"
+              >
+                Match details {view.hasTeams ? "& teams" : ""}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <span />
+            )}
+            {currentPlayer.role === "ADMIN" && (
+              <Link
+                href={`/admin/matches/${view.id}`}
+                className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
+              >
+                Admin →
+              </Link>
+            )}
           </div>
         )}
       </CardBody>

@@ -46,7 +46,7 @@ export default async function MatchDetailPage({
         <ArrowLeft className="h-4 w-4" /> Back to overview
       </Link>
 
-      <MatchCard view={view} currentPlayer={currentPlayer} />
+      <MatchCard view={view} currentPlayer={currentPlayer} showDetailsLink={false} />
 
       {teams.length > 0 && <TeamShowcase teams={teams} />}
     </div>
