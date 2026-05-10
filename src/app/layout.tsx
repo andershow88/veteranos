@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description:
     "Organize your football matches, sign-ups, waitlists and balanced teams. Modern, dynamic, always up to date.",
   applicationName: "Veteranos",
+  // Without this Chrome on Android won't recognize the page as installable
+  // and beforeinstallprompt never fires.
+  manifest: "/manifest.webmanifest",
   // iOS-specific tags — Next renders these as <meta apple-mobile-web-app-*>.
   appleWebApp: {
     capable: true,

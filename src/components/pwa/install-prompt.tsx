@@ -87,8 +87,15 @@ export function InstallPrompt() {
     }
   };
 
+  // Android install prompt anchors to the bottom (Chromium has no UI in
+  // the way down there). iOS hint anchors to the top because Safari's
+  // share button sits in the bottom toolbar and we must not cover it.
+  const positionClasses = deferred
+    ? "inset-x-3 bottom-3 sm:left-auto sm:right-3 sm:max-w-sm pb-[env(safe-area-inset-bottom)]"
+    : "inset-x-3 top-3 sm:left-auto sm:right-3 sm:max-w-sm pt-[env(safe-area-inset-top)]";
+
   return (
-    <div className="fixed inset-x-3 bottom-3 z-40 sm:left-auto sm:right-3 sm:max-w-sm">
+    <div className={`fixed z-40 ${positionClasses}`}>
       <div className="relative glass rounded-2xl border border-pitch-600/40 shadow-2xl px-4 py-3 pr-10">
         <button
           type="button"
@@ -120,7 +127,7 @@ export function InstallPrompt() {
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-foreground">Add to Home Screen</div>
               <div className="text-[11px] text-muted leading-snug">
-                Tap the Share icon in Safari, then choose &ldquo;Add to Home Screen&rdquo; to install Veteranos.
+                In Safari, tap the Share button (the square with the up-arrow) in the toolbar &mdash; then choose &ldquo;Add to Home Screen&rdquo;.
               </div>
             </div>
           </div>
