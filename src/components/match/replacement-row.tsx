@@ -86,13 +86,18 @@ export function ReplacementRow({
           <div className="text-sm text-muted italic">No replacement available</div>
         )}
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <PaymentBadge status={info.paymentStatus} />
-        </div>
+        {/* Payment badge is private to the two parties involved. Bystanders
+            (including admins viewing the public homepage card) don't see it.
+            Admins still get the full picture in /admin/matches/[id]. */}
+        {(isWaitlistMe || isAboMe) && (
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <PaymentBadge status={info.paymentStatus} />
+          </div>
+        )}
       </div>
 
-      {/* Payment action bar */}
-      {info.replacement && info.paymentStatus !== "NONE" && (
+      {/* Payment action bar — only visible to the abo and the waitlist replacement. */}
+      {info.replacement && info.paymentStatus !== "NONE" && (isWaitlistMe || isAboMe) && (
         <div className="rounded-lg border border-border/60 bg-surface/40 px-3 py-2 space-y-2">
           {/* Waitlist player's view */}
           {isWaitlistMe && info.paymentStatus === "PENDING" && (
@@ -189,37 +194,11 @@ export function ReplacementRow({
               </div>
             </div>
           )}
-
-          {/* Bystanders */}
-          {!isWaitlistMe && !isAboMe && info.paymentStatus !== "PAID" && (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-              <span>
-                {info.replacement.player.firstName} owes {info.abo.firstName}
-                {info.paymentStatus === "CLAIMED" && " · marked paid, awaiting confirmation"}
-              </span>
-              {info.abo.paypalLink ? (
-                <a
-                  href={info.abo.paypalLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 rounded-full border border-pitch-600/50 bg-pitch-700/20 px-2.5 py-1 text-[11px] font-semibold text-pitch-100 hover:bg-pitch-700/40 transition"
-                >
-                  <Wallet className="h-3 w-3" />
-                  PayPal {info.abo.firstName}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              ) : info.abo.paypalName ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border-strong bg-surface-2 px-2.5 py-1 text-[11px] text-foreground/80">
-                  <Wallet className="h-3 w-3 text-pitch-300" />
-                  {info.abo.paypalName}
-                </span>
-              ) : null}
-            </div>
-          )}
         </div>
       )}
 
-      {info.paymentNote && (
+      {/* Payment note also stays between the two parties. */}
+      {info.paymentNote && (isWaitlistMe || isAboMe) && (
         <div className="text-xs text-muted italic">&ldquo;{info.paymentNote}&rdquo;</div>
       )}
     </div>
