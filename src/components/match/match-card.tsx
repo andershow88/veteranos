@@ -129,7 +129,7 @@ export function MatchCard({
           >
             <div className="space-y-2">
               {view.replacements.map((r, idx) => (
-                <ReplacementRow key={idx} info={r} index={idx} />
+                <ReplacementRow key={idx} info={r} index={idx} currentPlayer={currentPlayer} />
               ))}
             </div>
           </Section>
@@ -141,25 +141,25 @@ export function MatchCard({
             icon={<ListOrdered className="h-3.5 w-3.5" />}
             count={view.waitlist.length}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            <div className="space-y-1.5">
               {view.waitlist.map((s, idx) => {
                 const isReplacing = idx < view.declined.length;
                 return (
                   <div
                     key={s.id}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-2 border ${
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 border ${
                       isReplacing
                         ? "border-pitch-600/60 bg-pitch-700/15"
                         : "border-border/60 bg-surface/40"
                     }`}
                   >
-                    <span className="text-xs font-bold text-pitch-300 w-5">#{idx + 1}</span>
+                    <span className="text-xs font-bold text-pitch-300 w-6 number-pill shrink-0">#{idx + 1}</span>
                     <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" src={s.player.avatarUrl} />
-                    <span className="text-sm">
+                    <span className="text-sm truncate flex-1 min-w-0">
                       {s.player.firstName} {s.player.lastName}
                     </span>
                     {isReplacing && (
-                      <Badge tone="success" className="ml-auto">
+                      <Badge tone="success" className="shrink-0">
                         stepping in
                       </Badge>
                     )}

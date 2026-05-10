@@ -177,4 +177,70 @@ export async function getActivePlayersGrouped(): Promise<PlayerKindGroup> {
   };
 }
 
+export type PaymentEntry = {
+  signupId: string;
+  matchId: string;
+  matchDate: Date;
+  status: "PENDING" | "CLAIMED" | "PAID";
+  /** The waitlist player who replaced an abo. */
+  waitlistPlayer: Player;
+  /** The abo player whose slot is being taken. */
+  aboPlayer: Player;
+};
+
+/**
+ * Returns all replacement payments for which the given player is either
+ * the waitlist replacement (owes) or the abo being replaced (is owed).
+ * Only includes matches in the future or recent past.
+ */
+export async function getPaymentsForPlayer(playerId: string): Promise<{
+  youOwe: PaymentEntry[];
+  owedToYou: PaymentEntry[];
+}> {
+  const cutoff = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30); // last 30 days + future
+
+  const matches = await db.match.findMany({
+    where: { date: { gte: cutoff } },
+    orderBy: { date: "asc" },
+    include: {
+      signups: {
+        include: { player: true },
+        orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+      },
+    },
+  });
+
+  const youOwe: PaymentEntry[] = [];
+  const owedToYou: PaymentEntry[] = [];
+
+  for (const m of matches) {
+    const declined = m.signups
+      .filter((s) => s.status === "OUT" && s.player.kind === "ABO")
+      .sort((a, b) => a.rank - b.rank);
+    const waitlist = m.signups
+      .filter((s) => s.status === "WAITLIST")
+      .sort((a, b) => a.rank - b.rank);
+
+    declined.forEach((out, idx) => {
+      const wl = waitlist[idx];
+      if (!wl) return;
+      if (wl.paymentStatus !== "PENDING" && wl.paymentStatus !== "CLAIMED" && wl.paymentStatus !== "PAID") return;
+
+      const entry: PaymentEntry = {
+        signupId: wl.id,
+        matchId: m.id,
+        matchDate: m.date,
+        status: wl.paymentStatus as PaymentEntry["status"],
+        waitlistPlayer: wl.player,
+        aboPlayer: out.player,
+      };
+
+      if (wl.playerId === playerId) youOwe.push(entry);
+      if (out.playerId === playerId) owedToYou.push(entry);
+    });
+  }
+
+  return { youOwe, owedToYou };
+}
+
 export type { Player, PlayerKind, Signup, SignupStatus, PaymentStatus };

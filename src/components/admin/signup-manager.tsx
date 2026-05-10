@@ -198,13 +198,23 @@ function IconBtn({
 
 function PaymentControls({ signupId, status }: { signupId: string; status: PaymentStatus }) {
   const [pending, start] = useTransition();
+  // Admin click cycles: PENDING -> CLAIMED -> PAID -> PENDING (skips NONE).
+  // NONE rows are non-replacements and not cycled by clicking.
   const cycle = () => {
-    const next: PaymentStatus = status === "PAID" ? "PENDING" : status === "PENDING" ? "PAID" : "PENDING";
+    const next: PaymentStatus =
+      status === "PAID"
+        ? "PENDING"
+        : status === "CLAIMED"
+        ? "PAID"
+        : status === "PENDING"
+        ? "CLAIMED"
+        : "PENDING";
     start(() => setPaymentStatusAction({ signupId, status: next }));
   };
-  const labels: Record<PaymentStatus, { tone: "success" | "warn" | "outline"; icon: React.ReactNode; label: string }> = {
-    PAID: { tone: "success", icon: <CheckCircle2 className="h-3 w-3" />, label: "paid" },
-    PENDING: { tone: "warn", icon: <Clock className="h-3 w-3" />, label: "pending" },
+  const labels: Record<PaymentStatus, { tone: "success" | "warn" | "info" | "outline"; icon: React.ReactNode; label: string }> = {
+    PAID: { tone: "success", icon: <CheckCircle2 className="h-3 w-3" />, label: "Paid" },
+    CLAIMED: { tone: "info", icon: <Clock className="h-3 w-3" />, label: "Awaiting confirmation" },
+    PENDING: { tone: "warn", icon: <Clock className="h-3 w-3" />, label: "Payment pending" },
     NONE: { tone: "outline", icon: <CircleDashed className="h-3 w-3" />, label: "no payment" },
   };
   const cur = labels[status];

@@ -268,9 +268,12 @@ export async function deleteMatchAction(matchId: string) {
   redirect("/admin/matches");
 }
 
-export async function generateTeamsAction(matchId: string) {
+export async function generateTeamsAction(
+  matchId: string,
+  options: { useAllPlayers?: boolean; excludePlayerIds?: string[] } = {},
+) {
   await requireAdmin();
-  await generateTeamsForMatch(matchId);
+  await generateTeamsForMatch(matchId, options);
   revalidatePath("/");
   revalidatePath(`/matches/${matchId}`);
   revalidatePath(`/admin/matches/${matchId}`);

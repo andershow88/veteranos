@@ -210,8 +210,30 @@ function balanceVerdict(teams: TeamDraft[]) {
   return "A bit uneven — one team looks stronger. Consider swapping.";
 }
 
-/** Reads the participating players of a match and generates balanced teams. */
-export async function generateTeamsForMatch(matchId: string) {
+/** Number of players we want per team in the default selection (5 per side). */
+const PLAYERS_PER_TEAM = 5;
+
+export type GenerateTeamsOptions = {
+  /** If true, include every IN abo + every waitlist signup, regardless of the
+   * standard 5×teamCount limit. Extras stretch the teams (e.g. 6 vs 6 vs 6
+   * instead of 5 vs 5 vs 5). */
+  useAllPlayers?: boolean;
+  /** Player ids the admin explicitly excluded from this generation. They
+   * stay signed up for the match but are not drafted onto a team. */
+  excludePlayerIds?: string[];
+};
+
+/** Reads the participating players of a match and generates balanced teams.
+ *
+ * Selection logic:
+ *  1. All IN abos in player-rank order (abos always have priority).
+ *  2. Waitlist signups in waitlist-rank order, filling the remaining seats.
+ *  3. Truncate to `teamCount * PLAYERS_PER_TEAM` unless `useAllPlayers` is set.
+ */
+export async function generateTeamsForMatch(
+  matchId: string,
+  options: GenerateTeamsOptions = {},
+) {
   const match = await db.match.findUnique({
     where: { id: matchId },
     include: {
@@ -223,20 +245,27 @@ export async function generateTeamsForMatch(matchId: string) {
   });
   if (!match) throw new Error("Match not found");
 
-  // Active players = IN abos + waitlist replacements (for the first N OUTs)
-  const ins = match.signups.filter((s) => s.status === "IN" && s.player.kind === "ABO");
-  const outs = match.signups.filter((s) => s.status === "OUT" && s.player.kind === "ABO");
+  const excluded = new Set(options.excludePlayerIds ?? []);
+
+  const ins = match.signups
+    .filter((s) => s.status === "IN" && s.player.kind === "ABO")
+    .sort((a, b) => a.player.rank - b.player.rank || a.rank - b.rank);
+
   const waitlist = match.signups
     .filter((s) => s.status === "WAITLIST")
-    .sort((a, b) => a.rank - b.rank);
-  const replacements = waitlist.slice(0, outs.length);
+    .sort((a, b) => a.rank - b.rank || a.player.rank - b.player.rank);
 
-  const playing: Player[] = [
+  const pool: Player[] = [
     ...ins.map((s) => s.player),
-    ...replacements.map((s) => s.player),
-  ];
+    ...waitlist.map((s) => s.player),
+  ].filter((p) => !excluded.has(p.id));
 
   const teamCount = Math.max(2, Math.min(4, match.teamCount));
+  const standardLimit = teamCount * PLAYERS_PER_TEAM;
+  const limit = options.useAllPlayers ? pool.length : Math.min(standardLimit, pool.length);
+
+  const playing = pool.slice(0, limit);
+
   if (playing.length < teamCount * 2) {
     throw new Error(
       `At least ${teamCount * 2} players required, currently ${playing.length}.`,

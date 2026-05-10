@@ -122,7 +122,30 @@ export default async function AdminMatchPage({
           </Badge>
         </CardHeader>
         <CardBody className="space-y-5">
-          <TeamControls matchId={id} hasTeams={teams.length > 0} locked={match.locked} />
+          <TeamControls
+            matchId={id}
+            hasTeams={teams.length > 0}
+            locked={match.locked}
+            teamCount={match.teamCount}
+            pool={[
+              ...view.attendees.map((s) => ({
+                id: s.player.id,
+                firstName: s.player.firstName,
+                lastName: s.player.lastName,
+                avatarUrl: s.player.avatarUrl,
+                kind: s.player.kind as "ABO" | "WAITLIST",
+                overall: s.player.overall,
+              })),
+              ...view.waitlist.map((s) => ({
+                id: s.player.id,
+                firstName: s.player.firstName,
+                lastName: s.player.lastName,
+                avatarUrl: s.player.avatarUrl,
+                kind: s.player.kind as "ABO" | "WAITLIST",
+                overall: s.player.overall,
+              })),
+            ]}
+          />
           {teams.length > 0 && <TeamShowcase teams={teams} />}
         </CardBody>
       </Card>

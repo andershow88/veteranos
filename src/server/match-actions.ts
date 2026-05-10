@@ -150,7 +150,7 @@ export async function setPaymentStatusAction(input: {
 
 /**
  * Sets the payment status to PENDING for the first N waitlist players (N = number of declines).
- * Anyone past that count gets reset to NONE.
+ * Already-CLAIMED or already-PAID rows are preserved. Anyone past that count gets reset to NONE.
  */
 async function syncWaitlistPaymentStatuses(matchId: string) {
   const declined = await db.signup.findMany({
@@ -171,7 +171,13 @@ async function syncWaitlistPaymentStatuses(matchId: string) {
       db.signup.update({
         where: { id: w.id },
         data: {
-          paymentStatus: w.paymentStatus === "PAID" ? "PAID" : "PENDING",
+          // Don't downgrade existing claim/paid state.
+          paymentStatus:
+            w.paymentStatus === "PAID"
+              ? "PAID"
+              : w.paymentStatus === "CLAIMED"
+              ? "CLAIMED"
+              : "PENDING",
         },
       }),
     ),
@@ -250,4 +256,147 @@ export async function adminSetSignupAction(input: {
   revalidatePath("/");
   revalidatePath(`/matches/${input.matchId}`);
   revalidatePath("/admin/matches");
+}
+
+/**
+ * Looks up the abo signup that a given waitlist signup is replacing.
+ * Match by rank: waitlist[i] replaces declined[i] when both lists are sorted.
+ * Returns null if this signup isn't a replacement.
+ */
+async function findReplacementContext(signupId: string) {
+  const wl = await db.signup.findUnique({
+    where: { id: signupId },
+    include: { player: true },
+  });
+  if (!wl || wl.status !== "WAITLIST") return null;
+
+  const [waitlist, outs] = await Promise.all([
+    db.signup.findMany({
+      where: { matchId: wl.matchId, status: "WAITLIST" },
+      orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+      select: { id: true },
+    }),
+    db.signup.findMany({
+      where: { matchId: wl.matchId, status: "OUT", player: { kind: "ABO" } },
+      orderBy: { rank: "asc" },
+      include: { player: true },
+    }),
+  ]);
+
+  const idx = waitlist.findIndex((s) => s.id === wl.id);
+  const out = idx >= 0 ? outs[idx] : null;
+  if (!out) return null;
+
+  return { waitlist: wl, out, abo: out.player };
+}
+
+function pathBust(matchId: string) {
+  revalidatePath("/");
+  revalidatePath(`/matches/${matchId}`);
+  revalidatePath("/profile");
+  revalidatePath(`/admin/matches/${matchId}`);
+}
+
+/**
+ * Waitlist player marks their replacement payment as paid.
+ * Transitions PENDING -> CLAIMED. The abo player still needs to confirm.
+ */
+export async function claimPaymentAction(signupId: string) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const ctx = await findReplacementContext(signupId);
+  if (!ctx) throw new Error("Not a replacement signup");
+  if (ctx.waitlist.playerId !== user.player.id) {
+    throw new Error("Only the waitlist player can claim payment");
+  }
+  if (ctx.waitlist.paymentStatus !== "PENDING") {
+    throw new Error("Payment is not pending");
+  }
+
+  await db.signup.update({
+    where: { id: signupId },
+    data: { paymentStatus: "CLAIMED" },
+  });
+
+  pathBust(ctx.waitlist.matchId);
+}
+
+/**
+ * Waitlist player undoes their paid claim.
+ * Transitions CLAIMED -> PENDING.
+ */
+export async function unclaimPaymentAction(signupId: string) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const ctx = await findReplacementContext(signupId);
+  if (!ctx) throw new Error("Not a replacement signup");
+  if (ctx.waitlist.playerId !== user.player.id) {
+    throw new Error("Only the waitlist player can revoke a claim");
+  }
+  if (ctx.waitlist.paymentStatus !== "CLAIMED") {
+    throw new Error("Payment is not claimed");
+  }
+
+  await db.signup.update({
+    where: { id: signupId },
+    data: { paymentStatus: "PENDING" },
+  });
+
+  pathBust(ctx.waitlist.matchId);
+}
+
+/**
+ * Abo player confirms they received payment.
+ * Transitions CLAIMED -> PAID.
+ */
+export async function confirmPaymentAction(signupId: string) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const ctx = await findReplacementContext(signupId);
+  if (!ctx) throw new Error("Not a replacement signup");
+  if (ctx.abo.id !== user.player.id) {
+    throw new Error("Only the abo can confirm receipt");
+  }
+  if (ctx.waitlist.paymentStatus !== "CLAIMED") {
+    throw new Error("Payment is not in a confirmable state");
+  }
+
+  await db.signup.update({
+    where: { id: signupId },
+    data: { paymentStatus: "PAID" },
+  });
+
+  pathBust(ctx.waitlist.matchId);
+}
+
+/**
+ * Abo player rejects a paid claim (CLAIMED -> PENDING).
+ * Used when waitlist marked paid but the abo never received it.
+ */
+export async function disputePaymentAction(signupId: string) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const ctx = await findReplacementContext(signupId);
+  if (!ctx) throw new Error("Not a replacement signup");
+  if (ctx.abo.id !== user.player.id) {
+    throw new Error("Only the abo can dispute");
+  }
+  if (ctx.waitlist.paymentStatus !== "CLAIMED") {
+    throw new Error("Nothing to dispute");
+  }
+
+  await db.signup.update({
+    where: { id: signupId },
+    data: { paymentStatus: "PENDING" },
+  });
+
+  pathBust(ctx.waitlist.matchId);
 }

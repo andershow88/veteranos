@@ -21,6 +21,10 @@ const fixups: Fixup[] = [
     name: 'rename PlayerKind value SUBSCRIBER -> ABO',
     sql: `ALTER TYPE "PlayerKind" RENAME VALUE 'SUBSCRIBER' TO 'ABO'`,
   },
+  {
+    name: 'add PaymentStatus value CLAIMED',
+    sql: `ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'CLAIMED'`,
+  },
 ];
 
 async function run() {

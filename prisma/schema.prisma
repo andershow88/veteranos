@@ -28,8 +28,9 @@ enum SignupStatus {
 
 enum PaymentStatus {
   NONE        // no payment required
-  PENDING     // pending
-  PAID        // paid
+  PENDING     // waitlist player owes the abo
+  CLAIMED     // waitlist player says they paid; awaiting abo confirmation
+  PAID        // abo confirmed receipt
 }
 
 enum Position {
