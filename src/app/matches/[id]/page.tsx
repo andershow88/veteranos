@@ -43,7 +43,7 @@ export default async function MatchDetailPage({
         href="/"
         className="inline-flex items-center gap-2 text-sm text-muted hover:text-pitch-300 transition"
       >
-        <ArrowLeft className="h-4 w-4" /> Zurück zur Übersicht
+        <ArrowLeft className="h-4 w-4" /> Back to overview
       </Link>
 
       <MatchCard view={view} currentPlayer={currentPlayer} />

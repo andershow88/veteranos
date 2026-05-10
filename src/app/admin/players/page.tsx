@@ -19,16 +19,16 @@ export default async function AdminPlayersPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-2xl tracking-wide">Spieler</h2>
+        <h2 className="font-display text-2xl tracking-wide">Players</h2>
         <Link href="/admin/players/new">
           <Button>
-            <Plus className="h-4 w-4" /> Neuer Spieler
+            <Plus className="h-4 w-4" /> New player
           </Button>
         </Link>
       </div>
 
-      <PlayerListSection title="Abo-Spieler" players={subs} tone="success" />
-      <PlayerListSection title="Wartelisten-Spieler" players={waitlist} tone="info" />
+      <PlayerListSection title="Subscribers" players={subs} tone="success" />
+      <PlayerListSection title="Waitlist" players={waitlist} tone="info" />
     </div>
   );
 }
@@ -56,7 +56,7 @@ function PlayerListSection({
       </CardHeader>
       <CardBody className="space-y-1.5">
         {players.length === 0 ? (
-          <p className="text-sm text-muted">Niemand hier.</p>
+          <p className="text-sm text-muted">Nobody here yet.</p>
         ) : (
           players.map((p) => (
             <Link
@@ -68,13 +68,13 @@ function PlayerListSection({
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-foreground">
                   {p.firstName} {p.lastName}
-                  {p.nickname && <span className="text-muted font-normal"> „{p.nickname}“</span>}
+                  {p.nickname && <span className="text-muted font-normal"> &ldquo;{p.nickname}&rdquo;</span>}
                 </div>
                 <div className="text-xs text-muted">
-                  Rank #{p.rank} · {p.user?.email ?? "kein Login"} · Stärke {p.overall}
+                  Rank #{p.rank} · {p.user?.email ?? "no login"} · OVR {p.overall}
                 </div>
               </div>
-              {!p.active && <Badge tone="warn">inaktiv</Badge>}
+              {!p.active && <Badge tone="warn">inactive</Badge>}
               <Pencil className="h-4 w-4 text-muted" />
             </Link>
           ))

@@ -11,15 +11,15 @@ import {
 } from "@/lib/auth";
 
 const loginSchema = z.object({
-  email: z.string().email("Bitte gültige Email angeben"),
-  password: z.string().min(1, "Passwort fehlt"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(1, "Password missing"),
 });
 
 const registerSchema = z.object({
-  email: z.string().email("Bitte gültige Email angeben"),
-  password: z.string().min(6, "Mindestens 6 Zeichen"),
-  firstName: z.string().min(1, "Vorname fehlt"),
-  lastName: z.string().min(1, "Nachname fehlt"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "At least 6 characters"),
+  firstName: z.string().min(1, "First name missing"),
+  lastName: z.string().min(1, "Last name missing"),
 });
 
 export type AuthState = { error?: string } | undefined;
@@ -32,10 +32,10 @@ export async function loginAction(_: AuthState, formData: FormData): Promise<Aut
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const user = await db.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
-  if (!user) return { error: "Email oder Passwort falsch" };
+  if (!user) return { error: "Wrong email or password" };
 
   const valid = await verifyPassword(parsed.data.password, user.passwordHash);
-  if (!valid) return { error: "Email oder Passwort falsch" };
+  if (!valid) return { error: "Wrong email or password" };
 
   await createSession({ userId: user.id, role: user.role, email: user.email });
   redirect("/");
@@ -52,7 +52,7 @@ export async function registerAction(_: AuthState, formData: FormData): Promise<
 
   const email = parsed.data.email.toLowerCase();
   const existing = await db.user.findUnique({ where: { email } });
-  if (existing) return { error: "Email bereits registriert" };
+  if (existing) return { error: "Email already registered" };
 
   const passwordHash = await hashPassword(parsed.data.password);
 

@@ -13,11 +13,11 @@ export function PasswordForm() {
     <form action={action} className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="currentPassword">Aktuelles Passwort</Label>
+          <Label htmlFor="currentPassword">Current password</Label>
           <Input id="currentPassword" name="currentPassword" type="password" required />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="newPassword">Neues Passwort</Label>
+          <Label htmlFor="newPassword">New password</Label>
           <Input id="newPassword" name="newPassword" type="password" minLength={6} required />
         </div>
       </div>
@@ -29,13 +29,13 @@ export function PasswordForm() {
       )}
       {state?.ok && (
         <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/20 px-3 py-2 text-sm text-pitch-200 inline-flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" /> Passwort geändert.
+          <CheckCircle2 className="h-4 w-4" /> Password changed.
         </div>
       )}
 
       <Button type="submit" variant="secondary" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        Passwort ändern
+        Change password
       </Button>
     </form>
   );

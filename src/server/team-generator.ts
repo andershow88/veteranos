@@ -58,13 +58,13 @@ function balanceCost(teams: TeamDraft[]) {
   const defSpread = spread(stats.map((s) => s.defense));
   const offSpread = spread(stats.map((s) => s.offense));
   const speedSpread = spread(stats.map((s) => s.speed));
-  // Größerer Wert für Overall, kleinere Gewichte für Detail-Skills.
+  // Higher weight on overall, lower weights on individual skills.
   return overallSpread * 3 + defSpread + offSpread + speedSpread * 0.5;
 }
 
 /**
- * Snake-Draft: Spieler nach Overall sortieren, in Reihenfolge austeilen,
- * Richtung pro Runde umkehren. Liefert grob ausgeglichene Teams.
+ * Snake draft: sort players by overall, deal them out in order,
+ * reverse direction every round. Produces roughly balanced teams.
  */
 function snakeDraft(players: Player[], teamCount: number): TeamDraft[] {
   const teams: TeamDraft[] = TEAM_COLORS.slice(0, teamCount).map((c) => ({
@@ -73,7 +73,7 @@ function snakeDraft(players: Player[], teamCount: number): TeamDraft[] {
     players: [],
   }));
 
-  // Torhüter zuerst gleichmäßig verteilen
+  // Distribute goalkeepers evenly first
   const goalkeepers = players
     .filter((p) => p.position === "GOALKEEPER" || p.goalkeeping >= 70)
     .sort((a, b) => b.goalkeeping - a.goalkeeping);
@@ -109,8 +109,8 @@ function snakeDraft(players: Player[], teamCount: number): TeamDraft[] {
 }
 
 /**
- * Lokale Optimierung: zufällige Spieler-Tausche zwischen zwei Teams,
- * nur akzeptiert, wenn Balance-Kosten sinken. Schnell & robust.
+ * Local optimization: random player swaps between two teams,
+ * only accepted if balance cost decreases. Fast and robust.
  */
 function refineSwaps(teams: TeamDraft[], iterations = 800): TeamDraft[] {
   const current = teams.map((t) => ({ ...t, players: [...t.players] }));
@@ -128,7 +128,7 @@ function refineSwaps(teams: TeamDraft[], iterations = 800): TeamDraft[] {
     const pa = current[a].players[ia];
     const pb = current[b].players[ib];
 
-    // Goalies nicht tauschen, wenn dadurch ein Team keinen Keeper mehr hat
+    // Don't swap goalies if it leaves a team without one
     const isPaKeeper = pa.position === "GOALKEEPER" || pa.goalkeeping >= 70;
     const isPbKeeper = pb.position === "GOALKEEPER" || pb.goalkeeping >= 70;
     if (isPaKeeper !== isPbKeeper) {
@@ -173,24 +173,24 @@ function describeTeam(team: TeamDraft, all: TeamDraft[]) {
   const gks = team.players.filter((p) => p.position === "GOALKEEPER" || p.goalkeeping >= 70);
 
   const traits: string[] = [];
-  if (isBestDef && isBestOff) traits.push("komplettes Paket");
-  else if (isBestDef) traits.push("defensiv stabil");
-  else if (isBestOff) traits.push("offensiv brandgefährlich");
-  if (isBestSpeed) traits.push("turbo-schnell");
-  if (isBestTech) traits.push("technisch verspielt");
-  if (gks.length === 0) traits.push("ohne festen Keeper");
+  if (isBestDef && isBestOff) traits.push("complete package");
+  else if (isBestDef) traits.push("defensively rock-solid");
+  else if (isBestOff) traits.push("dangerous up front");
+  if (isBestSpeed) traits.push("turbo-fast");
+  if (isBestTech) traits.push("technically gifted");
+  if (gks.length === 0) traits.push("no proper keeper");
 
   const phrases = [
-    `Stärke ${overall}/100 – ${traits.length ? traits.join(", ") : "ausgeglichen aufgestellt"}.`,
+    `OVR ${overall}/100 — ${traits.length ? traits.join(", ") : "balanced across the board"}.`,
     isBestOff && isBestDef
-      ? "Wer hier durchkommt, hat es verdient. Favoritenrolle!"
+      ? "Whoever beats this lot earns it. Favorites tag stamped on."
       : isBestOff
-      ? "Hinten wackelt es vielleicht, aber vorne brennt die Hütte."
+      ? "May leak goals at the back, but the attack is on fire."
       : isBestDef
-      ? "Festung Marke Eigenbau. Erst durchkommen, dann reden."
+      ? "Built like a fortress. Get past them first, then talk."
       : isBestSpeed
-      ? "Wenn es schnell geht, sind sie zuerst da."
-      : "Das Team mit Charakter – könnte heute überraschen.",
+      ? "If it turns into a foot race, these guys win it."
+      : "The team with character — could be today's surprise.",
   ];
 
   return {
@@ -204,13 +204,13 @@ function describeTeam(team: TeamDraft, all: TeamDraft[]) {
 
 function balanceVerdict(teams: TeamDraft[]) {
   const cost = balanceCost(teams);
-  if (cost < 5) return "🔥 Diese Teams sind bombenausgeglichen. Kann jeder gewinnen.";
-  if (cost < 12) return "👌 Sehr ausgewogene Teams – wird ein enges Ding.";
-  if (cost < 22) return "🤝 Solide Balance, kleine Vorteile für ein Team möglich.";
-  return "⚠️ Etwas unausgewogen – ein Team wirkt deutlich stärker. Vielleicht tauschen?";
+  if (cost < 5) return "Perfectly balanced — anyone can win this.";
+  if (cost < 12) return "Very even teams — should be tight.";
+  if (cost < 22) return "Solid balance, slight edge possible.";
+  return "A bit uneven — one team looks stronger. Consider swapping.";
 }
 
-/** Liest die teilnehmenden Spieler eines Termins und generiert balancierte Teams. */
+/** Reads the participating players of a match and generates balanced teams. */
 export async function generateTeamsForMatch(matchId: string) {
   const match = await db.match.findUnique({
     where: { id: matchId },
@@ -221,9 +221,9 @@ export async function generateTeamsForMatch(matchId: string) {
       },
     },
   });
-  if (!match) throw new Error("Termin nicht gefunden");
+  if (!match) throw new Error("Match not found");
 
-  // Aktive Teilnehmer = IN-Abo + Wartelisten-Nachrücker (für die ersten N OUTs)
+  // Active players = IN subscribers + waitlist replacements (for the first N OUTs)
   const ins = match.signups.filter((s) => s.status === "IN" && s.player.kind === "SUBSCRIBER");
   const outs = match.signups.filter((s) => s.status === "OUT" && s.player.kind === "SUBSCRIBER");
   const waitlist = match.signups
@@ -239,14 +239,14 @@ export async function generateTeamsForMatch(matchId: string) {
   const teamCount = Math.max(2, Math.min(4, match.teamCount));
   if (playing.length < teamCount * 2) {
     throw new Error(
-      `Mindestens ${teamCount * 2} Spieler nötig, aktuell ${playing.length}.`,
+      `At least ${teamCount * 2} players required, currently ${playing.length}.`,
     );
   }
 
   const initial = snakeDraft(playing, teamCount);
   const optimized = refineSwaps(initial);
 
-  // Persistieren: alte Teams löschen, neue erstellen
+  // Persist: drop old teams, create fresh ones
   await db.team.deleteMany({ where: { matchId } });
   const verdict = balanceVerdict(optimized);
 

@@ -27,9 +27,9 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat title="Spieler" value={playerCount} subtitle={`${subscriberCount} Abo · ${waitlistCount} Warteliste`} />
-        <Stat title="Anstehende Termine" value={upcomingMatches.length} />
-        <Stat title="Letzter Termin" value={lastMatch ? formatMatchDate(lastMatch.date) : "—"} small />
+        <Stat title="Players" value={playerCount} subtitle={`${subscriberCount} subscribers · ${waitlistCount} waitlist`} />
+        <Stat title="Upcoming matches" value={upcomingMatches.length} />
+        <Stat title="Last match" value={lastMatch ? formatMatchDate(lastMatch.date) : "—"} small />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -37,17 +37,17 @@ export default async function AdminDashboard() {
           <CardHeader className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-pitch-300" />
-              <h2 className="font-display text-2xl tracking-wide">Termine</h2>
+              <h2 className="font-display text-2xl tracking-wide">Matches</h2>
             </div>
             <Link href="/admin/matches/new">
               <Button size="sm">
-                <Plus className="h-4 w-4" /> Neuer Termin
+                <Plus className="h-4 w-4" /> New match
               </Button>
             </Link>
           </CardHeader>
           <CardBody className="space-y-2">
             {upcomingMatches.length === 0 ? (
-              <p className="text-sm text-muted">Keine anstehenden Termine.</p>
+              <p className="text-sm text-muted">No upcoming matches.</p>
             ) : (
               upcomingMatches.map((m) => (
                 <Link
@@ -57,15 +57,15 @@ export default async function AdminDashboard() {
                 >
                   <div>
                     <div className="text-sm font-medium">{formatMatchDate(m.date)}</div>
-                    <div className="text-xs text-muted">{m.location ?? "Ort offen"}</div>
+                    <div className="text-xs text-muted">{m.location ?? "Location TBD"}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     {m.locked && (
                       <span className="inline-flex items-center gap-1 text-xs text-amber-300">
-                        <Lock className="h-3 w-3" /> gesperrt
+                        <Lock className="h-3 w-3" /> locked
                       </span>
                     )}
-                    <span className="number-pill text-xs text-pitch-300">{m._count.signups} Einträge</span>
+                    <span className="number-pill text-xs text-pitch-300">{m._count.signups} entries</span>
                   </div>
                 </Link>
               ))
@@ -77,21 +77,21 @@ export default async function AdminDashboard() {
           <CardHeader className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-pitch-300" />
-              <h2 className="font-display text-2xl tracking-wide">Spieler</h2>
+              <h2 className="font-display text-2xl tracking-wide">Players</h2>
             </div>
             <Link href="/admin/players/new">
               <Button size="sm">
-                <Plus className="h-4 w-4" /> Neuer Spieler
+                <Plus className="h-4 w-4" /> New player
               </Button>
             </Link>
           </CardHeader>
           <CardBody className="space-y-3">
             <p className="text-sm text-muted">
-              {playerCount} aktive Spieler insgesamt. {subscriberCount} feste Abo-Plätze, {waitlistCount} auf der Warteliste.
+              {playerCount} active players total. {subscriberCount} subscriber slots, {waitlistCount} on the waitlist.
             </p>
             <Link href="/admin/players">
               <Button variant="secondary" size="sm">
-                <ListChecks className="h-4 w-4" /> Alle Spieler verwalten
+                <ListChecks className="h-4 w-4" /> Manage all players
               </Button>
             </Link>
           </CardBody>

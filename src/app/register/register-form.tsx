@@ -13,11 +13,11 @@ export function RegisterForm() {
     <form action={action} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="firstName">Vorname</Label>
+          <Label htmlFor="firstName">First name</Label>
           <Input id="firstName" name="firstName" required />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="lastName">Nachname</Label>
+          <Label htmlFor="lastName">Last name</Label>
           <Input id="lastName" name="lastName" required />
         </div>
       </div>
@@ -26,7 +26,7 @@ export function RegisterForm() {
         <Input id="email" name="email" type="email" autoComplete="email" required />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="password">Passwort</Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           name="password"
@@ -45,7 +45,7 @@ export function RegisterForm() {
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        Account anlegen
+        Create account
       </Button>
     </form>
   );

@@ -22,8 +22,8 @@ export function Header({ user }: Props) {
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
-          <NavLink href="/">Termine</NavLink>
-          {user && <NavLink href="/profile">Profil</NavLink>}
+          <NavLink href="/">Matches</NavLink>
+          {user && <NavLink href="/profile">Profile</NavLink>}
           {user?.role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
         </nav>
 
@@ -55,8 +55,8 @@ export function Header({ user }: Props) {
       </div>
 
       <nav className="md:hidden flex items-center gap-1 px-4 pb-3 border-t border-border/40">
-        <NavLink href="/">Termine</NavLink>
-        {user && <NavLink href="/profile">Profil</NavLink>}
+        <NavLink href="/">Matches</NavLink>
+        {user && <NavLink href="/profile">Profile</NavLink>}
         {user?.role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
       </nav>
     </header>

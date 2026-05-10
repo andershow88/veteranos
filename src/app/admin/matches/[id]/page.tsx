@@ -45,7 +45,7 @@ export default async function AdminMatchPage({
         href="/admin/matches"
         className="inline-flex items-center gap-2 text-sm text-muted hover:text-pitch-300 transition"
       >
-        <ArrowLeft className="h-4 w-4" /> Zurück
+        <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
       <Card>
@@ -56,14 +56,14 @@ export default async function AdminMatchPage({
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 {match.locked ? (
                   <Badge tone="warn">
-                    <Lock className="h-3 w-3" /> gesperrt
+                    <Lock className="h-3 w-3" /> locked
                   </Badge>
                 ) : (
                   <Badge tone="success">
-                    <Unlock className="h-3 w-3" /> offen
+                    <Unlock className="h-3 w-3" /> open
                   </Badge>
                 )}
-                <Badge tone="info">{view.attendees.length + view.replacements.filter(r => r.replacement).length} Spieler aktiv</Badge>
+                <Badge tone="info">{view.attendees.length + view.replacements.filter(r => r.replacement).length} players in</Badge>
               </div>
             </div>
 
@@ -71,7 +71,7 @@ export default async function AdminMatchPage({
               <ServerForm action={setMatchLockedAction.bind(null, id, !match.locked)}>
                 <Button variant="secondary" size="sm" type="submit">
                   {match.locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                  {match.locked ? "Entsperren" : "Liste sperren"}
+                  {match.locked ? "Unlock" : "Lock list"}
                 </Button>
               </ServerForm>
               <DeleteMatchForm matchId={id} />
@@ -82,7 +82,7 @@ export default async function AdminMatchPage({
 
       <Card>
         <CardHeader>
-          <h3 className="font-display text-xl tracking-wide">Termin bearbeiten</h3>
+          <h3 className="font-display text-xl tracking-wide">Edit match</h3>
         </CardHeader>
         <CardBody>
           <MatchForm
@@ -102,8 +102,8 @@ export default async function AdminMatchPage({
       <Card>
         <CardHeader className="flex items-center justify-between">
           <div>
-            <h3 className="font-display text-xl tracking-wide">Anmeldungen verwalten</h3>
-            <p className="text-xs text-muted">Spieler manuell zu-, absagen, auf Warteliste setzen oder Bezahlung tracken.</p>
+            <h3 className="font-display text-xl tracking-wide">Manage sign-ups</h3>
+            <p className="text-xs text-muted">Manually add, decline or waitlist players, and track payments.</p>
           </div>
         </CardHeader>
         <CardBody>
@@ -115,10 +115,10 @@ export default async function AdminMatchPage({
         <CardHeader className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-pitch-300" />
-            <h3 className="font-display text-xl tracking-wide">Team-Generator</h3>
+            <h3 className="font-display text-xl tracking-wide">Team Generator</h3>
           </div>
           <Badge tone={teams.length > 0 ? "success" : "default"}>
-            {teams.length > 0 ? `${teams.length} Teams generiert` : "Noch keine Teams"}
+            {teams.length > 0 ? `${teams.length} teams generated` : "No teams yet"}
           </Badge>
         </CardHeader>
         <CardBody className="space-y-5">
@@ -145,7 +145,7 @@ function DeleteMatchForm({ matchId }: { matchId: string }) {
   return (
     <form action={action}>
       <Button variant="danger" size="sm" type="submit">
-        <Trash2 className="h-4 w-4" /> Löschen
+        <Trash2 className="h-4 w-4" /> Delete
       </Button>
     </form>
   );

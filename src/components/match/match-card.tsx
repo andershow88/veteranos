@@ -43,16 +43,16 @@ export function MatchCard({
           <div className="flex flex-wrap items-center gap-2">
             {view.locked && (
               <Badge tone="warn">
-                <Lock className="h-3 w-3" /> gesperrt
+                <Lock className="h-3 w-3" /> locked
               </Badge>
             )}
             {view.hasTeams && (
               <Badge tone="success">
-                <Trophy className="h-3 w-3" /> Teams stehen
+                <Trophy className="h-3 w-3" /> Teams ready
               </Badge>
             )}
             <Badge tone="info">
-              <Users className="h-3 w-3" /> {totalPlaying} dabei
+              <Users className="h-3 w-3" /> {totalPlaying} playing
             </Badge>
           </div>
         </div>
@@ -71,12 +71,12 @@ export function MatchCard({
         />
 
         <Section
-          title="Teilnehmer"
+          title="Confirmed"
           icon={<Users className="h-3.5 w-3.5" />}
           count={view.attendees.length}
         >
           {view.attendees.length === 0 ? (
-            <Empty>Noch keine Zusagen.</Empty>
+            <Empty>No confirmations yet.</Empty>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {view.attendees.map((s) => (
@@ -93,7 +93,7 @@ export function MatchCard({
 
         {view.declined.length > 0 && (
           <Section
-            title="Abgesagt"
+            title="Declined"
             icon={<ListOrdered className="h-3.5 w-3.5" />}
             count={view.declined.length}
           >
@@ -118,7 +118,7 @@ export function MatchCard({
 
         {view.replacements.length > 0 && (
           <Section
-            title="Nachrücker"
+            title="Replacements"
             icon={<ArrowRight className="h-3.5 w-3.5" />}
             count={view.replacements.filter((r) => r.replacement).length}
           >
@@ -132,7 +132,7 @@ export function MatchCard({
 
         {view.waitlist.length > 0 && (
           <Section
-            title="Warteliste"
+            title="Waitlist"
             icon={<ListOrdered className="h-3.5 w-3.5" />}
             count={view.waitlist.length}
           >
@@ -155,7 +155,7 @@ export function MatchCard({
                     </span>
                     {isReplacing && (
                       <Badge tone="success" className="ml-auto">
-                        rückt nach
+                        stepping in
                       </Badge>
                     )}
                   </div>
@@ -170,7 +170,7 @@ export function MatchCard({
             href={`/matches/${view.id}`}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-pitch-300 hover:text-pitch-200 transition"
           >
-            Termin-Details {view.hasTeams ? "& Teams" : ""}
+            Match details {view.hasTeams ? "& teams" : ""}
             <ArrowRight className="h-4 w-4" />
           </Link>
           {currentPlayer.role === "ADMIN" && (
@@ -249,10 +249,10 @@ function PlayerChip({
 function labelPosition(p: string) {
   return (
     {
-      GOALKEEPER: "Torwart",
-      DEFENDER: "Defensive",
-      MIDFIELDER: "Mittelfeld",
-      STRIKER: "Sturm",
+      GOALKEEPER: "Goalkeeper",
+      DEFENDER: "Defender",
+      MIDFIELDER: "Midfielder",
+      STRIKER: "Striker",
       ANY: "—",
     } as Record<string, string>
   )[p] ?? p;

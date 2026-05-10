@@ -15,14 +15,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-pitch-300">
             <ShieldCheck className="h-3.5 w-3.5" /> Admin
           </div>
-          <h1 className="font-display text-4xl tracking-wide">Verwaltung</h1>
+          <h1 className="font-display text-4xl tracking-wide">Management</h1>
         </div>
       </div>
 
       <nav className="mb-8 flex flex-wrap gap-2">
         <NavItem href="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>Dashboard</NavItem>
-        <NavItem href="/admin/players" icon={<Users className="h-4 w-4" />}>Spieler</NavItem>
-        <NavItem href="/admin/matches" icon={<CalendarDays className="h-4 w-4" />}>Termine</NavItem>
+        <NavItem href="/admin/players" icon={<Users className="h-4 w-4" />}>Players</NavItem>
+        <NavItem href="/admin/matches" icon={<CalendarDays className="h-4 w-4" />}>Matches</NavItem>
       </nav>
 
       <div>{children}</div>

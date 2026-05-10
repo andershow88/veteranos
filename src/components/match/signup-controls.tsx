@@ -28,7 +28,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
   if (!currentPlayer.playerId) {
     return (
       <div className="rounded-xl border border-dashed border-border/60 bg-surface/50 px-4 py-3 text-xs text-muted">
-        Logge dich ein, um zu- oder abzusagen.
+        Log in to confirm or decline.
       </div>
     );
   }
@@ -36,7 +36,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
   if (locked) {
     return (
       <div className="rounded-xl border border-amber-700/40 bg-amber-900/10 px-4 py-3 text-xs text-amber-200">
-        Die Anmeldung für diesen Termin ist gesperrt.
+        Sign-ups for this match are locked.
       </div>
     );
   }
@@ -49,7 +49,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-xs font-semibold uppercase tracking-widest text-muted mr-1">
-        Deine Antwort:
+        Your reply:
       </span>
 
       {isSubscriber ? (
@@ -61,7 +61,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
             onClick={() => startTransition(() => setAttendingAction(matchId))}
           >
             {pending && isAttending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-            Kann spielen
+            I&apos;m in
           </Button>
           <Button
             size="sm"
@@ -70,7 +70,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
             onClick={() => startTransition(() => setDeclinedAction(matchId))}
           >
             {pending && isDeclined ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
-            Kann nicht
+            Can&apos;t make it
           </Button>
         </>
       ) : (
@@ -83,7 +83,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
               onClick={() => startTransition(() => leaveWaitlistAction(matchId))}
             >
               {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ListMinus className="h-3.5 w-3.5" />}
-              Von Warteliste runter
+              Leave waitlist
             </Button>
           ) : (
             <Button
@@ -93,7 +93,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
               onClick={() => startTransition(() => joinWaitlistAction(matchId))}
             >
               {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ListPlus className="h-3.5 w-3.5" />}
-              Auf Warteliste setzen
+              Join waitlist
             </Button>
           )}
         </>

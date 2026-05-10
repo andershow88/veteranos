@@ -1,11 +1,11 @@
 /**
- * Seed-Script. Legt einen Admin-User und Demo-Spieler an.
+ * Seed script. Creates an admin user and (optionally) demo players + a demo match.
  *
- * Steuern via ENV:
- *   ADMIN_EMAIL, ADMIN_PASSWORD          – Admin-Zugang (Pflicht)
- *   SEED_DEMO_PLAYERS=true               – legt 12 Demo-Abo-Spieler + 4 Wartelisten + 1 Demo-Termin an
+ * Configure via env:
+ *   ADMIN_EMAIL, ADMIN_PASSWORD       - admin credentials (required)
+ *   SEED_DEMO_PLAYERS=true            - also seed 12 demo subscribers + 4 waitlisters + 1 match
  *
- * Aufruf:
+ * Run:
  *   npm run db:seed
  */
 import { PrismaClient } from "@prisma/client";
@@ -56,24 +56,24 @@ async function main() {
 
 async function seedDemoPlayers() {
   const subs = [
-    ["Lukas", "Müller", "MIDFIELDER", { overall: 78, technique: 82, speed: 70, defense: 60, offense: 80, passing: 85, shooting: 72 }],
-    ["Marco", "Schmidt", "GOALKEEPER", { overall: 75, technique: 60, speed: 55, defense: 70, offense: 30, passing: 70, shooting: 40, goalkeeping: 90 }],
-    ["Felix", "Becker", "DEFENDER", { overall: 74, technique: 65, speed: 72, defense: 85, offense: 50, passing: 70, shooting: 55 }],
-    ["Jonas", "Wagner", "STRIKER", { overall: 80, technique: 78, speed: 85, defense: 45, offense: 88, passing: 70, shooting: 87 }],
-    ["David", "Hoffmann", "MIDFIELDER", { overall: 72, technique: 75, speed: 68, defense: 60, offense: 70, passing: 80, shooting: 65 }],
-    ["Niklas", "Klein", "DEFENDER", { overall: 70, technique: 60, speed: 65, defense: 80, offense: 45, passing: 65, shooting: 50 }],
-    ["Tom", "Weber", "STRIKER", { overall: 76, technique: 75, speed: 80, defense: 40, offense: 85, passing: 70, shooting: 82 }],
-    ["Paul", "Fischer", "MIDFIELDER", { overall: 73, technique: 78, speed: 72, defense: 55, offense: 72, passing: 78, shooting: 70 }],
-    ["Max", "Lange", "DEFENDER", { overall: 71, technique: 65, speed: 70, defense: 82, offense: 50, passing: 68, shooting: 55 }],
-    ["Tim", "Schulz", "STRIKER", { overall: 77, technique: 76, speed: 82, defense: 42, offense: 86, passing: 68, shooting: 84 }],
-    ["Ben", "Krüger", "MIDFIELDER", { overall: 74, technique: 80, speed: 70, defense: 58, offense: 74, passing: 82, shooting: 68 }],
+    ["Liam", "Walker", "MIDFIELDER", { overall: 78, technique: 82, speed: 70, defense: 60, offense: 80, passing: 85, shooting: 72 }],
+    ["Marcus", "Reed", "GOALKEEPER", { overall: 75, technique: 60, speed: 55, defense: 70, offense: 30, passing: 70, shooting: 40, goalkeeping: 90 }],
+    ["Felix", "Brooks", "DEFENDER", { overall: 74, technique: 65, speed: 72, defense: 85, offense: 50, passing: 70, shooting: 55 }],
+    ["Jonah", "Carter", "STRIKER", { overall: 80, technique: 78, speed: 85, defense: 45, offense: 88, passing: 70, shooting: 87 }],
+    ["David", "Hayes", "MIDFIELDER", { overall: 72, technique: 75, speed: 68, defense: 60, offense: 70, passing: 80, shooting: 65 }],
+    ["Nick", "Klein", "DEFENDER", { overall: 70, technique: 60, speed: 65, defense: 80, offense: 45, passing: 65, shooting: 50 }],
+    ["Tom", "Weaver", "STRIKER", { overall: 76, technique: 75, speed: 80, defense: 40, offense: 85, passing: 70, shooting: 82 }],
+    ["Paul", "Fisher", "MIDFIELDER", { overall: 73, technique: 78, speed: 72, defense: 55, offense: 72, passing: 78, shooting: 70 }],
+    ["Max", "Lang", "DEFENDER", { overall: 71, technique: 65, speed: 70, defense: 82, offense: 50, passing: 68, shooting: 55 }],
+    ["Tim", "Schultz", "STRIKER", { overall: 77, technique: 76, speed: 82, defense: 42, offense: 86, passing: 68, shooting: 84 }],
+    ["Ben", "Krieger", "MIDFIELDER", { overall: 74, technique: 80, speed: 70, defense: 58, offense: 74, passing: 82, shooting: 68 }],
     ["Leo", "Werner", "DEFENDER", { overall: 73, technique: 68, speed: 73, defense: 84, offense: 48, passing: 70, shooting: 55 }],
   ];
   const wl = [
-    ["Joel", "Brandt", "MIDFIELDER", { overall: 70 }],
-    ["Kevin", "Lehmann", "STRIKER", { overall: 71 }],
-    ["Jakob", "Schreiber", "DEFENDER", { overall: 69 }],
-    ["Luka", "Hartmann", "MIDFIELDER", { overall: 72 }],
+    ["Joel", "Brand", "MIDFIELDER", { overall: 70 }],
+    ["Kevin", "Lehman", "STRIKER", { overall: 71 }],
+    ["Jacob", "Sawyer", "DEFENDER", { overall: 69 }],
+    ["Luka", "Hartman", "MIDFIELDER", { overall: 72 }],
   ];
 
   let rank = 1;
@@ -126,7 +126,7 @@ async function seedDemoPlayers() {
 
   console.log("→ demo players seeded");
 
-  // Demo Termin in 5 Tagen
+  // Demo match in 5 days
   const inFiveDays = new Date();
   inFiveDays.setDate(inFiveDays.getDate() + 5);
   inFiveDays.setHours(20, 0, 0, 0);
@@ -143,7 +143,7 @@ async function seedDemoPlayers() {
     await db.match.create({
       data: {
         date: inFiveDays,
-        location: "Sportplatz Veteranos",
+        location: "Veteranos pitch",
         durationMin: 90,
         teamCount: 3,
         signups: {

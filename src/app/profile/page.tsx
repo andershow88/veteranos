@@ -27,10 +27,10 @@ export default async function ProfilePage() {
             {player ? `${player.firstName} ${player.lastName}` : user.email}
           </h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
-            <Badge tone="info">{user.role === "ADMIN" ? "Admin" : "Spieler"}</Badge>
+            <Badge tone="info">{user.role === "ADMIN" ? "Admin" : "Player"}</Badge>
             {player && (
               <Badge tone={player.kind === "SUBSCRIBER" ? "success" : "default"}>
-                {player.kind === "SUBSCRIBER" ? "Abo-Spieler" : "Warteliste"}
+                {player.kind === "SUBSCRIBER" ? "Subscriber" : "Waitlist"}
               </Badge>
             )}
           </div>
@@ -40,8 +40,8 @@ export default async function ProfilePage() {
       {player && (
         <Card>
           <CardHeader>
-            <h2 className="font-display text-2xl tracking-wide">Profil</h2>
-            <p className="text-sm text-muted">Pflege deine Daten und PayPal-Infos.</p>
+            <h2 className="font-display text-2xl tracking-wide">Profile</h2>
+            <p className="text-sm text-muted">Update your details and PayPal info.</p>
           </CardHeader>
           <CardBody>
             <ProfileForm
@@ -60,7 +60,7 @@ export default async function ProfilePage() {
 
       <Card>
         <CardHeader>
-          <h2 className="font-display text-2xl tracking-wide">Passwort ändern</h2>
+          <h2 className="font-display text-2xl tracking-wide">Change password</h2>
         </CardHeader>
         <CardBody>
           <PasswordForm />

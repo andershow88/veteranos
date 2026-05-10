@@ -10,14 +10,14 @@ export default function NewMatchPage() {
         href="/admin/matches"
         className="inline-flex items-center gap-2 text-sm text-muted hover:text-pitch-300 transition"
       >
-        <ArrowLeft className="h-4 w-4" /> Zurück
+        <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
       <Card>
         <CardHeader>
-          <h2 className="font-display text-2xl tracking-wide">Neuer Termin</h2>
+          <h2 className="font-display text-2xl tracking-wide">New match</h2>
           <p className="text-sm text-muted">
-            Alle aktiven Abo-Spieler werden automatisch mit Status „kann spielen“ eingetragen.
+            All active subscribers are automatically signed up with status &ldquo;in&rdquo;.
           </p>
         </CardHeader>
         <CardBody>

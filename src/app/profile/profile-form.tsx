@@ -22,30 +22,30 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
     <form action={action} className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="firstName">Vorname</Label>
+          <Label htmlFor="firstName">First name</Label>
           <Input id="firstName" name="firstName" defaultValue={defaults.firstName} required />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="lastName">Nachname</Label>
+          <Label htmlFor="lastName">Last name</Label>
           <Input id="lastName" name="lastName" defaultValue={defaults.lastName} required />
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="nickname">Spitzname (optional)</Label>
+        <Label htmlFor="nickname">Nickname (optional)</Label>
         <Input id="nickname" name="nickname" defaultValue={defaults.nickname ?? ""} />
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="paypalName">PayPal Name</Label>
+          <Label htmlFor="paypalName">PayPal name</Label>
           <Input
             id="paypalName"
             name="paypalName"
-            placeholder="z.B. Max Mustermann"
+            placeholder="e.g. John Smith"
             defaultValue={defaults.paypalName ?? ""}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="paypalLink">PayPal Link</Label>
+          <Label htmlFor="paypalLink">PayPal link</Label>
           <Input
             id="paypalLink"
             name="paypalLink"
@@ -56,7 +56,7 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="phone">Telefon (optional)</Label>
+        <Label htmlFor="phone">Phone (optional)</Label>
         <Input id="phone" name="phone" defaultValue={defaults.phone ?? ""} />
       </div>
 
@@ -67,13 +67,13 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
       )}
       {state?.ok && (
         <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/20 px-3 py-2 text-sm text-pitch-200 inline-flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" /> Gespeichert.
+          <CheckCircle2 className="h-4 w-4" /> Saved.
         </div>
       )}
 
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-        Speichern
+        Save
       </Button>
     </form>
   );

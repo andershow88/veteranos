@@ -1,125 +1,125 @@
-# Veteranos – Fußballtermine organisieren
+# Veteranos – Football Match Organizer
 
-Eine moderne Web-App für die Organisation eurer Fußballtermine mit Abo-Spielern, Wartelisten, automatischem Nachrücken, Bezahlung-Tracking und automatischer Team-Generierung.
+A modern web app for organising your football matches with subscribers, waitlists, automatic replacements, payment tracking, and balanced team generation.
 
-## Tech-Stack
+## Tech stack
 
 - **Next.js 16** (App Router, React Server Components, Server Actions)
 - **React 19** + **TypeScript**
-- **Tailwind CSS v4** mit Custom-Design-System
+- **Tailwind CSS v4** with a custom design system
 - **Prisma 6** + **PostgreSQL**
-- **Custom Auth** (bcryptjs + jose JWT cookies)
-- **Zod** für Validierung
-- **lucide-react** Icons
-- Deployment-Ziel: **Railway**
+- **Custom auth** (bcryptjs + jose JWT cookies)
+- **Zod** for validation
+- **lucide-react** icons
+- Deployment target: **Railway**
 
 ## Features
 
-### Spieler-Sicht
-- Übersicht aller anstehenden Termine mit Datum, Uhrzeit, Ort
-- Pro Termin: Teilnehmer, Absagen, Warteliste, **Nachrücker-Zuordnung**
-- **Zahlungsstatus** zwischen nachrückendem Wartelisten- und absagendem Abo-Spieler
-- PayPal-Link / -Name des Abo-Spielers für direktes Bezahlen
-- Eigenes Profil mit PayPal-Daten und Passwort-Wechsel
-- Zwei Spieler-Typen:
-  - **Abo-Spieler**: fester Platz, sagt pro Termin zu/ab
-  - **Wartelisten-Spieler**: tragen sich pro Termin auf die Warteliste ein
+### Player view
+- Overview of all upcoming matches with date, time, and location
+- Per match: confirmed players, declines, waitlist, **replacement assignment**
+- **Payment status** between the stepping-in waitlist player and the absent subscriber
+- PayPal link / name on subscriber profiles for one-click payment
+- Personal profile page with PayPal info and password change
+- Two player types:
+  - **Subscriber**: fixed slot, confirms or declines per match
+  - **Waitlist player**: opts into individual matches via the waitlist
 
-### Auto-Nachrück-Logik
-Strikte Reihenfolge: Wartelisten-Spieler 1 ersetzt den ersten abgesagten Abo-Spieler, Wartelisten-Spieler 2 den zweiten, usw. Bei jeder Änderung wird der Zahlungsstatus für die jeweils aktiven Nachrücker automatisch auf `PENDING` gesetzt (oder zurück auf `NONE`, falls der Wartelisten-Spieler nicht mehr nachrückt).
+### Auto-replacement logic
+Strict order: waitlist player 1 replaces the first declined subscriber, waitlist player 2 the second, and so on. On every change the payment status of currently-active replacements is automatically set to `PENDING` (or reset to `NONE` if they no longer step in).
 
-### Admin-Bereich
-- Spieler anlegen, bearbeiten, löschen
-- Skills (0–100): Gesamtstärke, Technik, Geschwindigkeit, Ausdauer, Defensive, Offensive, Passspiel, Schuss, Torwart, plus Position
-- Termine anlegen, bearbeiten, **sperren**, löschen
-- Spieler manuell zu Termin hinzufügen/entfernen
-- Zahlungsstatus durch Klick durchschalten (`offen` ↔ `bezahlt`)
-- **Teams generieren** (2, 3 oder 4 Teams) mit Snake-Draft + lokaler Tausch-Optimierung
-- Faire Verteilung anhand Skills, Position und Torhüter-Verteilung
-- Team-Übersicht mit Stärke-Stats und automatischen, fußballtypischen Kommentaren
+### Admin area
+- Create, edit, delete players
+- Skills (0–100): overall, technique, speed, stamina, defense, offense, passing, shooting, goalkeeping + preferred position
+- Create, edit, **lock**, delete matches
+- Manually add or remove players from a match
+- Toggle payment status with a click (`pending` ↔ `paid`)
+- **Generate teams** (2, 3 or 4 teams) using snake-draft + local swap optimisation
+- Fair distribution based on skills, position, and goalkeeper spread
+- Team showcase with strength stats and short, punchy commentary per team
 
-## Lokale Entwicklung
+## Local development
 
-### Voraussetzungen
+### Prerequisites
 - Node.js 20+
-- PostgreSQL (lokal oder Docker)
+- PostgreSQL (locally or via Docker)
 
-### Schritte
+### Steps
 
 ```bash
 git clone https://github.com/andershow88/veteranos.git
 cd veteranos
 npm install
 
-# .env vorbereiten
+# Prepare .env
 cp .env.example .env
-# DATABASE_URL, AUTH_SECRET, ADMIN_EMAIL und ADMIN_PASSWORD setzen.
-# AUTH_SECRET generieren: openssl rand -base64 32
+# Set DATABASE_URL, AUTH_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD.
+# Generate AUTH_SECRET: openssl rand -base64 32
 
-# Datenbank-Schema anlegen
+# Apply schema
 npx prisma migrate dev --name init
 
-# Admin anlegen (optional mit Demo-Daten)
+# Create admin (optionally with demo data)
 npm run db:seed
-# oder mit Demo-Spielern:
+# or with demo players + a demo match:
 SEED_DEMO_PLAYERS=true npm run db:seed
 
-# Dev-Server starten
+# Start the dev server
 npm run dev
 ```
 
-Dann http://localhost:3000 öffnen.
+Then open http://localhost:3000.
 
-## Railway Deployment
+## Railway deployment
 
-1. **Railway-Projekt erstellen** und ein PostgreSQL-Plugin hinzufügen → `DATABASE_URL` wird automatisch bereitgestellt.
-2. **Repository verbinden** (`andershow88/veteranos`).
-3. **Environment-Variablen** im Railway-Service setzen:
-   - `AUTH_SECRET` (mit `openssl rand -base64 32` generieren)
-   - `ADMIN_EMAIL` und `ADMIN_PASSWORD` (für initialen Admin)
-4. **Deployen.** Railway nutzt `railway.json`:
+1. **Create a Railway project** and add a PostgreSQL plugin → `DATABASE_URL` is provided automatically.
+2. **Connect the repository** (`andershow88/veteranos`).
+3. **Set environment variables** on the Railway service:
+   - `AUTH_SECRET` (generate via `openssl rand -base64 32`)
+   - `ADMIN_EMAIL` and `ADMIN_PASSWORD` (for the initial admin)
+4. **Deploy.** Railway uses `railway.json`:
    - **Build:** `npm ci && npx prisma generate && npm run build`
    - **Start:** `npx prisma migrate deploy && npm run start`
-5. Einmalig den Admin anlegen via Railway Shell: `npm run db:seed`.
+5. Once, in the Railway shell: `npm run db:seed` to create the admin account.
 
-`/api/health` antwortet mit JSON, sobald DB erreichbar ist.
+`/api/health` returns JSON as soon as the database is reachable.
 
-## Projektstruktur
+## Project structure
 
 ```
 src/
-├─ app/                  # App Router Pages
-│  ├─ page.tsx           # Homepage = Termin-Übersicht
-│  ├─ matches/[id]       # Termin-Detail (inkl. Team-Übersicht)
+├─ app/                  # App Router pages
+│  ├─ page.tsx           # Homepage = match overview
+│  ├─ matches/[id]       # Match detail (incl. team showcase)
 │  ├─ login, register    # Auth
-│  ├─ profile            # Spielerprofil
-│  ├─ admin/             # Adminbereich
-│  └─ api/health         # Health-Check für Railway
+│  ├─ profile            # Player profile
+│  ├─ admin/             # Admin area
+│  └─ api/health         # Health check for Railway
 ├─ components/
 │  ├─ ui/                # Button, Card, Input, Avatar, Badge
 │  ├─ match/             # MatchCard, SignupControls, ReplacementRow
 │  ├─ admin/             # PlayerForm, MatchForm, SignupManager, TeamControls
 │  └─ team/              # TeamShowcase
 ├─ lib/
-│  ├─ auth.ts            # Sessions, Hashing, Guards
-│  ├─ db.ts              # Prisma Client
-│  └─ utils.ts           # cn, Datums-Helpers
+│  ├─ auth.ts            # Sessions, hashing, guards
+│  ├─ db.ts              # Prisma client
+│  └─ utils.ts           # cn, date helpers
 └─ server/
    ├─ auth-actions.ts    # login/register/logout
-   ├─ match-actions.ts   # zu-/absagen, Warteliste, Nachrücker-Logik
-   ├─ match-queries.ts   # buildMatchView mit Replacement-Berechnung
-   ├─ admin-actions.ts   # Spieler/Match-CRUD, Teams generieren
-   ├─ profile-actions.ts # Profilpflege
-   └─ team-generator.ts  # Snake-Draft + Tausch-Optimierung
+   ├─ match-actions.ts   # confirm/decline, waitlist, replacement logic
+   ├─ match-queries.ts   # buildMatchView with replacement assignment
+   ├─ admin-actions.ts   # player/match CRUD, team generation
+   ├─ profile-actions.ts # profile editing
+   └─ team-generator.ts  # snake-draft + local swap optimisation
 prisma/
 ├─ schema.prisma
 └─ seed.ts
 ```
 
-## API für spätere Mobile-App
+## API for a future mobile app
 
-Server Actions kapseln die gesamte Geschäftslogik (Nachrück-Algorithmus, Team-Generator). Für eine spätere Mobile-App (Expo / React Native) lassen sich die Module in `src/server/*` direkt als Basis für REST-/JSON-Endpunkte unter `src/app/api/*` wiederverwenden – die Datenmodelle und Logik sind UI-frei.
+Server Actions encapsulate the entire business logic (replacement algorithm, team generator). For a future mobile app (Expo / React Native), the modules in `src/server/*` can be reused directly to back REST/JSON endpoints under `src/app/api/*` — the data models and logic are UI-free.
 
-## Lizenz
+## License
 
-Privat – Veteranos.
+Private — Veteranos.

@@ -40,14 +40,14 @@ function Hero() {
       <div className="absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-pitch-400/15 blur-3xl pointer-events-none" />
       <div className="relative flex flex-col gap-4">
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-pitch-500/40 bg-pitch-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pitch-200">
-          <Sparkles className="h-3 w-3" /> Anstehende Termine
+          <Sparkles className="h-3 w-3" /> Upcoming matches
         </div>
         <h1 className="font-display text-4xl sm:text-6xl tracking-wide text-foreground">
-          Veteranos. <span className="text-pitch-300">Kicken.</span> Gewinnen.
+          Veteranos. <span className="text-pitch-300">Play.</span> Win.
         </h1>
         <p className="max-w-2xl text-base sm:text-lg text-muted">
-          Eure Fußballtermine an einem Ort. Sag zu, sag ab, oder reih dich ein – wir kümmern uns um faire Teams,
-          Wartelisten und Bezahlung.
+          Your football matches in one place. Confirm, decline or queue up &mdash; we handle balanced teams,
+          waitlists and payments.
         </p>
       </div>
     </section>
@@ -60,15 +60,15 @@ function EmptyState({ isAdmin }: { isAdmin: boolean }) {
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-pitch-700/30 text-pitch-300">
         <CalendarPlus className="h-6 w-6" />
       </div>
-      <h2 className="mt-4 font-display text-2xl tracking-wide">Noch keine Termine geplant</h2>
+      <h2 className="mt-4 font-display text-2xl tracking-wide">No matches scheduled yet</h2>
       <p className="mt-1 text-sm text-muted">
-        Sobald ein Termin angelegt wird, taucht er hier auf.
+        Once a match is created, it will show up here.
       </p>
       {isAdmin && (
         <Link href="/admin/matches/new" className="mt-6 inline-block">
           <Button>
             <CalendarPlus className="h-4 w-4" />
-            Neuen Termin anlegen
+            Create new match
           </Button>
         </Link>
       )}

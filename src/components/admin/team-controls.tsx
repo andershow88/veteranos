@@ -23,12 +23,12 @@ export function TeamControls({
       try {
         await generateTeamsAction(matchId);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Fehler beim Generieren");
+        setError(e instanceof Error ? e.message : "Failed to generate teams");
       }
     });
   };
   const remove = () => {
-    if (!confirm("Teams wirklich löschen?")) return;
+    if (!confirm("Really delete the teams?")) return;
     start(() => deleteTeamsAction(matchId));
   };
 
@@ -36,18 +36,18 @@ export function TeamControls({
     <div className="space-y-3">
       {!locked && (
         <div className="rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-xs text-amber-200">
-          Tipp: Erst die Liste sperren, damit sich keine Anmeldungen mehr ändern, dann Teams generieren.
+          Tip: lock the list first so sign-ups stop changing, then generate teams.
         </div>
       )}
 
       <div className="flex flex-wrap gap-2">
         <Button onClick={generate} disabled={pending}>
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-          {hasTeams ? "Teams neu generieren" : "Teams generieren"}
+          {hasTeams ? "Regenerate teams" : "Generate teams"}
         </Button>
         {hasTeams && (
           <Button variant="danger" onClick={remove} disabled={pending}>
-            <Trash2 className="h-4 w-4" /> Teams löschen
+            <Trash2 className="h-4 w-4" /> Delete teams
           </Button>
         )}
       </div>

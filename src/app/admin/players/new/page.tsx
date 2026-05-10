@@ -10,12 +10,12 @@ export default function NewPlayerPage() {
         href="/admin/players"
         className="inline-flex items-center gap-2 text-sm text-muted hover:text-pitch-300 transition"
       >
-        <ArrowLeft className="h-4 w-4" /> Zurück
+        <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
       <Card>
         <CardHeader>
-          <h2 className="font-display text-2xl tracking-wide">Neuer Spieler</h2>
+          <h2 className="font-display text-2xl tracking-wide">New player</h2>
         </CardHeader>
         <CardBody>
           <PlayerForm />

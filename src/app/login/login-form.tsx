@@ -19,7 +19,7 @@ export function LoginForm() {
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="password">Passwort</Label>
+        <Label htmlFor="password">Password</Label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-subtle" />
           <Input
@@ -41,7 +41,7 @@ export function LoginForm() {
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        Einloggen
+        Sign in
       </Button>
     </form>
   );

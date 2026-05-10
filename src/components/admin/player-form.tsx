@@ -28,38 +28,38 @@ export function PlayerForm({ player }: { player?: Defaults }) {
 
   return (
     <form action={formAction} className="space-y-6">
-      <Section title="Persönliche Daten">
+      <Section title="Personal details">
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field name="firstName" label="Vorname" required defaultValue={player?.firstName ?? ""} />
-          <Field name="lastName" label="Nachname" required defaultValue={player?.lastName ?? ""} />
+          <Field name="firstName" label="First name" required defaultValue={player?.firstName ?? ""} />
+          <Field name="lastName" label="Last name" required defaultValue={player?.lastName ?? ""} />
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field name="nickname" label="Spitzname" defaultValue={player?.nickname ?? ""} />
-          <Field name="phone" label="Telefon" defaultValue={player?.phone ?? ""} />
+          <Field name="nickname" label="Nickname" defaultValue={player?.nickname ?? ""} />
+          <Field name="phone" label="Phone" defaultValue={player?.phone ?? ""} />
         </div>
       </Section>
 
-      <Section title="Spieler-Typ">
+      <Section title="Player type">
         <div className="grid sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="kind">Typ</Label>
+            <Label htmlFor="kind">Type</Label>
             <Select id="kind" name="kind" defaultValue={player?.kind ?? "SUBSCRIBER"}>
-              <option value="SUBSCRIBER">Abo-Spieler</option>
-              <option value="WAITLIST">Wartelisten-Spieler</option>
+              <option value="SUBSCRIBER">Subscriber</option>
+              <option value="WAITLIST">Waitlist</option>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="rank">Reihenfolge (rank)</Label>
+            <Label htmlFor="rank">Order (rank)</Label>
             <Input id="rank" name="rank" type="number" min={0} defaultValue={player?.rank ?? 0} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="position">Bevorzugte Position</Label>
+            <Label htmlFor="position">Preferred position</Label>
             <Select id="position" name="position" defaultValue={player?.position ?? "ANY"}>
-              <option value="ANY">Egal</option>
-              <option value="GOALKEEPER">Torwart</option>
-              <option value="DEFENDER">Defensive</option>
-              <option value="MIDFIELDER">Mittelfeld</option>
-              <option value="STRIKER">Sturm</option>
+              <option value="ANY">Any</option>
+              <option value="GOALKEEPER">Goalkeeper</option>
+              <option value="DEFENDER">Defender</option>
+              <option value="MIDFIELDER">Midfielder</option>
+              <option value="STRIKER">Striker</option>
             </Select>
           </div>
         </div>
@@ -70,38 +70,38 @@ export function PlayerForm({ player }: { player?: Defaults }) {
             defaultChecked={player?.active ?? true}
             className="h-4 w-4 rounded border-border-strong bg-surface"
           />
-          aktiv (in Termin-Listen sichtbar)
+          active (visible in match lists)
         </label>
       </Section>
 
-      <Section title="Bezahlung">
+      <Section title="Payment">
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field name="paypalName" label="PayPal Name" defaultValue={player?.paypalName ?? ""} />
-          <Field name="paypalLink" label="PayPal Link" type="url" placeholder="https://paypal.me/..." defaultValue={player?.paypalLink ?? ""} />
+          <Field name="paypalName" label="PayPal name" defaultValue={player?.paypalName ?? ""} />
+          <Field name="paypalLink" label="PayPal link" type="url" placeholder="https://paypal.me/..." defaultValue={player?.paypalLink ?? ""} />
         </div>
       </Section>
 
       <Section title="Skills (0–100)">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {skill("overall", "Gesamtstärke")}
-          {skill("technique", "Technik")}
-          {skill("speed", "Geschwindigkeit")}
-          {skill("stamina", "Ausdauer")}
-          {skill("defense", "Defensive")}
-          {skill("offense", "Offensive")}
-          {skill("passing", "Passspiel")}
-          {skill("shooting", "Schuss")}
-          {skill("goalkeeping", "Torwartfähigkeit")}
+          {skill("overall", "Overall")}
+          {skill("technique", "Technique")}
+          {skill("speed", "Speed")}
+          {skill("stamina", "Stamina")}
+          {skill("defense", "Defense")}
+          {skill("offense", "Offense")}
+          {skill("passing", "Passing")}
+          {skill("shooting", "Shooting")}
+          {skill("goalkeeping", "Goalkeeping")}
         </div>
       </Section>
 
-      <Section title="Notizen">
-        <Textarea name="notes" defaultValue={player?.notes ?? ""} placeholder="Sonstige Eigenschaften, Spielweise, ..." />
+      <Section title="Notes">
+        <Textarea name="notes" defaultValue={player?.notes ?? ""} placeholder="Other traits, play style, ..." />
       </Section>
 
       <Section title="Account (optional)">
         <p className="text-xs text-muted mb-3">
-          Wenn der Spieler sich einloggen können soll, hier Email & Passwort setzen.
+          Set email and password if this player should be able to log in.
         </p>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field
@@ -109,11 +109,11 @@ export function PlayerForm({ player }: { player?: Defaults }) {
             label="Email"
             type="email"
             defaultValue={player?.email ?? ""}
-            placeholder="spieler@example.com"
+            placeholder="player@example.com"
           />
           <Field
             name="password"
-            label={isEdit ? "Neues Passwort (leer lassen, um nicht zu ändern)" : "Passwort"}
+            label={isEdit ? "New password (leave blank to keep)" : "Password"}
             type="password"
           />
         </div>
@@ -126,14 +126,14 @@ export function PlayerForm({ player }: { player?: Defaults }) {
       )}
       {state?.ok && (
         <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/20 px-3 py-2 text-sm text-pitch-200 inline-flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" /> Gespeichert.
+          <CheckCircle2 className="h-4 w-4" /> Saved.
         </div>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" disabled={pending}>
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {isEdit ? "Speichern" : "Spieler anlegen"}
+          {isEdit ? "Save" : "Create player"}
         </Button>
         {isEdit && (
           <DeleteButton playerId={player!.id!} />
@@ -150,11 +150,11 @@ function DeleteButton({ playerId }: { playerId: string }) {
       action={action}
       className="inline"
       onSubmit={(e) => {
-        if (!confirm("Diesen Spieler wirklich löschen?")) e.preventDefault();
+        if (!confirm("Really delete this player?")) e.preventDefault();
       }}
     >
       <Button type="submit" variant="danger" size="sm">
-        Spieler löschen
+        Delete player
       </Button>
     </form>
   );

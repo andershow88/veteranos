@@ -29,21 +29,21 @@ export default async function AdminMatchesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-2xl tracking-wide">Termine</h2>
+        <h2 className="font-display text-2xl tracking-wide">Matches</h2>
         <Link href="/admin/matches/new">
           <Button>
-            <Plus className="h-4 w-4" /> Neuer Termin
+            <Plus className="h-4 w-4" /> New match
           </Button>
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <h3 className="font-display text-xl tracking-wide">Anstehende Termine</h3>
+          <h3 className="font-display text-xl tracking-wide">Upcoming matches</h3>
         </CardHeader>
         <CardBody className="space-y-2">
           {upcoming.length === 0 ? (
-            <p className="text-sm text-muted">Keine anstehenden Termine.</p>
+            <p className="text-sm text-muted">No upcoming matches.</p>
           ) : (
             upcoming.map((m) => <MatchRow key={m.id} match={m} />)
           )}
@@ -52,11 +52,11 @@ export default async function AdminMatchesPage() {
 
       <Card>
         <CardHeader>
-          <h3 className="font-display text-xl tracking-wide">Vergangene Termine</h3>
+          <h3 className="font-display text-xl tracking-wide">Past matches</h3>
         </CardHeader>
         <CardBody className="space-y-2">
           {past.length === 0 ? (
-            <p className="text-sm text-muted">Noch keine Historie.</p>
+            <p className="text-sm text-muted">No history yet.</p>
           ) : (
             past.map((m) => <MatchRow key={m.id} match={m} />)
           )}
@@ -85,9 +85,9 @@ function MatchRow({
     >
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold">{formatMatchDate(match.date)}</div>
-        <div className="text-xs text-muted">{match.location ?? "Ort offen"} · {match.teamCount} Teams geplant</div>
+        <div className="text-xs text-muted">{match.location ?? "Location TBD"} · {match.teamCount} teams planned</div>
       </div>
-      <Badge tone="info">{match._count.signups} Einträge</Badge>
+      <Badge tone="info">{match._count.signups} entries</Badge>
       {match._count.teams > 0 && (
         <Badge tone="success">
           <Trophy className="h-3 w-3" /> Teams
@@ -95,7 +95,7 @@ function MatchRow({
       )}
       {match.locked && (
         <Badge tone="warn">
-          <Lock className="h-3 w-3" /> gesperrt
+          <Lock className="h-3 w-3" /> locked
         </Badge>
       )}
     </Link>

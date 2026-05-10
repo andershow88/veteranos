@@ -16,10 +16,10 @@ export function TeamShowcase({ teams }: { teams: TeamWithSlots[] }) {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
           <div className="text-xs font-bold uppercase tracking-[0.25em] text-pitch-300">
-            Team-Generator
+            Team Generator
           </div>
           <h2 className="font-display text-3xl sm:text-4xl tracking-wide text-foreground">
-            Die Teams stehen
+            Teams are set
           </h2>
         </div>
         <div className="rounded-2xl border border-pitch-600/40 bg-pitch-700/20 px-4 py-2 text-sm font-medium text-pitch-100">
@@ -69,7 +69,7 @@ function TeamCard({ team }: { team: TeamWithSlots }) {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          <StatBadge label="Stärke" value={team.avgOverall} icon={<Trophy className="h-3 w-3" />} dark={team.color === "WHITE"} />
+          <StatBadge label="Overall" value={team.avgOverall} icon={<Trophy className="h-3 w-3" />} dark={team.color === "WHITE"} />
           <StatBadge label="Defense" value={team.avgDefense} icon={<Shield className="h-3 w-3" />} dark={team.color === "WHITE"} />
           <StatBadge label="Offense" value={team.avgOffense} icon={<Sword className="h-3 w-3" />} dark={team.color === "WHITE"} />
           <StatBadge label="Speed" value={team.avgSpeed} icon={<Zap className="h-3 w-3" />} dark={team.color === "WHITE"} />
@@ -119,10 +119,10 @@ function StatBadge({
 
 function PlayerSlot({ slot }: { slot: TeamSlot & { player: Player } }) {
   const labels: Record<string, string> = {
-    GOALKEEPER: "Tor",
-    DEFENDER: "Verteidigung",
-    MIDFIELDER: "Mittelfeld",
-    STRIKER: "Sturm",
+    GOALKEEPER: "Goal",
+    DEFENDER: "Defense",
+    MIDFIELDER: "Midfield",
+    STRIKER: "Attack",
     ANY: "—",
   };
   return (
@@ -144,8 +144,8 @@ function PlayerSlot({ slot }: { slot: TeamSlot & { player: Player } }) {
 }
 
 function balanceVerdict(spread: number) {
-  if (spread < 2) return "🔥 Bombenausgeglichen – jeder kann gewinnen";
-  if (spread < 4) return "👌 Sehr ausgewogene Teams";
-  if (spread < 7) return "🤝 Solide Balance, kleine Vorteile möglich";
-  return "⚠️ Etwas unausgewogen – ggf. tauschen";
+  if (spread < 2) return "Perfectly balanced — anyone could win this";
+  if (spread < 4) return "Well-balanced teams";
+  if (spread < 7) return "Solid balance, slight edge possible";
+  return "A bit uneven — consider swapping";
 }

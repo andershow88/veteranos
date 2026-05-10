@@ -42,14 +42,14 @@ export function SignupManager({ view, allPlayers }: Props) {
       {/* Add manually */}
       <div className="rounded-xl border border-border-strong/60 bg-surface/50 p-4">
         <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-pitch-300 mb-3">
-          Spieler manuell hinzufügen
+          Add player manually
         </h4>
         <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-[180px]">
+          <div className="flex-1 min-w-45">
             <Select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)}>
-              <option value="">Spieler wählen…</option>
+              <option value="">Choose player…</option>
               {availableSubs.length > 0 && (
-                <optgroup label="Abo-Spieler">
+                <optgroup label="Subscribers">
                   {availableSubs.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.firstName} {p.lastName}
@@ -58,7 +58,7 @@ export function SignupManager({ view, allPlayers }: Props) {
                 </optgroup>
               )}
               {availableWls.length > 0 && (
-                <optgroup label="Wartelisten-Spieler">
+                <optgroup label="Waitlist">
                   {availableWls.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.firstName} {p.lastName}
@@ -73,9 +73,9 @@ export function SignupManager({ view, allPlayers }: Props) {
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as SignupStatus)}
             >
-              <option value="IN">Kann spielen</option>
-              <option value="OUT">Kann nicht</option>
-              <option value="WAITLIST">Auf Warteliste</option>
+              <option value="IN">In</option>
+              <option value="OUT">Out</option>
+              <option value="WAITLIST">Waitlist</option>
             </Select>
           </div>
           <Button
@@ -87,20 +87,20 @@ export function SignupManager({ view, allPlayers }: Props) {
             }}
           >
             {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-            <ListPlus className="h-4 w-4" /> Hinzufügen
+            <ListPlus className="h-4 w-4" /> Add
           </Button>
         </div>
       </div>
 
       <SignupSection
-        title={`Teilnehmer (${view.attendees.length})`}
+        title={`Confirmed (${view.attendees.length})`}
         rows={view.attendees}
         renderActions={(s) => (
           <>
-            <IconBtn onClick={() => setStatus(s.playerId, "OUT")} title="Auf 'kann nicht' setzen">
+            <IconBtn onClick={() => setStatus(s.playerId, "OUT")} title="Mark as out">
               <X className="h-3.5 w-3.5" />
             </IconBtn>
-            <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Entfernen">
+            <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Remove">
               <Trash2 className="h-3.5 w-3.5" />
             </IconBtn>
           </>
@@ -108,14 +108,14 @@ export function SignupManager({ view, allPlayers }: Props) {
       />
 
       <SignupSection
-        title={`Abgesagt (${view.declined.length})`}
+        title={`Declined (${view.declined.length})`}
         rows={view.declined}
         renderActions={(s) => (
           <>
-            <IconBtn onClick={() => setStatus(s.playerId, "IN")} title="Auf 'kann spielen' zurücksetzen">
+            <IconBtn onClick={() => setStatus(s.playerId, "IN")} title="Mark as in">
               <Check className="h-3.5 w-3.5" />
             </IconBtn>
-            <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Entfernen">
+            <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Remove">
               <Trash2 className="h-3.5 w-3.5" />
             </IconBtn>
           </>
@@ -123,12 +123,12 @@ export function SignupManager({ view, allPlayers }: Props) {
       />
 
       <SignupSection
-        title={`Warteliste (${view.waitlist.length})`}
+        title={`Waitlist (${view.waitlist.length})`}
         rows={view.waitlist}
         renderActions={(s) => (
           <>
             <PaymentControls signupId={s.id} status={s.paymentStatus} />
-            <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Entfernen">
+            <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Remove">
               <Trash2 className="h-3.5 w-3.5" />
             </IconBtn>
           </>
@@ -166,7 +166,7 @@ function SignupSection({
                   {s.player.firstName} {s.player.lastName}
                 </div>
                 <div className="text-[10px] uppercase tracking-widest text-muted">
-                  {s.player.kind === "SUBSCRIBER" ? "Abo" : "Warteliste"} · Stärke {s.player.overall}
+                  {s.player.kind === "SUBSCRIBER" ? "Subscriber" : "Waitlist"} · OVR {s.player.overall}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 ml-auto">{renderActions(s)}</div>
@@ -203,9 +203,9 @@ function PaymentControls({ signupId, status }: { signupId: string; status: Payme
     start(() => setPaymentStatusAction({ signupId, status: next }));
   };
   const labels: Record<PaymentStatus, { tone: "success" | "warn" | "outline"; icon: React.ReactNode; label: string }> = {
-    PAID: { tone: "success", icon: <CheckCircle2 className="h-3 w-3" />, label: "bezahlt" },
-    PENDING: { tone: "warn", icon: <Clock className="h-3 w-3" />, label: "offen" },
-    NONE: { tone: "outline", icon: <CircleDashed className="h-3 w-3" />, label: "keine Zahlung" },
+    PAID: { tone: "success", icon: <CheckCircle2 className="h-3 w-3" />, label: "paid" },
+    PENDING: { tone: "warn", icon: <Clock className="h-3 w-3" />, label: "pending" },
+    NONE: { tone: "outline", icon: <CircleDashed className="h-3 w-3" />, label: "no payment" },
   };
   const cur = labels[status];
   return (
@@ -214,7 +214,7 @@ function PaymentControls({ signupId, status }: { signupId: string; status: Payme
       onClick={cycle}
       disabled={pending}
       className="cursor-pointer disabled:opacity-50"
-      title="Zahlungsstatus durchschalten"
+      title="Cycle payment status"
     >
       <Badge tone={cur.tone}>
         {cur.icon}

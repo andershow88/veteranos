@@ -1,4 +1,4 @@
-// Veteranos – Football scheduling app
+// Veteranos - football scheduling app
 // Prisma schema
 
 generator client {
@@ -16,20 +16,20 @@ enum Role {
 }
 
 enum PlayerKind {
-  SUBSCRIBER // Abo-Spieler (fester Platz)
-  WAITLIST   // Wartelisten-Spieler
+  SUBSCRIBER // Subscriber (fixed slot)
+  WAITLIST   // Waitlist player
 }
 
 enum SignupStatus {
-  IN          // Abo-Spieler nimmt teil
-  OUT         // Abo-Spieler abgesagt
-  WAITLIST    // Wartelisten-Spieler eingetragen
+  IN          // Subscriber confirmed
+  OUT         // Subscriber declined
+  WAITLIST    // Waitlist player signed up for this match
 }
 
 enum PaymentStatus {
-  NONE        // keine Zahlung erforderlich
-  PENDING     // ausstehend
-  PAID        // bezahlt
+  NONE        // no payment required
+  PENDING     // pending
+  PAID        // paid
 }
 
 enum Position {
@@ -68,10 +68,10 @@ model Player {
   avatarUrl   String?
 
   kind        PlayerKind @default(SUBSCRIBER)
-  // Position innerhalb der jeweiligen Liste (1,2,3...) - bestimmt Nachrück-Reihenfolge
+  // Position within the respective list (1, 2, 3, ...) - determines replacement order
   rank        Int        @default(0)
 
-  // Kontakt / Bezahlung
+  // Contact / payment
   paypalName  String?
   paypalLink  String?
   phone       String?
@@ -107,10 +107,10 @@ model Match {
   location    String?
   notes       String?
 
-  // Wenn locked, sind keine Anmeldungs-Änderungen mehr möglich
+  // When locked, sign-up changes are no longer allowed
   locked      Boolean    @default(false)
 
-  // Anzahl Teams für die Generierung (3 oder 4)
+  // Number of teams to generate (2 - 4)
   teamCount   Int        @default(2)
 
   signups     Signup[]
@@ -130,11 +130,11 @@ model Signup {
   player        Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   status        SignupStatus
-  // Reihenfolge in der jeweiligen Liste (für Wartelisten / Absagen)
+  // Order within the respective list (waitlist / declines)
   rank          Int           @default(0)
 
-  // Zahlungsstatus zwischen Wartelisten-Spieler und Abo-Spieler
-  // Nur relevant, wenn dieser Wartelisten-Spieler für einen Abo-Spieler nachgerückt ist
+  // Payment status between this waitlist player and the subscriber they're replacing.
+  // Only relevant when this waitlist player has stepped in for a subscriber.
   paymentStatus PaymentStatus @default(NONE)
   paymentNote   String?
 
@@ -153,7 +153,7 @@ model Team {
   name      String
   color     TeamColor
 
-  // Aggregierte Stats (für Übersicht)
+  // Aggregated stats (for the overview UI)
   avgOverall   Float    @default(0)
   avgDefense   Float    @default(0)
   avgOffense   Float    @default(0)

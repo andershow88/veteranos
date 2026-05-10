@@ -24,7 +24,7 @@ export type ProfileState = { error?: string; ok?: boolean } | undefined;
 export async function updateProfileAction(_: ProfileState, formData: FormData): Promise<ProfileState> {
   await requireUser();
   const user = await getCurrentUser();
-  if (!user?.player) return { error: "Kein Spielerprofil" };
+  if (!user?.player) return { error: "No player profile" };
 
   const parsed = profileSchema.safeParse({
     firstName: formData.get("firstName"),
@@ -52,7 +52,7 @@ export async function updateProfileAction(_: ProfileState, formData: FormData): 
 export async function changePasswordAction(_: ProfileState, formData: FormData): Promise<ProfileState> {
   await requireUser();
   const user = await getCurrentUser();
-  if (!user) return { error: "Kein Account" };
+  if (!user) return { error: "No account" };
 
   const parsed = passwordSchema.safeParse({
     currentPassword: formData.get("currentPassword"),
@@ -62,7 +62,7 @@ export async function changePasswordAction(_: ProfileState, formData: FormData):
 
   const bcrypt = await import("bcryptjs");
   const ok = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
-  if (!ok) return { error: "Aktuelles Passwort stimmt nicht" };
+  if (!ok) return { error: "Current password is wrong" };
 
   await db.user.update({
     where: { id: user.id },

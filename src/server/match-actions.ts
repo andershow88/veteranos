@@ -14,18 +14,18 @@ async function nextWaitlistRank(matchId: string) {
   return (top?.rank ?? 0) + 1;
 }
 
-/** Abo-Spieler bestätigt Teilnahme oder ist neu eingetragen. */
+/** Subscriber confirms participation or is freshly signed up. */
 export async function setAttendingAction(matchId: string) {
   await requireUser();
   const user = await getCurrentUser();
-  if (!user?.player) throw new Error("Kein Spielerprofil");
+  if (!user?.player) throw new Error("No player profile");
 
   const match = await db.match.findUnique({ where: { id: matchId } });
-  if (!match) throw new Error("Termin nicht gefunden");
-  if (match.locked) throw new Error("Termin ist gesperrt");
+  if (!match) throw new Error("Match not found");
+  if (match.locked) throw new Error("Match is locked");
 
   if (user.player.kind !== "SUBSCRIBER") {
-    throw new Error("Nur Abo-Spieler können hier zusagen. Wartelisten-Spieler nutzen die Warteliste.");
+    throw new Error("Only subscribers can confirm here. Waitlist players use the waitlist.");
   }
 
   await db.signup.upsert({
@@ -43,21 +43,21 @@ export async function setAttendingAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
 }
 
-/** Abo-Spieler sagt ab. Falls Wartelisten-Spieler vorhanden: Zahlungsstatus PENDING setzen. */
+/** Subscriber declines. If a waitlist player is available, payment status flips to PENDING. */
 export async function setDeclinedAction(matchId: string) {
   await requireUser();
   const user = await getCurrentUser();
-  if (!user?.player) throw new Error("Kein Spielerprofil");
+  if (!user?.player) throw new Error("No player profile");
 
   const match = await db.match.findUnique({ where: { id: matchId } });
-  if (!match) throw new Error("Termin nicht gefunden");
-  if (match.locked) throw new Error("Termin ist gesperrt");
+  if (!match) throw new Error("Match not found");
+  if (match.locked) throw new Error("Match is locked");
 
   if (user.player.kind !== "SUBSCRIBER") {
-    throw new Error("Nur Abo-Spieler können absagen.");
+    throw new Error("Only subscribers can decline.");
   }
 
-  // Reihenfolge der Absagen: bestehende Anzahl OUTs zählt -> rank für Zuordnung
+  // Decline order: count existing OUTs to assign rank
   const outRank = await db.signup.count({
     where: { matchId, status: "OUT", player: { kind: "SUBSCRIBER" } },
   });
@@ -73,25 +73,25 @@ export async function setDeclinedAction(matchId: string) {
     update: { status: "OUT", rank: outRank },
   });
 
-  // Wenn ein Wartelisten-Spieler an Position [outRank] existiert -> Zahlungsstatus PENDING markieren
+  // If a waitlist player at position [outRank] exists, mark payment as PENDING.
   await syncWaitlistPaymentStatuses(matchId);
 
   revalidatePath("/");
   revalidatePath(`/matches/${matchId}`);
 }
 
-/** Wartelisten-Spieler trägt sich ein. */
+/** Waitlist player adds themselves to a match. */
 export async function joinWaitlistAction(matchId: string) {
   await requireUser();
   const user = await getCurrentUser();
-  if (!user?.player) throw new Error("Kein Spielerprofil");
+  if (!user?.player) throw new Error("No player profile");
 
   const match = await db.match.findUnique({ where: { id: matchId } });
-  if (!match) throw new Error("Termin nicht gefunden");
-  if (match.locked) throw new Error("Termin ist gesperrt");
+  if (!match) throw new Error("Match not found");
+  if (match.locked) throw new Error("Match is locked");
 
   if (user.player.kind !== "WAITLIST") {
-    throw new Error("Nur Wartelisten-Spieler können sich auf die Warteliste setzen.");
+    throw new Error("Only waitlist players can join the waitlist.");
   }
 
   const rank = await nextWaitlistRank(matchId);
@@ -113,17 +113,17 @@ export async function joinWaitlistAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
 }
 
-/** Wartelisten-Spieler trägt sich aus. */
+/** Waitlist player leaves the waitlist. */
 export async function leaveWaitlistAction(matchId: string) {
   await requireUser();
   const user = await getCurrentUser();
-  if (!user?.player) throw new Error("Kein Spielerprofil");
+  if (!user?.player) throw new Error("No player profile");
 
   await db.signup.deleteMany({
     where: { matchId, playerId: user.player.id, status: "WAITLIST" },
   });
 
-  // Wartelisten-Ränge neu durchnummerieren
+  // Renumber waitlist ranks
   await renumberWaitlist(matchId);
   await syncWaitlistPaymentStatuses(matchId);
 
@@ -131,7 +131,7 @@ export async function leaveWaitlistAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
 }
 
-/** Admin: Zahlungsstatus zwischen Wartelisten- und Abo-Spieler manuell setzen. */
+/** Admin: manually set the payment status between waitlist and subscriber. */
 export async function setPaymentStatusAction(input: {
   signupId: string;
   status: PaymentStatus;
@@ -149,8 +149,8 @@ export async function setPaymentStatusAction(input: {
 }
 
 /**
- * Setzt für die jeweils ersten N Wartelisten-Spieler (N = Anzahl Absagen) den
- * Zahlungsstatus auf PENDING (falls noch NONE). Spieler dahinter bleiben NONE.
+ * Sets the payment status to PENDING for the first N waitlist players (N = number of declines).
+ * Anyone past that count gets reset to NONE.
  */
 async function syncWaitlistPaymentStatuses(matchId: string) {
   const declined = await db.signup.findMany({
@@ -197,7 +197,7 @@ async function renumberWaitlist(matchId: string) {
   );
 }
 
-/** Admin: Match-Liste sperren / entsperren. */
+/** Admin: lock or unlock a match's sign-up list. */
 export async function setMatchLockedAction(matchId: string, locked: boolean) {
   await requireAdmin();
   await db.match.update({ where: { id: matchId }, data: { locked } });
@@ -206,7 +206,7 @@ export async function setMatchLockedAction(matchId: string, locked: boolean) {
   revalidatePath("/admin/matches");
 }
 
-/** Admin: Spieler manuell für einen Termin (de-)anmelden. */
+/** Admin: manually sign a player up for / remove from a match. */
 export async function adminSetSignupAction(input: {
   matchId: string;
   playerId: string;
@@ -225,7 +225,7 @@ export async function adminSetSignupAction(input: {
   }
 
   const player = await db.player.findUnique({ where: { id: input.playerId } });
-  if (!player) throw new Error("Spieler nicht gefunden");
+  if (!player) throw new Error("Player not found");
 
   let rank = player.rank;
   if (input.status === "WAITLIST") rank = await nextWaitlistRank(input.matchId);

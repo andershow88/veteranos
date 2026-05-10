@@ -18,9 +18,9 @@ const bebas = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "Veteranos · Fußballtermine",
+  title: "Veteranos · Football Match Organizer",
   description:
-    "Organisiere eure Fußballtermine, Anmeldungen, Wartelisten und faire Teams. Modern, dynamisch und immer up to date.",
+    "Organize your football matches, sign-ups, waitlists and balanced teams. Modern, dynamic, always up to date.",
   applicationName: "Veteranos",
   appleWebApp: { capable: true, title: "Veteranos", statusBarStyle: "black-translucent" },
 };
@@ -37,7 +37,7 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="de" className={`${inter.variable} ${bebas.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <Header
           user={
@@ -52,7 +52,7 @@ export default async function RootLayout({
         />
         <main className="flex-1 w-full">{children}</main>
         <footer className="mt-16 border-t border-border/60 py-8 text-center text-xs text-subtle">
-          <span className="font-display tracking-widest text-pitch-400">VETERANOS</span> · Built with Next.js, Prisma & Liebe zum Fußball
+          <span className="font-display tracking-widest text-pitch-400">VETERANOS</span> · Built with Next.js, Prisma & love for the game
         </footer>
       </body>
     </html>

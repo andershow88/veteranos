@@ -7,13 +7,13 @@ export type MatchSlot = {
 };
 
 export type ReplacementInfo = {
-  /** Abo-Spieler, der abgesagt hat */
+  /** Subscriber who declined */
   subscriber: Player;
-  /** Wartelisten-Spieler, der nachrückt (oder null, falls keiner verfügbar) */
+  /** Waitlist player who steps in (or null if nobody is available) */
   replacement: (Signup & { player: Player }) | null;
-  /** Original-Signup des Abo-Spielers (mit OUT-Status) */
+  /** Original signup of the subscriber (with OUT status) */
   outSignup: Signup;
-  /** Zahlungsstatus zwischen Wartelisten-Spieler und Abo-Spieler */
+  /** Payment status between the waitlist player and the subscriber */
   paymentStatus: PaymentStatus;
   paymentNote: string | null;
 };
@@ -27,24 +27,24 @@ export type MatchView = {
   locked: boolean;
   teamCount: number;
 
-  /** Alle aktiven Abo-Spieler, die teilnehmen (IN-Status) */
+  /** All active subscribers who are confirmed (IN status) */
   attendees: Array<Signup & { player: Player }>;
-  /** Abo-Spieler, die abgesagt haben (OUT-Status), sortiert nach rank */
+  /** Subscribers who declined (OUT status), sorted by rank */
   declined: Array<Signup & { player: Player }>;
-  /** Wartelisten-Spieler, die sich für diesen Termin eingetragen haben */
+  /** Waitlist players who signed up for this match */
   waitlist: Array<Signup & { player: Player }>;
 
-  /** Berechnete Nachrück-Zuordnung */
+  /** Computed replacement assignment */
   replacements: ReplacementInfo[];
-  /** Wartelisten-Spieler, die NICHT nachrücken (überzählig) */
+  /** Waitlist players that do NOT replace anyone (overflow) */
   waitlistOverflow: Array<Signup & { player: Player }>;
 
   hasTeams: boolean;
 };
 
 /**
- * Liefert die berechnete Sicht auf einen Termin – inkl. Nachrücker-Zuordnung
- * gemäß strikter Reihenfolge: Wartelisten-Spieler 1 → erster abgesagter Abo-Spieler usw.
+ * Returns the computed view of a match including the replacement assignment.
+ * Strict order: waitlist player 1 -> first declined subscriber, waitlist 2 -> second, etc.
  */
 export async function buildMatchView(matchId: string): Promise<MatchView | null> {
   const match = await db.match.findUnique({
@@ -64,7 +64,7 @@ export async function buildMatchView(matchId: string): Promise<MatchView | null>
 
 export async function listUpcomingMatches(): Promise<MatchView[]> {
   const matches = await db.match.findMany({
-    where: { date: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) } }, // bis 6h nach Start zählt noch als "kommend"
+    where: { date: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) } }, // up to 6h after kick-off still counts as upcoming
     orderBy: { date: "asc" },
     include: {
       signups: {
@@ -116,7 +116,7 @@ function composeMatchView(match: {
     .filter((s) => s.status === "WAITLIST")
     .sort((a, b) => a.rank - b.rank || a.player.rank - b.player.rank);
 
-  // Reihenfolge der Wartelisten-Spieler: erster der Liste rückt für ersten abgesagten Abo nach
+  // Waitlist order: the first listed waitlist player replaces the first declined subscriber.
   const replacements: ReplacementInfo[] = declined.map((out, idx) => {
     const replacement = waitlist[idx] ?? null;
     return {

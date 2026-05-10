@@ -17,7 +17,7 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
               {info.subscriber.firstName} {info.subscriber.lastName}
             </div>
             <div className="text-[10px] uppercase tracking-widest text-red-300/80">
-              Abo · abgesagt
+              Subscriber · declined
             </div>
           </div>
         </div>
@@ -37,12 +37,12 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
                 {info.replacement.player.firstName} {info.replacement.player.lastName}
               </div>
               <div className="text-[10px] uppercase tracking-widest text-pitch-300/80">
-                Warteliste · rückt nach
+                Waitlist · stepping in
               </div>
             </div>
           </div>
         ) : (
-          <div className="text-sm text-muted italic">Kein Nachrücker verfügbar</div>
+          <div className="text-sm text-muted italic">No replacement available</div>
         )}
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -55,7 +55,7 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
               className="inline-flex items-center gap-1 rounded-full border border-pitch-600/50 bg-pitch-700/20 px-2.5 py-1 text-[11px] font-semibold text-pitch-100 hover:bg-pitch-700/40 transition"
             >
               <Wallet className="h-3 w-3" />
-              PayPal an {info.subscriber.firstName}
+              Pay {info.subscriber.firstName}
               <ExternalLink className="h-3 w-3" />
             </a>
           )}
@@ -69,7 +69,7 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
       </div>
 
       {info.paymentNote && (
-        <div className="mt-2 text-xs text-muted italic">„{info.paymentNote}“</div>
+        <div className="mt-2 text-xs text-muted italic">&ldquo;{info.paymentNote}&rdquo;</div>
       )}
     </div>
   );
@@ -79,13 +79,13 @@ function PaymentBadge({ status }: { status: ReplacementInfo["paymentStatus"] }) 
   if (status === "PAID")
     return (
       <Badge tone="success">
-        <CheckCircle2 className="h-3 w-3" /> bezahlt
+        <CheckCircle2 className="h-3 w-3" /> paid
       </Badge>
     );
   if (status === "PENDING")
     return (
       <Badge tone="warn">
-        <Clock className="h-3 w-3" /> offen
+        <Clock className="h-3 w-3" /> pending
       </Badge>
     );
   return (

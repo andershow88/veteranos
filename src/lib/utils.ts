@@ -11,10 +11,10 @@ export function initials(firstName: string, lastName: string) {
 
 export function formatMatchDate(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat("de-DE", {
+  return new Intl.DateTimeFormat("en-GB", {
     weekday: "short",
     day: "2-digit",
-    month: "2-digit",
+    month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -25,7 +25,7 @@ export function formatRelativeMatchDate(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
   const diffMs = d.getTime() - Date.now();
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-  const rtf = new Intl.RelativeTimeFormat("de-DE", { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
   if (Math.abs(diffDays) < 1) {
     const diffH = Math.round(diffMs / (1000 * 60 * 60));
     return rtf.format(diffH, "hour");

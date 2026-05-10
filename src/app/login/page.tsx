@@ -11,15 +11,15 @@ export default async function LoginPage() {
     <div className="mx-auto flex min-h-[calc(100vh-200px)] w-full max-w-md items-center justify-center px-4 py-12">
       <div className="w-full">
         <div className="mb-8 text-center">
-          <h1 className="font-display text-4xl tracking-wide text-foreground">Willkommen zurück</h1>
-          <p className="mt-2 text-sm text-muted">Logge dich ein, um deine Termine zu sehen.</p>
+          <h1 className="font-display text-4xl tracking-wide text-foreground">Welcome back</h1>
+          <p className="mt-2 text-sm text-muted">Log in to see your matches.</p>
         </div>
         <div className="glass rounded-2xl p-6 sm:p-8">
           <LoginForm />
           <div className="mt-6 text-center text-xs text-subtle">
-            Noch kein Account?{" "}
+            No account yet?{" "}
             <Link href="/register" className="font-semibold text-pitch-300 hover:text-pitch-200">
-              Registrieren
+              Register
             </Link>
           </div>
         </div>

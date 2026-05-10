@@ -75,7 +75,7 @@ export async function createPlayerAction(
       let userId: string | null = null;
       if (email && password) {
         const existing = await tx.user.findUnique({ where: { email: email.toLowerCase() } });
-        if (existing) throw new Error("Email bereits in Verwendung");
+        if (existing) throw new Error("Email already in use");
         const passwordHash = await hashPassword(password);
         const user = await tx.user.create({
           data: { email: email.toLowerCase(), passwordHash, role: "PLAYER" },
@@ -85,7 +85,7 @@ export async function createPlayerAction(
       await tx.player.create({ data: { ...playerData, userId } });
     });
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "Konnte Spieler nicht anlegen" };
+    return { error: e instanceof Error ? e.message : "Could not create player" };
   }
 
   revalidatePath("/admin/players");
@@ -117,7 +117,7 @@ export async function updatePlayerAction(
         where: { id: playerId },
         include: { user: true },
       });
-      if (!player) throw new Error("Spieler nicht gefunden");
+      if (!player) throw new Error("Player not found");
 
       let userId = player.userId;
       if (email && email.toLowerCase() !== player.user?.email) {
@@ -143,7 +143,7 @@ export async function updatePlayerAction(
       await tx.player.update({ where: { id: playerId }, data: { ...playerData, userId } });
     });
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "Konnte Spieler nicht speichern" };
+    return { error: e instanceof Error ? e.message : "Could not save player" };
   }
 
   revalidatePath("/admin/players");
@@ -193,7 +193,7 @@ export async function createMatchAction(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const dt = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
-  if (Number.isNaN(dt.getTime())) return { error: "Ungültiges Datum" };
+  if (Number.isNaN(dt.getTime())) return { error: "Invalid date" };
 
   const subs = await db.player.findMany({
     where: { kind: "SUBSCRIBER", active: true },
@@ -208,6 +208,7 @@ export async function createMatchAction(
       location: parsed.data.location || null,
       notes: parsed.data.notes || null,
       teamCount: parsed.data.teamCount,
+      // Subscribers default to IN
       signups: {
         create: subs.map((s) => ({
           playerId: s.id,
@@ -240,7 +241,7 @@ export async function updateMatchAction(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const dt = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
-  if (Number.isNaN(dt.getTime())) return { error: "Ungültiges Datum" };
+  if (Number.isNaN(dt.getTime())) return { error: "Invalid date" };
 
   await db.match.update({
     where: { id: matchId },
