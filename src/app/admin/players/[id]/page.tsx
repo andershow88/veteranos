@@ -9,6 +9,7 @@ import { AvatarUploader } from "@/components/ui/avatar-uploader";
 import { PlayerForm } from "@/components/admin/player-form";
 import { RoleControls } from "@/components/admin/role-controls";
 import { ResetLinkControls } from "@/components/admin/reset-link-controls";
+import { DeletePlayerButton } from "@/components/admin/delete-player-button";
 import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +119,23 @@ export default async function EditPlayerPage({
           </Card>
         </>
       )}
+
+      <Card className="border-red-900/40">
+        <CardHeader>
+          <h3 className="font-display text-xl tracking-wide text-red-200">Danger zone</h3>
+          <p className="text-xs text-muted">
+            Deletes the player profile, the account (if any), sign-ups across all matches,
+            and any team-slot assignments. This cannot be undone.
+          </p>
+        </CardHeader>
+        <CardBody>
+          <DeletePlayerButton
+            playerId={player.id}
+            playerName={`${player.firstName}${player.lastName ? ` ${player.lastName}` : ""}`}
+            isSelf={isSelf}
+          />
+        </CardBody>
+      </Card>
     </div>
   );
 }

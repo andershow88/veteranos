@@ -7,7 +7,6 @@ import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import {
   createPlayerAction,
   updatePlayerAction,
-  deletePlayerAction,
   type AdminFormState,
 } from "@/server/admin-actions";
 import type { Player } from "@prisma/client";
@@ -135,27 +134,7 @@ export function PlayerForm({ player }: { player?: Defaults }) {
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
           {isEdit ? "Save" : "Create player"}
         </Button>
-        {isEdit && (
-          <DeleteButton playerId={player!.id!} />
-        )}
       </div>
-    </form>
-  );
-}
-
-function DeleteButton({ playerId }: { playerId: string }) {
-  const action = deletePlayerAction.bind(null, playerId);
-  return (
-    <form
-      action={action}
-      className="inline"
-      onSubmit={(e) => {
-        if (!confirm("Really delete this player?")) e.preventDefault();
-      }}
-    >
-      <Button type="submit" variant="danger" size="sm">
-        Delete player
-      </Button>
     </form>
   );
 }

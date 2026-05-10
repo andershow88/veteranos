@@ -153,16 +153,29 @@ export async function updatePlayerAction(
 }
 
 export async function deletePlayerAction(playerId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
   const player = await db.player.findUnique({ where: { id: playerId } });
-  if (!player) return;
+  if (!player) {
+    revalidatePath("/admin/players");
+    redirect("/admin/players");
+  }
+
+  // Block self-deletion to prevent admins from locking themselves out.
+  if (player.userId && player.userId === session.userId) {
+    throw new Error("You cannot delete your own account.");
+  }
+
+  // Player.userId uses onDelete: SetNull, so deleting the user does NOT
+  // remove the player. We must delete the player record explicitly, and
+  // also drop the user row when one is linked. Signups and TeamSlots
+  // cascade via the Player relation.
   await db.$transaction(async (tx) => {
+    await tx.player.delete({ where: { id: playerId } });
     if (player.userId) {
       await tx.user.delete({ where: { id: player.userId } });
-    } else {
-      await tx.player.delete({ where: { id: playerId } });
     }
   });
+
   revalidatePath("/admin/players");
   revalidatePath("/");
   redirect("/admin/players");
