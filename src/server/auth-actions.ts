@@ -20,17 +20,8 @@ const registerSchema = z.object({
   // Required
   firstName: z.string().min(1, "First name missing"),
   lastName: z.string().min(1, "Last name missing"),
-  // Optional account credentials. If you provide one, you must provide both.
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .optional()
-    .or(z.literal("")),
-  password: z
-    .string()
-    .min(6, "At least 6 characters")
-    .optional()
-    .or(z.literal("")),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "At least 6 characters"),
   // Optional profile data
   nickname: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
@@ -45,9 +36,7 @@ const registerSchema = z.object({
   invite: z.string().min(1, "Invitation missing"),
 });
 
-export type AuthState =
-  | { error?: string; ok?: "registered_no_login" }
-  | undefined;
+export type AuthState = { error?: string } | undefined;
 
 export async function loginAction(_: AuthState, formData: FormData): Promise<AuthState> {
   const parsed = loginSchema.safeParse({
@@ -84,58 +73,40 @@ export async function registerAction(_: AuthState, formData: FormData): Promise<
   const invite = await findUsableInvite(parsed.data.invite);
   if (!invite) return { error: "Invitation link is invalid or expired" };
 
-  const email = parsed.data.email ? parsed.data.email.toLowerCase() : "";
-  const password = parsed.data.password ?? "";
-  const wantsLogin = Boolean(email);
-
-  // If they want a login they must provide both email AND password.
-  if (wantsLogin && !password) {
-    return { error: "Please choose a password too, or leave email empty" };
-  }
-  if (!wantsLogin && password) {
-    return { error: "Please add an email too, or leave password empty" };
-  }
-
-  if (wantsLogin) {
-    const existing = await db.user.findUnique({ where: { email } });
-    if (existing) return { error: "Email already registered" };
-  }
+  const email = parsed.data.email.toLowerCase();
+  const existing = await db.user.findUnique({ where: { email } });
+  if (existing) return { error: "Email already registered" };
 
   // Atomically consume the invite. If it raced with another registration
   // and is now full/expired, abort.
   const consumed = await consumeInvite(parsed.data.invite);
   if (!consumed) return { error: "Invitation link can no longer be used" };
 
-  const playerData = {
-    firstName: parsed.data.firstName,
-    lastName: parsed.data.lastName,
-    nickname: parsed.data.nickname || null,
-    phone: parsed.data.phone || null,
-    paypalName: parsed.data.paypalName || null,
-    paypalLink: parsed.data.paypalLink || null,
-    // Self-registration always lands on the waitlist; admin can promote later.
-    kind: "WAITLIST" as const,
-    rank: 999,
-  };
+  const passwordHash = await hashPassword(parsed.data.password);
 
-  if (wantsLogin) {
-    const passwordHash = await hashPassword(password);
-    const user = await db.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: "PLAYER",
-        player: { create: playerData },
+  const user = await db.user.create({
+    data: {
+      email,
+      passwordHash,
+      role: "PLAYER",
+      player: {
+        create: {
+          firstName: parsed.data.firstName,
+          lastName: parsed.data.lastName,
+          nickname: parsed.data.nickname || null,
+          phone: parsed.data.phone || null,
+          paypalName: parsed.data.paypalName || null,
+          paypalLink: parsed.data.paypalLink || null,
+          // Self-registration always lands on the waitlist; admin can promote later.
+          kind: "WAITLIST",
+          rank: 999,
+        },
       },
-    });
-    await createSession({ userId: user.id, role: user.role, email: user.email });
-    redirect("/");
-  }
+    },
+  });
 
-  // No login wanted — create just the Player record. The player shows up in
-  // the roster but cannot log in until an admin sets up an account for them.
-  await db.player.create({ data: playerData });
-  return { ok: "registered_no_login" };
+  await createSession({ userId: user.id, role: user.role, email: user.email });
+  redirect("/");
 }
 
 export async function logoutAction() {
