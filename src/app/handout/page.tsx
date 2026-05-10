@@ -45,30 +45,30 @@ const TOC: TocItem[] = [
 
 export default function HandoutPage() {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
-      <header className="mb-8 sm:mb-10">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-12">
+      <header className="mb-6 sm:mb-10">
         <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-pitch-300">
           <BookOpen className="h-4 w-4" /> User Guide
         </div>
-        <h1 className="font-display text-4xl sm:text-5xl tracking-wide mt-2">Handout</h1>
+        <h1 className="font-display text-3xl sm:text-5xl tracking-wide mt-2">Handout</h1>
         <p className="mt-2 text-sm sm:text-base text-muted max-w-2xl">
           Everything Veteranos can do, how to use it, and the few non-obvious things worth
-          knowing. Skim the table of contents on the left or scroll through.
+          knowing.
         </p>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-[18rem_1fr]">
-        <aside className="lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-auto scrollbar-thin">
-          <div className="rounded-2xl border border-border-strong/60 bg-surface/40 p-3 lg:p-4">
-            <div className="text-[11px] font-bold uppercase tracking-[0.25em] text-pitch-300 px-1.5 mb-2">
+      <div className="grid gap-6 lg:gap-8 lg:grid-cols-[18rem_1fr]">
+        <aside className="lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-auto scrollbar-thin -mx-4 sm:mx-0">
+          <div className="lg:rounded-2xl lg:border lg:border-border-strong/60 lg:bg-surface/40 lg:p-4">
+            <div className="hidden lg:block text-[11px] font-bold uppercase tracking-[0.25em] text-pitch-300 px-1.5 mb-2">
               Contents
             </div>
-            <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible scrollbar-thin">
+            <nav className="flex lg:flex-col gap-1.5 lg:gap-1 overflow-x-auto lg:overflow-visible scrollbar-thin px-4 sm:px-0">
               {TOC.map((item) => (
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm text-foreground/80 hover:text-foreground hover:bg-surface-2 transition"
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 lg:px-3 lg:py-2 text-xs lg:text-sm font-medium text-foreground/80 hover:text-foreground bg-surface/60 lg:bg-transparent border border-border/50 lg:border-0 hover:bg-surface-2 transition shrink-0"
                 >
                   <span className="text-pitch-300">{item.icon}</span>
                   {item.label}
@@ -78,7 +78,7 @@ export default function HandoutPage() {
           </div>
         </aside>
 
-        <div className="space-y-10 sm:space-y-12 max-w-3xl">
+        <div className="space-y-10 sm:space-y-12 min-w-0">
           <Section
             id="quick-start"
             icon={<Rocket className="h-5 w-5" />}
@@ -93,8 +93,10 @@ export default function HandoutPage() {
             <Steps>
               <Step n={1}>
                 <strong>Get an invitation.</strong> An admin shares a link such as{" "}
-                <code className="rounded bg-surface-2 px-1.5 py-0.5 text-xs">https://veteranos.club/register?invite=…</code>.
-                Without that link the registration page won&apos;t accept you.
+                <code className="inline-block max-w-full break-all rounded bg-surface-2 px-1.5 py-0.5 text-xs">
+                  https://veteranos.club/register?invite=…
+                </code>
+                . Without that link the registration page won&apos;t accept you.
               </Step>
               <Step n={2}>
                 <strong>Register.</strong> Fill in first name, last name, email, password, and
@@ -446,17 +448,17 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-24">
+    <section id={id} className="scroll-mt-32 sm:scroll-mt-24 min-w-0">
       <div className="flex items-start gap-3 mb-4">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pitch-700/30 text-pitch-200">
+        <span className="grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center rounded-xl bg-pitch-700/30 text-pitch-200">
           {icon}
         </span>
         <div className="min-w-0">
-          <h2 className="font-display text-2xl sm:text-3xl tracking-wide">{title}</h2>
-          {subtitle && <p className="text-sm text-muted mt-0.5">{subtitle}</p>}
+          <h2 className="font-display text-xl sm:text-3xl tracking-wide leading-tight wrap-break-word">{title}</h2>
+          {subtitle && <p className="text-xs sm:text-sm text-muted mt-1">{subtitle}</p>}
         </div>
       </div>
-      <div className="space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed">
+      <div className="space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed wrap-break-word">
         {children}
       </div>
     </section>
@@ -554,22 +556,26 @@ function FeatureCard({
 function Table({ rows }: { rows: React.ReactNode[][] }) {
   return (
     <div className="rounded-xl border border-border/60 bg-surface/40 overflow-hidden">
-      <table className="w-full text-sm">
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-border/40 last:border-b-0">
-              {row.map((cell, j) => (
-                <td
-                  key={j}
-                  className={`px-3 py-2 align-top ${j === 0 ? "font-semibold whitespace-nowrap text-foreground" : "text-muted"}`}
-                >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full min-w-[20rem] text-xs sm:text-sm">
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i} className="border-b border-border/40 last:border-b-0">
+                {row.map((cell, j) => (
+                  <td
+                    key={j}
+                    className={`px-2.5 sm:px-3 py-2 align-top wrap-break-word ${
+                      j === 0 ? "font-semibold text-foreground w-32 sm:w-auto sm:whitespace-nowrap" : "text-muted"
+                    }`}
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
