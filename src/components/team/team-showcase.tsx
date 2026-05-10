@@ -127,7 +127,7 @@ function PlayerSlot({ slot }: { slot: TeamSlot & { player: Player } }) {
   };
   return (
     <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-surface-2 transition">
-      <Avatar firstName={slot.player.firstName} lastName={slot.player.lastName} size="sm" />
+      <Avatar firstName={slot.player.firstName} lastName={slot.player.lastName} size="sm" src={slot.player.avatarUrl} />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-foreground truncate">
           {slot.player.firstName} {slot.player.lastName}

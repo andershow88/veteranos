@@ -48,14 +48,33 @@ enum TeamColor {
 }
 
 model User {
-  id           String       @id @default(cuid())
-  email        String       @unique
-  passwordHash String
-  role         Role         @default(PLAYER)
-  player       Player?
-  invitations  Invitation[] @relation("InvitationCreator")
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             String               @id @default(cuid())
+  email          String               @unique
+  passwordHash   String
+  role           Role                 @default(PLAYER)
+  player         Player?
+  invitations    Invitation[]         @relation("InvitationCreator")
+  passwordResets PasswordResetToken[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  usedAt    DateTime?
+  // 'self' if requested through /forgot-password, otherwise the userId of the admin
+  // who generated it. Used so admins can audit and so we can render the link in the UI.
+  source    String    @default("self")
+
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Invitation {

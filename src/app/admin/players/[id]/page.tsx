@@ -4,8 +4,11 @@ import { ArrowLeft, ShieldCheck, ShieldOff } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar } from "@/components/ui/avatar";
+import { AvatarUploader } from "@/components/ui/avatar-uploader";
 import { PlayerForm } from "@/components/admin/player-form";
 import { RoleControls } from "@/components/admin/role-controls";
+import { ResetLinkControls } from "@/components/admin/reset-link-controls";
 import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -39,14 +42,28 @@ export default async function EditPlayerPage({
 
       <Card>
         <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="font-display text-2xl tracking-wide">
-                {player.firstName} {player.lastName ?? ""}
-              </h2>
-              {player.user?.email && (
-                <p className="text-xs text-muted">Account: {player.user.email}</p>
-              )}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-start gap-4">
+              <Avatar
+                firstName={player.firstName}
+                lastName={player.lastName}
+                size="lg"
+                src={player.avatarUrl}
+              />
+              <div className="space-y-2">
+                <h2 className="font-display text-2xl tracking-wide">
+                  {player.firstName} {player.lastName ?? ""}
+                </h2>
+                {player.user?.email && (
+                  <p className="text-xs text-muted">Account: {player.user.email}</p>
+                )}
+                <AvatarUploader
+                  playerId={player.id}
+                  firstName={player.firstName}
+                  lastName={player.lastName}
+                  currentUrl={player.avatarUrl}
+                />
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {player.user?.role === "ADMIN" ? (
@@ -69,22 +86,37 @@ export default async function EditPlayerPage({
       </Card>
 
       {player.user && (
-        <Card>
-          <CardHeader>
-            <h3 className="font-display text-xl tracking-wide">Account role</h3>
-            <p className="text-xs text-muted">
-              Admins can manage players, matches and invitations.
-            </p>
-          </CardHeader>
-          <CardBody>
-            <RoleControls
-              userId={player.user.id}
-              role={player.user.role}
-              isSelf={isSelf}
-              isLastAdmin={player.user.role === "ADMIN" && adminCount <= 1}
-            />
-          </CardBody>
-        </Card>
+        <>
+          <Card>
+            <CardHeader>
+              <h3 className="font-display text-xl tracking-wide">Account role</h3>
+              <p className="text-xs text-muted">
+                Admins can manage players, matches and invitations.
+              </p>
+            </CardHeader>
+            <CardBody>
+              <RoleControls
+                userId={player.user.id}
+                role={player.user.role}
+                isSelf={isSelf}
+                isLastAdmin={player.user.role === "ADMIN" && adminCount <= 1}
+              />
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <h3 className="font-display text-xl tracking-wide">Password reset</h3>
+              <p className="text-xs text-muted">
+                Generate a one-hour reset link for this user. The link is emailed to them
+                (if email is configured) and shown here as a fallback you can copy and forward.
+              </p>
+            </CardHeader>
+            <CardBody>
+              <ResetLinkControls userId={player.user.id} />
+            </CardBody>
+          </Card>
+        </>
       )}
     </div>
   );

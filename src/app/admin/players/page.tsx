@@ -64,7 +64,7 @@ function PlayerListSection({
               href={`/admin/players/${p.id}`}
               className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-surface/50 px-3 py-2.5 hover:border-pitch-500 transition"
             >
-              <Avatar firstName={p.firstName} lastName={p.lastName} size="md" />
+              <Avatar firstName={p.firstName} lastName={p.lastName} size="md" src={p.avatarUrl} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-foreground">
                   {p.firstName} {p.lastName}

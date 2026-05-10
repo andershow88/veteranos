@@ -4,6 +4,7 @@ import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
+import { AvatarUploader } from "@/components/ui/avatar-uploader";
 import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
@@ -19,15 +20,20 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-10 space-y-6">
-      <header className="flex flex-wrap items-center gap-4">
+      <header className="flex flex-wrap items-start gap-4">
         {player ? (
-          <Avatar firstName={player.firstName} lastName={player.lastName ?? ""} size="lg" />
+          <Avatar
+            firstName={player.firstName}
+            lastName={player.lastName ?? ""}
+            size="lg"
+            src={player.avatarUrl}
+          />
         ) : (
           <div className="h-14 w-14 rounded-full bg-surface-2" />
         )}
-        <div>
+        <div className="flex-1 min-w-0 space-y-2">
           <h1 className="font-display text-3xl tracking-wide">{displayName}</h1>
-          <div className="flex flex-wrap items-center gap-2 mt-1">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge tone="info">{user.role === "ADMIN" ? "Admin" : "Player"}</Badge>
             {player && (
               <Badge tone={player.kind === "ABO" ? "success" : "default"}>
@@ -35,6 +41,14 @@ export default async function ProfilePage() {
               </Badge>
             )}
           </div>
+          {player && (
+            <AvatarUploader
+              playerId={player.id}
+              firstName={player.firstName}
+              lastName={player.lastName}
+              currentUrl={player.avatarUrl}
+            />
+          )}
         </div>
       </header>
 

@@ -85,6 +85,7 @@ export function MatchCard({
                   firstName={s.player.firstName}
                   lastName={s.player.lastName}
                   position={s.player.position}
+                  src={s.player.avatarUrl}
                 />
               ))}
             </div>
@@ -105,7 +106,7 @@ export function MatchCard({
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-red-300">#{idx + 1}</span>
-                    <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" />
+                    <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" src={s.player.avatarUrl} />
                     <span className="text-sm text-foreground/90 line-through decoration-red-400/60">
                       {s.player.firstName} {s.player.lastName}
                     </span>
@@ -149,7 +150,7 @@ export function MatchCard({
                     }`}
                   >
                     <span className="text-xs font-bold text-pitch-300 w-5">#{idx + 1}</span>
-                    <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" />
+                    <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" src={s.player.avatarUrl} />
                     <span className="text-sm">
                       {s.player.firstName} {s.player.lastName}
                     </span>
@@ -224,14 +225,16 @@ function PlayerChip({
   firstName,
   lastName,
   position,
+  src,
 }: {
   firstName: string;
   lastName: string | null;
   position: string;
+  src?: string | null;
 }) {
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-surface/50 px-3 py-2">
-      <Avatar firstName={firstName} lastName={lastName} size="sm" />
+      <Avatar firstName={firstName} lastName={lastName} size="sm" src={src} />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-foreground truncate">
           {firstName}{lastName ? ` ${lastName}` : ""}

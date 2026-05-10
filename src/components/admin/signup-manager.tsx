@@ -160,7 +160,7 @@ function SignupSection({
               className="flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-surface/50 px-3 py-2"
             >
               <span className="number-pill text-xs text-muted w-6">#{idx + 1}</span>
-              <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" />
+              <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" src={s.player.avatarUrl} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">
                   {s.player.firstName} {s.player.lastName}

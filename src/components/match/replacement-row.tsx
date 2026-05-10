@@ -11,7 +11,7 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
 
         {/* Out: abo */}
         <div className="flex items-center gap-2 min-w-0">
-          <Avatar firstName={info.abo.firstName} lastName={info.abo.lastName} size="sm" />
+          <Avatar firstName={info.abo.firstName} lastName={info.abo.lastName} size="sm" src={info.abo.avatarUrl} />
           <div className="min-w-0">
             <div className="text-sm text-foreground/80 line-through decoration-red-400/50 truncate">
               {info.abo.firstName} {info.abo.lastName}
