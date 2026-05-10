@@ -3,6 +3,7 @@
 import { useTransition, useState } from "react";
 import { ShieldCheck, ShieldOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { promoteToAdminAction, demoteToPlayerAction } from "@/server/role-actions";
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 export function RoleControls({ userId, role, isSelf, isLastAdmin }: Props) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
 
   const promote = () => {
     setError(null);
@@ -27,9 +29,15 @@ export function RoleControls({ userId, role, isSelf, isLastAdmin }: Props) {
     });
   };
 
-  const demote = () => {
+  const demote = async () => {
     setError(null);
-    if (!confirm("Demote this admin to a regular player?")) return;
+    const ok = await confirm({
+      title: "Demote to player?",
+      description: "This admin will lose access to player, match, and invitation management. They keep their player profile and login.",
+      confirmText: "Demote to player",
+      variant: "danger",
+    });
+    if (!ok) return;
     start(async () => {
       try {
         await demoteToPlayerAction(userId);
@@ -79,6 +87,8 @@ export function RoleControls({ userId, role, isSelf, isLastAdmin }: Props) {
           {error}
         </div>
       )}
+
+      {dialog}
     </div>
   );
 }

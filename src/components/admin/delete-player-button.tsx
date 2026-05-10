@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { deletePlayerAction } from "@/server/admin-actions";
 
 export function DeletePlayerButton({
@@ -16,15 +17,18 @@ export function DeletePlayerButton({
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
 
-  const onDelete = () => {
+  const onDelete = async () => {
     setError(null);
-    if (
-      !confirm(
-        `Really delete ${playerName}? This removes the player profile, account, sign-ups and any team slots. This cannot be undone.`,
-      )
-    )
-      return;
+    const ok = await confirm({
+      title: `Delete ${playerName}?`,
+      description:
+        "This removes the player profile, account, sign-ups and any team slots. This cannot be undone.",
+      confirmText: "Delete player",
+      variant: "danger",
+    });
+    if (!ok) return;
     start(async () => {
       try {
         await deletePlayerAction(playerId);
@@ -55,6 +59,7 @@ export function DeletePlayerButton({
           {error}
         </div>
       )}
+      {dialog}
     </div>
   );
 }

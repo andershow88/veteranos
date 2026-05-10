@@ -3,6 +3,7 @@
 import { useTransition, useState } from "react";
 import { RefreshCcw, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { generateTeamsAction, deleteTeamsAction } from "@/server/admin-actions";
 
 export function TeamControls({
@@ -16,6 +17,7 @@ export function TeamControls({
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
 
   const generate = () => {
     setError(null);
@@ -27,8 +29,15 @@ export function TeamControls({
       }
     });
   };
-  const remove = () => {
-    if (!confirm("Really delete the teams?")) return;
+
+  const remove = async () => {
+    const ok = await confirm({
+      title: "Delete teams?",
+      description: "All generated teams for this match will be removed. You can regenerate them at any time.",
+      confirmText: "Delete teams",
+      variant: "danger",
+    });
+    if (!ok) return;
     start(() => deleteTeamsAction(matchId));
   };
 
@@ -57,6 +66,8 @@ export function TeamControls({
           {error}
         </div>
       )}
+
+      {dialog}
     </div>
   );
 }

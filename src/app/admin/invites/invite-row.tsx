@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Copy, Check, Power, PowerOff, Trash2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import {
   revokeInviteAction,
   deleteInviteAction,
@@ -24,6 +25,7 @@ type InviteVM = {
 export function InviteRow({ invite }: { invite: InviteVM }) {
   const [copied, setCopied] = useState(false);
   const [pending, startTransition] = useTransition();
+  const { confirm, dialog } = useConfirm();
 
   const usable = invite.active && !invite.expired && (invite.maxUses == null || invite.uses < invite.maxUses);
 
@@ -94,8 +96,16 @@ export function InviteRow({ invite }: { invite: InviteVM }) {
           variant="danger"
           size="sm"
           disabled={pending}
-          onClick={() => {
-            if (!confirm("Really delete this invitation?")) return;
+          onClick={async () => {
+            const ok = await confirm({
+              title: "Delete invitation?",
+              description: invite.label
+                ? `Really delete the invitation "${invite.label}"? Anyone holding the link will no longer be able to register with it.`
+                : "Really delete this invitation? Anyone holding the link will no longer be able to register with it.",
+              confirmText: "Delete invitation",
+              variant: "danger",
+            });
+            if (!ok) return;
             startTransition(() => deleteInviteAction(invite.id));
           }}
         >
@@ -103,6 +113,8 @@ export function InviteRow({ invite }: { invite: InviteVM }) {
           Delete
         </Button>
       </div>
+
+      {dialog}
     </div>
   );
 }

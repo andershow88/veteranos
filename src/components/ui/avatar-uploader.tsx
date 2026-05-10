@@ -6,6 +6,7 @@ import type { Area, Point } from "react-easy-crop";
 import { Camera, Trash2, X, Loader2, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "./button";
 import { Avatar } from "./avatar";
+import { useConfirm } from "./confirm-dialog";
 import {
   updateAvatarAction,
   removeAvatarAction,
@@ -29,6 +30,7 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
   const [areaPixels, setAreaPixels] = useState<Area | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const { confirm, dialog } = useConfirm();
 
   const onCropComplete = useCallback((_: Area, area: Area) => {
     setAreaPixels(area);
@@ -75,8 +77,14 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
     });
   };
 
-  const remove = () => {
-    if (!confirm("Remove the photo?")) return;
+  const remove = async () => {
+    const ok = await confirm({
+      title: "Remove photo?",
+      description: "Your avatar will fall back to your initials.",
+      confirmText: "Remove photo",
+      variant: "danger",
+    });
+    if (!ok) return;
     startTransition(async () => {
       try {
         await removeAvatarAction(playerId);
@@ -212,6 +220,8 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
           </div>
         </div>
       )}
+
+      {dialog}
     </div>
   );
 }
