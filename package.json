@@ -13,7 +13,8 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "pwa:icons": "node scripts/build-pwa-icons.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
