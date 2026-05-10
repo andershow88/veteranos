@@ -18,9 +18,15 @@ export function RegisterForm({ token }: { token: string }) {
       </div>
 
       <Section title="Required">
-        <div className="space-y-1.5">
-          <Label htmlFor="firstName">First name *</Label>
-          <Input id="firstName" name="firstName" required />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="firstName">First name *</Label>
+            <Input id="firstName" name="firstName" required />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="lastName">Last name *</Label>
+            <Input id="lastName" name="lastName" required />
+          </div>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="email">Email *</Label>
@@ -40,15 +46,9 @@ export function RegisterForm({ token }: { token: string }) {
       </Section>
 
       <Section title="Optional">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input id="lastName" name="lastName" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="nickname">Nickname</Label>
-            <Input id="nickname" name="nickname" />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="nickname">Nickname</Label>
+          <Input id="nickname" name="nickname" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="phone">Phone</Label>

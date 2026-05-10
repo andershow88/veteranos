@@ -19,10 +19,10 @@ const loginSchema = z.object({
 const registerSchema = z.object({
   // Required
   firstName: z.string().min(1, "First name missing"),
+  lastName: z.string().min(1, "Last name missing"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "At least 6 characters"),
   // Optional
-  lastName: z.string().optional().nullable(),
   nickname: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
   paypalName: z.string().optional().nullable(),
@@ -58,9 +58,9 @@ export async function loginAction(_: AuthState, formData: FormData): Promise<Aut
 export async function registerAction(_: AuthState, formData: FormData): Promise<AuthState> {
   const parsed = registerSchema.safeParse({
     firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
     email: formData.get("email"),
     password: formData.get("password"),
-    lastName: formData.get("lastName"),
     nickname: formData.get("nickname"),
     phone: formData.get("phone"),
     paypalName: formData.get("paypalName"),
@@ -92,7 +92,7 @@ export async function registerAction(_: AuthState, formData: FormData): Promise<
       player: {
         create: {
           firstName: parsed.data.firstName,
-          lastName: parsed.data.lastName || null,
+          lastName: parsed.data.lastName,
           nickname: parsed.data.nickname || null,
           phone: parsed.data.phone || null,
           paypalName: parsed.data.paypalName || null,
