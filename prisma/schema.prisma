@@ -1,0 +1,181 @@
+// Veteranos – Football scheduling app
+// Prisma schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PLAYER
+}
+
+enum PlayerKind {
+  SUBSCRIBER // Abo-Spieler (fester Platz)
+  WAITLIST   // Wartelisten-Spieler
+}
+
+enum SignupStatus {
+  IN          // Abo-Spieler nimmt teil
+  OUT         // Abo-Spieler abgesagt
+  WAITLIST    // Wartelisten-Spieler eingetragen
+}
+
+enum PaymentStatus {
+  NONE        // keine Zahlung erforderlich
+  PENDING     // ausstehend
+  PAID        // bezahlt
+}
+
+enum Position {
+  GOALKEEPER
+  DEFENDER
+  MIDFIELDER
+  STRIKER
+  ANY
+}
+
+enum TeamColor {
+  BLUE
+  RED
+  WHITE
+  BLACK
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(PLAYER)
+  player       Player?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Player {
+  id          String     @id @default(cuid())
+  userId      String?    @unique
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  firstName   String
+  lastName    String
+  nickname    String?
+  avatarUrl   String?
+
+  kind        PlayerKind @default(SUBSCRIBER)
+  // Position innerhalb der jeweiligen Liste (1,2,3...) - bestimmt Nachrück-Reihenfolge
+  rank        Int        @default(0)
+
+  // Kontakt / Bezahlung
+  paypalName  String?
+  paypalLink  String?
+  phone       String?
+  notes       String?
+
+  // Skills (0-100)
+  overall     Int        @default(50)
+  technique   Int        @default(50)
+  speed       Int        @default(50)
+  stamina     Int        @default(50)
+  defense     Int        @default(50)
+  offense     Int        @default(50)
+  passing     Int        @default(50)
+  shooting    Int        @default(50)
+  goalkeeping Int        @default(20)
+  position    Position   @default(ANY)
+
+  active      Boolean    @default(true)
+
+  signups     Signup[]
+  teamSlots   TeamSlot[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([kind, rank])
+}
+
+model Match {
+  id          String     @id @default(cuid())
+  date        DateTime
+  durationMin Int        @default(90)
+  location    String?
+  notes       String?
+
+  // Wenn locked, sind keine Anmeldungs-Änderungen mehr möglich
+  locked      Boolean    @default(false)
+
+  // Anzahl Teams für die Generierung (3 oder 4)
+  teamCount   Int        @default(2)
+
+  signups     Signup[]
+  teams       Team[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([date])
+}
+
+model Signup {
+  id            String        @id @default(cuid())
+  matchId       String
+  match         Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  playerId      String
+  player        Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  status        SignupStatus
+  // Reihenfolge in der jeweiligen Liste (für Wartelisten / Absagen)
+  rank          Int           @default(0)
+
+  // Zahlungsstatus zwischen Wartelisten-Spieler und Abo-Spieler
+  // Nur relevant, wenn dieser Wartelisten-Spieler für einen Abo-Spieler nachgerückt ist
+  paymentStatus PaymentStatus @default(NONE)
+  paymentNote   String?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([matchId, playerId])
+  @@index([matchId, status, rank])
+}
+
+model Team {
+  id        String     @id @default(cuid())
+  matchId   String
+  match     Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  name      String
+  color     TeamColor
+
+  // Aggregierte Stats (für Übersicht)
+  avgOverall   Float    @default(0)
+  avgDefense   Float    @default(0)
+  avgOffense   Float    @default(0)
+  avgSpeed     Float    @default(0)
+  comment      String?
+
+  slots     TeamSlot[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([matchId, color])
+}
+
+model TeamSlot {
+  id        String  @id @default(cuid())
+  teamId    String
+  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId  String
+  player    Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  position  Position @default(ANY)
+
+  @@unique([teamId, playerId])
+  @@index([teamId])
+}
