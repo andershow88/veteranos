@@ -62,7 +62,7 @@ export function ForgotPasswordForm() {
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-        Send reset link
+        Generate set link
       </Button>
     </form>
   );
