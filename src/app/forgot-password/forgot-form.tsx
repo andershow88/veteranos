@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Loader2, CheckCircle2, AlertTriangle, Mail } from "lucide-react";
+import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import {
@@ -22,7 +22,7 @@ export function ForgotPasswordForm() {
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             {state.emailDelivered
-              ? "Reset link sent. Check your email — it expires in one hour."
+              ? "Reset link sent to the email on file. Check your inbox — it expires in one hour."
               : "Reset link generated. Email delivery is not configured on this server, so please ask the admin for the link."}
           </span>
         </div>
@@ -45,19 +45,12 @@ export function ForgotPasswordForm() {
           <Input id="lastName" name="lastName" required />
         </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email *</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-subtle" />
-          <Input id="email" name="email" type="email" autoComplete="email" required className="pl-9" />
-        </div>
-      </div>
 
       {state?.status === "name_mismatch" && (
         <div className="rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-sm text-amber-200 inline-flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
-            The first or last name does not match what we have on file. Please contact an admin to generate a reset link for you.
+            That first and last name don&apos;t match a player on file (or match more than one). Please contact an admin to generate a reset link for you.
           </span>
         </div>
       )}

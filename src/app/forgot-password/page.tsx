@@ -14,7 +14,7 @@ export default async function ForgotPasswordPage() {
         <div className="mb-8 text-center">
           <h1 className="font-display text-4xl tracking-wide text-foreground">Forgot password</h1>
           <p className="mt-2 text-sm text-muted">
-            Enter your email plus the first and last name on your account. If they all match, we&apos;ll email you a reset link.
+            Enter the first and last name on your account. We&apos;ll email a reset link to the address on file.
           </p>
         </div>
         <div className="glass rounded-2xl p-6 sm:p-8">

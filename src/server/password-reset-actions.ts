@@ -13,7 +13,6 @@ const TOKEN_TTL_MS = 1000 * 60 * 60; // 1 hour
 const forgotSchema = z.object({
   firstName: z.string().min(1, "First name missing"),
   lastName: z.string().min(1, "Last name missing"),
-  email: z.string().email("Please enter a valid email"),
 });
 
 const resetSchema = z.object({
@@ -40,7 +39,14 @@ async function getBaseUrl() {
   return `${proto}://${host}`;
 }
 
-/** Public: request a password reset by providing email + first + last name. */
+/**
+ * Public: request a password reset using only first + last name.
+ *
+ * We look up the matching player and email the link to the email
+ * stored on that player's account. We require an unambiguous match
+ * (exactly one player and a linked user account); zero or multiple
+ * matches return name_mismatch so we don't leak account info either way.
+ */
 export async function requestPasswordResetAction(
   _: ForgotState,
   formData: FormData,
@@ -48,40 +54,36 @@ export async function requestPasswordResetAction(
   const parsed = forgotSchema.safeParse({
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
-    email: formData.get("email"),
   });
   if (!parsed.success) {
     return { status: "error", error: parsed.error.issues[0].message };
   }
 
-  const email = parsed.data.email.toLowerCase();
-  const user = await db.user.findUnique({
-    where: { email },
-    include: { player: true },
+  const first = parsed.data.firstName.trim();
+  const last = parsed.data.lastName.trim();
+
+  const matches = await db.player.findMany({
+    where: {
+      firstName: { equals: first, mode: "insensitive" },
+      lastName: { equals: last, mode: "insensitive" },
+    },
+    include: { user: true },
+    take: 2, // we only care whether it's exactly 1
   });
 
-  // Only proceed if the supplied first + last name match the player record.
-  // We treat "no user" and "wrong name" the same so we don't leak account
-  // existence — the form returns "name_mismatch" and asks the user to talk
-  // to an admin in either case.
-  const expectedFirst = user?.player?.firstName?.trim().toLowerCase();
-  const expectedLast = user?.player?.lastName?.trim().toLowerCase();
-  const providedFirst = parsed.data.firstName.trim().toLowerCase();
-  const providedLast = parsed.data.lastName.trim().toLowerCase();
-
-  const namesMatch =
-    !!user && !!expectedFirst && !!expectedLast &&
-    expectedFirst === providedFirst && expectedLast === providedLast;
-
-  if (!namesMatch) {
+  // 0 matches, >1 matches, or no linked user account → ask admin.
+  if (matches.length !== 1 || !matches[0].user) {
     return { status: "name_mismatch" };
   }
+
+  const player = matches[0];
+  const user = player.user!;
 
   const token = generateToken();
   await db.passwordResetToken.create({
     data: {
       token,
-      userId: user!.id,
+      userId: user.id,
       expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
       source: "self",
     },
@@ -91,7 +93,7 @@ export async function requestPasswordResetAction(
   const resetUrl = buildPasswordResetUrl(baseUrl, token);
 
   const text = [
-    `Hi ${user!.player?.firstName ?? "there"},`,
+    `Hi ${player.firstName},`,
     "",
     "We received a request to reset your Veteranos password.",
     "Open the link below to choose a new password. It expires in one hour.",
@@ -102,7 +104,7 @@ export async function requestPasswordResetAction(
   ].join("\n");
 
   const result = await sendEmail({
-    to: user!.email,
+    to: user.email,
     subject: "Reset your Veteranos password",
     text,
   });

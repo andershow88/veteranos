@@ -19,11 +19,11 @@ export function CreateInviteForm() {
     <form action={action} className="space-y-4">
       <div className="grid sm:grid-cols-3 gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="label">Label (optional)</Label>
+          <Label htmlFor="label">Label</Label>
           <Input id="label" name="label" placeholder="e.g. Group chat WhatsApp" />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="maxUses">Max uses (optional)</Label>
+          <Label htmlFor="maxUses">Max uses</Label>
           <Input
             id="maxUses"
             name="maxUses"
@@ -33,7 +33,7 @@ export function CreateInviteForm() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="expiresInDays">Valid for X days (optional)</Label>
+          <Label htmlFor="expiresInDays">Valid for X days</Label>
           <Input
             id="expiresInDays"
             name="expiresInDays"
