@@ -166,23 +166,16 @@ export function MatchCard({
           </Section>
         )}
 
-        <div className="flex items-center justify-between pt-2">
-          <Link
-            href={`/matches/${view.id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-pitch-300 hover:text-pitch-200 transition"
-          >
-            Match details {view.hasTeams ? "& teams" : ""}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          {currentPlayer.role === "ADMIN" && (
+        {currentPlayer.role === "ADMIN" && (
+          <div className="flex items-center justify-end pt-2">
             <Link
               href={`/admin/matches/${view.id}`}
               className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
             >
               Admin →
             </Link>
-          )}
-        </div>
+          </div>
+        )}
       </CardBody>
     </Card>
   );
