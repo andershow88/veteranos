@@ -43,6 +43,13 @@ export function RegisterForm({ token }: { token: string }) {
             required
           />
         </div>
+        <div className="space-y-1.5">
+          <Label>Player type *</Label>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <KindRadio value="ABO" label="Abo" description="Fixed slot. Confirm or decline per match." />
+            <KindRadio value="WAITLIST" label="Waitlist" description="Sign up per match when there is an open spot." />
+          </div>
+        </div>
       </Section>
 
       <Section title="Optional">
@@ -97,5 +104,31 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       </legend>
       {children}
     </fieldset>
+  );
+}
+
+function KindRadio({
+  value,
+  label,
+  description,
+}: {
+  value: "ABO" | "WAITLIST";
+  label: string;
+  description: string;
+}) {
+  return (
+    <label className="group flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface px-3 py-2.5 transition hover:border-pitch-500 has-checked:border-pitch-500 has-checked:bg-pitch-700/20 has-checked:ring-1 has-checked:ring-pitch-500/40">
+      <input
+        type="radio"
+        name="kind"
+        value={value}
+        required
+        className="mt-1 h-4 w-4 accent-pitch-500"
+      />
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-foreground">{label}</div>
+        <div className="text-[11px] text-muted leading-snug">{description}</div>
+      </div>
+    </label>
   );
 }

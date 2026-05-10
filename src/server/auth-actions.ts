@@ -22,6 +22,9 @@ const registerSchema = z.object({
   lastName: z.string().min(1, "Last name missing"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "At least 6 characters"),
+  kind: z.enum(["ABO", "WAITLIST"], {
+    errorMap: () => ({ message: "Please choose Abo or Waitlist" }),
+  }),
   // Optional profile data
   nickname: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
@@ -61,6 +64,7 @@ export async function registerAction(_: AuthState, formData: FormData): Promise<
     lastName: formData.get("lastName"),
     email: formData.get("email"),
     password: formData.get("password"),
+    kind: formData.get("kind"),
     nickname: formData.get("nickname"),
     phone: formData.get("phone"),
     paypalName: formData.get("paypalName"),
@@ -97,8 +101,8 @@ export async function registerAction(_: AuthState, formData: FormData): Promise<
           phone: parsed.data.phone || null,
           paypalName: parsed.data.paypalName || null,
           paypalLink: parsed.data.paypalLink || null,
-          // Self-registration always lands on the waitlist; admin can promote later.
-          kind: "WAITLIST",
+          // The user picks their type during registration. Admin can change it later.
+          kind: parsed.data.kind,
           rank: 999,
         },
       },
