@@ -18,7 +18,7 @@ export default async function ResetPasswordPage({
   const row = token ? await findUsableResetToken(token) : null;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-200px)] w-full max-w-md items-center justify-center px-4 py-12">
+    <div className="mx-auto w-full max-w-md px-4 py-8 sm:py-12">
       <div className="w-full">
         <div className="mb-8 text-center">
           <h1 className="font-display text-4xl tracking-wide text-foreground">Choose a new password</h1>

@@ -58,7 +58,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body
+        className="min-h-full flex flex-col"
+        // Reserves space for iOS home indicator and Android gesture bar so
+        // bottom-anchored buttons (Sign in, Save, etc.) are reachable when
+        // the app runs in standalone / PWA mode with viewport-fit: cover.
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <Header
           user={
             user

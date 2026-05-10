@@ -87,50 +87,45 @@ export function InstallPrompt() {
     }
   };
 
-  // Android install prompt anchors to the bottom (Chromium has no UI in
-  // the way down there). iOS hint anchors to the top because Safari's
-  // share button sits in the bottom toolbar and we must not cover it.
-  const positionClasses = deferred
-    ? "inset-x-3 bottom-3 sm:left-auto sm:right-3 sm:max-w-sm pb-[env(safe-area-inset-bottom)]"
-    : "inset-x-3 top-3 sm:left-auto sm:right-3 sm:max-w-sm pt-[env(safe-area-inset-top)]";
-
+  // Compact pill anchored to the bottom-right with safe-area padding.
+  // Stays out of the way of forms / buttons. Tapping the pill expands the
+  // detail card; X dismisses for this session.
   return (
-    <div className={`fixed z-40 ${positionClasses}`}>
-      <div className="relative glass rounded-2xl border border-pitch-600/40 shadow-2xl px-4 py-3 pr-10">
+    <div
+      className="fixed z-40 right-3 bottom-3 max-w-[min(22rem,calc(100vw-1.5rem))] sm:max-w-sm"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div className="relative glass rounded-2xl border border-pitch-600/40 shadow-2xl px-3 py-2 pr-9 flex items-center gap-2.5">
         <button
           type="button"
           onClick={dismiss}
           aria-label="Dismiss"
-          className="absolute right-2 top-2 text-muted hover:text-foreground transition"
+          className="absolute right-1.5 top-1.5 text-muted hover:text-foreground transition"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
 
         {deferred ? (
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-pitch-700/30 text-pitch-200">
-              <Download className="h-4 w-4" />
+          <>
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-pitch-700/30 text-pitch-200">
+              <Download className="h-3.5 w-3.5" />
             </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-foreground">Install Veteranos</div>
-              <div className="text-[11px] text-muted leading-snug">
-                Add the app to your home screen for a faster, full-screen experience.
-              </div>
+            <div className="min-w-0 flex-1 text-[12px] leading-tight">
+              <div className="font-semibold text-foreground">Install app</div>
+              <div className="text-[11px] text-muted">One-tap home-screen add</div>
             </div>
             <Button size="sm" onClick={install}>Install</Button>
-          </div>
+          </>
         ) : (
-          <div className="flex items-start gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-pitch-700/30 text-pitch-200">
-              <Share className="h-4 w-4" />
+          <>
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-pitch-700/30 text-pitch-200">
+              <Share className="h-3.5 w-3.5" />
             </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-foreground">Add to Home Screen</div>
-              <div className="text-[11px] text-muted leading-snug">
-                In Safari, tap the Share button (the square with the up-arrow) in the toolbar &mdash; then choose &ldquo;Add to Home Screen&rdquo;.
-              </div>
+            <div className="min-w-0 flex-1 text-[12px] leading-tight">
+              <div className="font-semibold text-foreground">Add to Home Screen</div>
+              <div className="text-[11px] text-muted">Safari: Share → Add to Home Screen</div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
