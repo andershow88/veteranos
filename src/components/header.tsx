@@ -31,6 +31,7 @@ export function Header({ user }: Props) {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink href="/">Matches</NavLink>
           {user && <NavLink href="/profile">Profile</NavLink>}
+          <NavLink href="/handout">Handout</NavLink>
           {user?.role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
         </nav>
 
@@ -65,6 +66,7 @@ export function Header({ user }: Props) {
       <nav className="md:hidden flex items-center gap-1 px-3 pb-2 pt-1 border-t border-border/40 overflow-x-auto scrollbar-thin">
         <NavLink href="/">Matches</NavLink>
         {user && <NavLink href="/profile">Profile</NavLink>}
+        <NavLink href="/handout">Handout</NavLink>
         {user?.role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
       </nav>
     </header>
