@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -28,16 +28,60 @@ export function MatchForm({ defaults }: { defaults?: Defaults }) {
     undefined,
   );
 
+  // Controlled state so the UI reflects the latest server data after save.
+  // useEffect re-syncs whenever the parent passes new defaults (i.e. after
+  // a successful update + revalidatePath).
+  const [date, setDate] = useState(defaults?.date ?? "");
+  const [time, setTime] = useState(defaults?.time ?? "20:00");
+  const [durationMin, setDurationMin] = useState(String(defaults?.durationMin ?? 90));
+  const [location, setLocation] = useState(defaults?.location ?? "");
+  const [teamCount, setTeamCount] = useState(String(defaults?.teamCount ?? 2));
+  const [notes, setNotes] = useState(defaults?.notes ?? "");
+
+  useEffect(() => {
+    // Resync controlled inputs to the latest server data after a save +
+    // revalidatePath cycle. This is the "sync state to props" pattern the
+    // lint rule discourages by default, but is the right call here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDate(defaults?.date ?? "");
+    setTime(defaults?.time ?? "20:00");
+    setDurationMin(String(defaults?.durationMin ?? 90));
+    setLocation(defaults?.location ?? "");
+    setTeamCount(String(defaults?.teamCount ?? 2));
+    setNotes(defaults?.notes ?? "");
+  }, [
+    defaults?.date,
+    defaults?.time,
+    defaults?.durationMin,
+    defaults?.location,
+    defaults?.teamCount,
+    defaults?.notes,
+  ]);
+
   return (
     <form action={formAction} className="space-y-5">
       <div className="grid sm:grid-cols-3 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="date">Date</Label>
-          <Input id="date" name="date" type="date" defaultValue={defaults?.date ?? ""} required />
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="time">Time</Label>
-          <Input id="time" name="time" type="time" defaultValue={defaults?.time ?? "20:00"} required />
+          <Input
+            id="time"
+            name="time"
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="durationMin">Duration (minutes)</Label>
@@ -47,7 +91,8 @@ export function MatchForm({ defaults }: { defaults?: Defaults }) {
             type="number"
             min={30}
             max={240}
-            defaultValue={defaults?.durationMin ?? 90}
+            value={durationMin}
+            onChange={(e) => setDurationMin(e.target.value)}
             required
           />
         </div>
@@ -59,13 +104,19 @@ export function MatchForm({ defaults }: { defaults?: Defaults }) {
           <Input
             id="location"
             name="location"
-            defaultValue={defaults?.location ?? ""}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             placeholder="e.g. Riverside pitch"
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="teamCount">Number of teams</Label>
-          <Select id="teamCount" name="teamCount" defaultValue={String(defaults?.teamCount ?? 2)}>
+          <Select
+            id="teamCount"
+            name="teamCount"
+            value={teamCount}
+            onChange={(e) => setTeamCount(e.target.value)}
+          >
             <option value="2">2 teams</option>
             <option value="3">3 teams</option>
             <option value="4">4 teams</option>
@@ -75,7 +126,13 @@ export function MatchForm({ defaults }: { defaults?: Defaults }) {
 
       <div className="space-y-1.5">
         <Label htmlFor="notes">Notes</Label>
-        <Textarea id="notes" name="notes" defaultValue={defaults?.notes ?? ""} placeholder="Indoor / outdoor, what to bring, ..." />
+        <Textarea
+          id="notes"
+          name="notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Indoor / outdoor, what to bring, ..."
+        />
       </div>
 
       {state?.error && (
