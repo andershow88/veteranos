@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "./button";
 
@@ -31,12 +32,16 @@ export function ConfirmDialog({
   }, [open, onClose]);
 
   if (!open) return null;
+  if (typeof document === "undefined") return null;
 
   const isDanger = options.variant === "danger";
 
-  return (
+  // Render through a portal so the dialog escapes any ancestor stacking
+  // context (e.g. transformed/filtered elements, sticky headers, the install
+  // prompt) and always sits above everything else.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose(false);
       }}
@@ -86,7 +91,8 @@ export function ConfirmDialog({
           </Button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Lock, Unlock, Trash2, Trophy } from "lucide-react";
+import { ArrowLeft, Lock, Unlock, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { MatchForm } from "@/components/admin/match-form";
 import { SignupManager } from "@/components/admin/signup-manager";
 import { TeamControls } from "@/components/admin/team-controls";
+import { DeleteMatchButton } from "@/components/admin/delete-match-button";
 import { TeamShowcase } from "@/components/team/team-showcase";
 import { buildMatchView, getActivePlayersGrouped } from "@/server/match-queries";
 import { setMatchLockedAction } from "@/server/match-actions";
-import { deleteMatchAction } from "@/server/admin-actions";
 import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +74,7 @@ export default async function AdminMatchPage({
                   {match.locked ? "Unlock" : "Lock list"}
                 </Button>
               </ServerForm>
-              <DeleteMatchForm matchId={id} />
+              <DeleteMatchButton matchId={id} matchLabel={formatMatchDate(match.date)} />
             </div>
           </div>
         </CardHeader>
@@ -163,13 +163,3 @@ async function ServerForm({
   return <form action={action}>{children}</form>;
 }
 
-function DeleteMatchForm({ matchId }: { matchId: string }) {
-  const action = deleteMatchAction.bind(null, matchId);
-  return (
-    <form action={action}>
-      <Button variant="danger" size="sm" type="submit">
-        <Trash2 className="h-4 w-4" /> Delete
-      </Button>
-    </form>
-  );
-}

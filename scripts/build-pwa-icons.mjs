@@ -24,11 +24,10 @@ const PUBLIC_DIR = join(ROOT, "public");
 mkdirSync(PUBLIC_DIR, { recursive: true });
 
 /* ---------- Brand palette ---------- */
-const BG = rgb(0x07, 0x12, 0x0a);        // app background
-const BG_RING = rgb(0x05, 0x96, 0x69);   // pitch-700 glow ring on bigger icons
-const BALL_WHITE = rgb(0xf5, 0xfa, 0xf7);
-const BALL_SHADE = rgb(0xc2, 0xcd, 0xc8);
-const BALL_PATCH = rgb(0x0e, 0x18, 0x12);
+const BG = rgb(0x07, 0x12, 0x0a);             // app background
+const PITCH_GREEN = rgb(0x10, 0xa3, 0x6e);    // mid pitch
+const PITCH_GREEN_DARK = rgb(0x0a, 0x7a, 0x4f); // pitch shadow stripe
+const PITCH_LINE = rgb(0xf5, 0xfa, 0xf7);     // line markings
 const BEER_GOLD = rgb(0xf2, 0xb3, 0x35);
 const BEER_GOLD_DEEP = rgb(0xc1, 0x8a, 0x1c);
 const BEER_FOAM = rgb(0xfb, 0xf8, 0xe9);
@@ -100,100 +99,88 @@ function distance(x, y, cx, cy) {
 
 /* ---------- Drawing ---------- */
 
-function drawBall(canvas, cx, cy, r) {
-  // Ball outline + interior shading
-  for (let y = cy - r - 1; y <= cy + r + 1; y++) {
-    for (let x = cx - r - 1; x <= cx + r + 1; x++) {
-      const d = distance(x, y, cx, cy);
-      if (d > r + 1) continue;
+function drawPitch(canvas, cx, cy, halfW, halfH) {
+  const left = cx - halfW;
+  const right = cx + halfW;
+  const top = cy - halfH;
+  const bottom = cy + halfH;
 
-      // Soft anti-aliased edge
-      if (d > r) {
-        const t = Math.min(1, d - r);
-        const base = blend(BALL_WHITE, BG, t);
-        canvas.set(x, y, base);
-        continue;
-      }
+  const lineThick = Math.max(2, Math.round(halfW * 0.04));
+  const stripeBand = Math.max(4, Math.round(halfH / 6));
 
-      // Vertical light gradient inside the ball: bright top, slight shade bottom
-      const t = Math.max(0, (y - (cy - r)) / (2 * r));
-      const base = blend(BALL_WHITE, BALL_SHADE, t * 0.55);
+  // Pitch fill with horizontal mowed stripes for depth
+  for (let y = top; y < bottom; y++) {
+    if (y < 0 || y >= canvas.size) continue;
+    const stripeIndex = Math.floor((y - top) / stripeBand);
+    const base = stripeIndex % 2 === 0 ? PITCH_GREEN : PITCH_GREEN_DARK;
+    for (let x = left; x < right; x++) {
+      if (x < 0 || x >= canvas.size) continue;
       canvas.set(x, y, base);
     }
   }
 
-  // Pentagonal patches placed in a classic football arrangement.
-  const patches = [
-    { cx, cy: cy - r * 0.55, rr: r * 0.20 },
-    { cx: cx - r * 0.55, cy: cy - r * 0.05, rr: r * 0.16 },
-    { cx: cx + r * 0.55, cy: cy - r * 0.05, rr: r * 0.16 },
-    { cx: cx - r * 0.28, cy: cy + r * 0.45, rr: r * 0.16 },
-    { cx: cx + r * 0.28, cy: cy + r * 0.45, rr: r * 0.16 },
-  ];
+  // Outer rectangle border
+  drawRectStroke(canvas, left, top, right - left, bottom - top, lineThick, PITCH_LINE);
 
-  for (const p of patches) {
-    // 5-sided pentagon-ish shape, scaled to radius
-    drawPentagon(canvas, p.cx, p.cy, p.rr, BALL_PATCH);
-  }
-
-  // Black seams connecting the patches and edge — short lines
-  drawSeam(canvas, patches[0], patches[1], r * 0.04);
-  drawSeam(canvas, patches[0], patches[2], r * 0.04);
-  drawSeam(canvas, patches[1], patches[3], r * 0.04);
-  drawSeam(canvas, patches[2], patches[4], r * 0.04);
-  drawSeam(canvas, patches[3], patches[4], r * 0.04);
-}
-
-function drawPentagon(canvas, cx, cy, r, color) {
-  // Approximate pentagon by rasterizing pixels inside it.
-  // Build 5 vertices (top vertex pointing up), then fill via point-in-polygon.
-  const verts = [];
-  for (let i = 0; i < 5; i++) {
-    const angle = -Math.PI / 2 + i * (2 * Math.PI / 5);
-    verts.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
-  }
-
-  // Bounding box
-  const minX = Math.floor(Math.min(...verts.map(v => v.x)));
-  const maxX = Math.ceil(Math.max(...verts.map(v => v.x)));
-  const minY = Math.floor(Math.min(...verts.map(v => v.y)));
-  const maxY = Math.ceil(Math.max(...verts.map(v => v.y)));
-
-  for (let y = minY; y <= maxY; y++) {
-    for (let x = minX; x <= maxX; x++) {
-      if (pointInPolygon(x + 0.5, y + 0.5, verts)) {
-        canvas.set(x, y, color);
-      }
+  // Halfway vertical line
+  for (let y = top; y < bottom; y++) {
+    for (let dx = 0; dx < lineThick; dx++) {
+      canvas.set(cx - Math.floor(lineThick / 2) + dx, y, PITCH_LINE);
     }
   }
-}
 
-function pointInPolygon(px, py, verts) {
-  let inside = false;
-  for (let i = 0, j = verts.length - 1; i < verts.length; j = i++) {
-    const a = verts[i], b = verts[j];
-    const intersect =
-      (a.y > py) !== (b.y > py) &&
-      px < ((b.x - a.x) * (py - a.y)) / (b.y - a.y) + a.x;
-    if (intersect) inside = !inside;
+  // Center circle
+  const circleR = Math.min(halfW, halfH) * 0.32;
+  drawCircleStroke(canvas, cx, cy, circleR, lineThick, PITCH_LINE);
+
+  // Center spot
+  for (let y = cy - lineThick; y <= cy + lineThick; y++) {
+    for (let x = cx - lineThick; x <= cx + lineThick; x++) {
+      if (distance(x, y, cx, cy) <= lineThick * 0.6) canvas.set(x, y, PITCH_LINE);
+    }
   }
-  return inside;
+
+  // Penalty boxes (left + right)
+  const penWidth = halfW * 0.22;
+  const penHeight = halfH * 1.0;
+  // left penalty box
+  drawRectStroke(canvas, left, cy - penHeight / 2, penWidth, penHeight, lineThick, PITCH_LINE);
+  // right penalty box
+  drawRectStroke(canvas, right - penWidth, cy - penHeight / 2, penWidth, penHeight, lineThick, PITCH_LINE);
+
+  // Goal areas (smaller boxes inside the penalty boxes)
+  const goalWidth = penWidth * 0.4;
+  const goalHeight = penHeight * 0.5;
+  drawRectStroke(canvas, left, cy - goalHeight / 2, goalWidth, goalHeight, lineThick, PITCH_LINE);
+  drawRectStroke(canvas, right - goalWidth, cy - goalHeight / 2, goalWidth, goalHeight, lineThick, PITCH_LINE);
 }
 
-function drawSeam(canvas, a, b, w) {
-  const dx = b.cx - a.cx, dy = b.cy - a.cy;
-  const len = Math.sqrt(dx * dx + dy * dy);
-  const steps = Math.ceil(len);
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const x = a.cx + dx * t;
-    const y = a.cy + dy * t;
-    for (let oy = -w; oy <= w; oy += 0.5) {
-      for (let ox = -w; ox <= w; ox += 0.5) {
-        if (ox * ox + oy * oy <= w * w) {
-          canvas.set(x + ox, y + oy, BALL_PATCH);
-        }
-      }
+function drawRectStroke(canvas, x, y, w, h, t, color) {
+  // top
+  for (let yy = y; yy < y + t; yy++) {
+    for (let xx = x; xx < x + w; xx++) canvas.set(xx, yy, color);
+  }
+  // bottom
+  for (let yy = y + h - t; yy < y + h; yy++) {
+    for (let xx = x; xx < x + w; xx++) canvas.set(xx, yy, color);
+  }
+  // left
+  for (let xx = x; xx < x + t; xx++) {
+    for (let yy = y; yy < y + h; yy++) canvas.set(xx, yy, color);
+  }
+  // right
+  for (let xx = x + w - t; xx < x + w; xx++) {
+    for (let yy = y; yy < y + h; yy++) canvas.set(xx, yy, color);
+  }
+}
+
+function drawCircleStroke(canvas, cx, cy, r, t, color) {
+  const outer = r;
+  const inner = r - t;
+  for (let y = cy - outer - 1; y <= cy + outer + 1; y++) {
+    for (let x = cx - outer - 1; x <= cx + outer + 1; x++) {
+      const d = distance(x, y, cx, cy);
+      if (d <= outer && d >= inner) canvas.set(x, y, color);
     }
   }
 }
@@ -247,19 +234,6 @@ function drawBeer(canvas, x0, y0, w, h) {
   }
 }
 
-function drawGlow(canvas, cx, cy, rOuter, rInner) {
-  // Soft ring glow behind the ball
-  for (let y = cy - rOuter; y <= cy + rOuter; y++) {
-    for (let x = cx - rOuter; x <= cx + rOuter; x++) {
-      const d = distance(x, y, cx, cy);
-      if (d <= rOuter && d >= rInner) {
-        const t = (d - rInner) / (rOuter - rInner);
-        canvas.set(x, y, blend(BG_RING, BG, t));
-      }
-    }
-  }
-}
-
 /* ---------- Compose icon ---------- */
 
 function drawIcon(size, { maskable = false } = {}) {
@@ -267,22 +241,21 @@ function drawIcon(size, { maskable = false } = {}) {
   canvas.fill(BG);
 
   // Maskable: keep visuals in inner ~70% so Android's mask doesn't clip.
-  const safe = maskable ? 0.36 : 0.46;
+  const safe = maskable ? 0.34 : 0.42;
 
-  // Slight offset: ball sits a bit up and to the left so the beer mug fits
-  // into the lower-right without clipping.
-  const bx = size * 0.43;
-  const by = size * 0.46;
-  const ballR = size * safe;
+  // Pitch is shown in horizontal orientation, rounded to the brand center.
+  const pitchHalfW = Math.round(size * safe);
+  const pitchHalfH = Math.round(size * safe * 0.62);
+  const cx = Math.round(size * 0.46);
+  const cy = Math.round(size * 0.50);
 
-  drawGlow(canvas, bx, by, ballR * 1.05, ballR * 0.98);
-  drawBall(canvas, bx, by, ballR);
+  drawPitch(canvas, cx, cy, pitchHalfW, pitchHalfH);
 
-  // Beer mug: bottom-right of the ball, slightly overlapping.
+  // Beer mug overlapping the bottom-right corner of the pitch.
   const mugW = Math.round(size * 0.22);
   const mugH = Math.round(size * 0.28);
-  const mugX = Math.round(bx + ballR * 0.45 - mugW * 0.2);
-  const mugY = Math.round(by + ballR * 0.30);
+  const mugX = Math.round(cx + pitchHalfW * 0.55 - mugW * 0.4);
+  const mugY = Math.round(cy + pitchHalfH * 0.30);
   drawBeer(canvas, mugX, mugY, mugW, mugH);
 
   return canvas.buf;
