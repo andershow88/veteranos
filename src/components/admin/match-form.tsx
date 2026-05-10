@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
@@ -27,6 +28,13 @@ export function MatchForm({ defaults }: { defaults?: Defaults }) {
     action,
     undefined,
   );
+  const router = useRouter();
+
+  // revalidatePath alone doesn't reliably re-fetch the current dynamic route
+  // in Next 16, so trigger an explicit refresh after every successful save.
+  useEffect(() => {
+    if (state?.ok) router.refresh();
+  }, [state, router]);
 
   // Controlled state so the UI reflects the latest server data after save.
   // useEffect re-syncs whenever the parent passes new defaults (i.e. after
