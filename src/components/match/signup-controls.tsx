@@ -16,7 +16,7 @@ type Props = {
   locked: boolean;
   currentPlayer: {
     playerId: string | null;
-    kind: "SUBSCRIBER" | "WAITLIST" | null;
+    kind: "ABO" | "WAITLIST" | null;
     role: "ADMIN" | "PLAYER" | null;
   };
   mySignup: (Signup & { player: Player }) | null;
@@ -41,7 +41,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
     );
   }
 
-  const isSubscriber = currentPlayer.kind === "SUBSCRIBER";
+  const isAbo = currentPlayer.kind === "ABO";
   const isAttending = mySignup?.status === "IN";
   const isDeclined = mySignup?.status === "OUT";
   const isOnWaitlist = mySignup?.status === "WAITLIST";
@@ -52,7 +52,7 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
         Your reply:
       </span>
 
-      {isSubscriber ? (
+      {isAbo ? (
         <>
           <Button
             size="sm"

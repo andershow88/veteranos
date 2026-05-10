@@ -9,15 +9,15 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-xs font-bold text-pitch-300 number-pill">#{index + 1}</span>
 
-        {/* Out: subscriber */}
+        {/* Out: abo */}
         <div className="flex items-center gap-2 min-w-0">
-          <Avatar firstName={info.subscriber.firstName} lastName={info.subscriber.lastName} size="sm" />
+          <Avatar firstName={info.abo.firstName} lastName={info.abo.lastName} size="sm" />
           <div className="min-w-0">
             <div className="text-sm text-foreground/80 line-through decoration-red-400/50 truncate">
-              {info.subscriber.firstName} {info.subscriber.lastName}
+              {info.abo.firstName} {info.abo.lastName}
             </div>
             <div className="text-[10px] uppercase tracking-widest text-red-300/80">
-              Subscriber · declined
+              Abo · declined
             </div>
           </div>
         </div>
@@ -47,22 +47,22 @@ export function ReplacementRow({ info, index }: { info: ReplacementInfo; index: 
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <PaymentBadge status={info.paymentStatus} />
-          {info.subscriber.paypalLink && (
+          {info.abo.paypalLink && (
             <a
-              href={info.subscriber.paypalLink}
+              href={info.abo.paypalLink}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1 rounded-full border border-pitch-600/50 bg-pitch-700/20 px-2.5 py-1 text-[11px] font-semibold text-pitch-100 hover:bg-pitch-700/40 transition"
             >
               <Wallet className="h-3 w-3" />
-              Pay {info.subscriber.firstName}
+              Pay {info.abo.firstName}
               <ExternalLink className="h-3 w-3" />
             </a>
           )}
-          {!info.subscriber.paypalLink && info.subscriber.paypalName && (
+          {!info.abo.paypalLink && info.abo.paypalName && (
             <span className="inline-flex items-center gap-1 rounded-full border border-border-strong bg-surface-2 px-2.5 py-1 text-[11px] text-foreground/80">
               <Wallet className="h-3 w-3 text-pitch-300" />
-              {info.subscriber.paypalName}
+              {info.abo.paypalName}
             </span>
           )}
         </div>

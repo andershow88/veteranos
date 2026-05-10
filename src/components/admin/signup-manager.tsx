@@ -15,7 +15,7 @@ import type { Player, PaymentStatus, SignupStatus } from "@prisma/client";
 
 type Props = {
   view: MatchView;
-  allPlayers: { subscribers: Player[]; waitlisters: Player[] };
+  allPlayers: { abos: Player[]; waitlisters: Player[] };
 };
 
 export function SignupManager({ view, allPlayers }: Props) {
@@ -28,7 +28,7 @@ export function SignupManager({ view, allPlayers }: Props) {
     ...view.declined.map((s) => s.playerId),
     ...view.waitlist.map((s) => s.playerId),
   ]);
-  const availableSubs = allPlayers.subscribers.filter((p) => !allSignedUpIds.has(p.id));
+  const availableSubs = allPlayers.abos.filter((p) => !allSignedUpIds.has(p.id));
   const availableWls = allPlayers.waitlisters.filter((p) => !allSignedUpIds.has(p.id));
 
   const setStatus = (playerId: string, status: SignupStatus | "REMOVE") => {
@@ -49,7 +49,7 @@ export function SignupManager({ view, allPlayers }: Props) {
             <Select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)}>
               <option value="">Choose player…</option>
               {availableSubs.length > 0 && (
-                <optgroup label="Subscribers">
+                <optgroup label="Abos">
                   {availableSubs.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.firstName} {p.lastName}
@@ -166,7 +166,7 @@ function SignupSection({
                   {s.player.firstName} {s.player.lastName}
                 </div>
                 <div className="text-[10px] uppercase tracking-widest text-muted">
-                  {s.player.kind === "SUBSCRIBER" ? "Subscriber" : "Waitlist"} · OVR {s.player.overall}
+                  {s.player.kind === "ABO" ? "Abo" : "Waitlist"} · OVR {s.player.overall}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 ml-auto">{renderActions(s)}</div>

@@ -7,10 +7,11 @@ export function Avatar({
   className,
 }: {
   firstName: string;
-  lastName: string;
+  lastName?: string | null;
   size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }) {
+  const safeLast = lastName ?? "";
   const sizes = {
     xs: "h-6 w-6 text-[10px]",
     sm: "h-8 w-8 text-xs",
@@ -18,7 +19,7 @@ export function Avatar({
     lg: "h-14 w-14 text-base",
   } as const;
 
-  const seed = (firstName + lastName).toLowerCase();
+  const seed = (firstName + safeLast).toLowerCase();
   const hue = Array.from(seed).reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
 
   return (
@@ -33,7 +34,7 @@ export function Avatar({
       }}
       aria-hidden
     >
-      {initials(firstName, lastName)}
+      {initials(firstName, safeLast)}
     </div>
   );
 }

@@ -16,13 +16,13 @@ enum Role {
 }
 
 enum PlayerKind {
-  SUBSCRIBER // Subscriber (fixed slot)
-  WAITLIST   // Waitlist player
+  ABO       // Abo player (fixed slot)
+  WAITLIST  // Waitlist player
 }
 
 enum SignupStatus {
-  IN          // Subscriber confirmed
-  OUT         // Subscriber declined
+  IN          // Abo player confirmed
+  OUT         // Abo player declined
   WAITLIST    // Waitlist player signed up for this match
 }
 
@@ -48,13 +48,32 @@ enum TeamColor {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String       @id @default(cuid())
+  email        String       @unique
   passwordHash String
-  role         Role     @default(PLAYER)
+  role         Role         @default(PLAYER)
   player       Player?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  invitations  Invitation[] @relation("InvitationCreator")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  token       String    @unique
+  label       String?
+  active      Boolean   @default(true)
+  uses        Int       @default(0)
+  maxUses     Int?
+  expiresAt   DateTime?
+
+  createdById String?
+  createdBy   User?     @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([active])
 }
 
 model Player {
@@ -63,11 +82,11 @@ model Player {
   user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   firstName   String
-  lastName    String
+  lastName    String?
   nickname    String?
   avatarUrl   String?
 
-  kind        PlayerKind @default(SUBSCRIBER)
+  kind        PlayerKind @default(WAITLIST)
   // Position within the respective list (1, 2, 3, ...) - determines replacement order
   rank        Int        @default(0)
 
@@ -133,8 +152,8 @@ model Signup {
   // Order within the respective list (waitlist / declines)
   rank          Int           @default(0)
 
-  // Payment status between this waitlist player and the subscriber they're replacing.
-  // Only relevant when this waitlist player has stepped in for a subscriber.
+  // Payment status between this waitlist player and the abo they're replacing.
+  // Only relevant when this waitlist player has stepped in for an abo.
   paymentStatus PaymentStatus @default(NONE)
   paymentNote   String?
 

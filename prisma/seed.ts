@@ -3,7 +3,7 @@
  *
  * Configure via env:
  *   ADMIN_EMAIL, ADMIN_PASSWORD       - admin credentials (required)
- *   SEED_DEMO_PLAYERS=true            - also seed 12 demo subscribers + 4 waitlisters + 1 match
+ *   SEED_DEMO_PLAYERS=true            - also seed 12 demo abos + 4 waitlisters + 1 match
  *
  * Run:
  *   npm run db:seed
@@ -38,7 +38,7 @@ async function main() {
           create: {
             firstName: "Admin",
             lastName: "Veteranos",
-            kind: "SUBSCRIBER",
+            kind: "ABO",
             rank: 0,
             overall: 75,
             position: "ANY",
@@ -86,7 +86,7 @@ async function seedDemoPlayers() {
         firstName: first as string,
         lastName: last as string,
         position: position as never,
-        kind: "SUBSCRIBER",
+        kind: "ABO",
         rank,
         paypalLink: `https://paypal.me/${(first as string).toLowerCase()}`,
         paypalName: `${first} ${last}`,
@@ -136,7 +136,7 @@ async function seedDemoPlayers() {
   });
   if (!existingMatch) {
     const subsAll = await db.player.findMany({
-      where: { kind: "SUBSCRIBER", active: true },
+      where: { kind: "ABO", active: true },
       orderBy: { rank: "asc" },
       select: { id: true, rank: true },
     });

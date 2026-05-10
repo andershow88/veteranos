@@ -10,7 +10,7 @@ import { ReplacementRow } from "./replacement-row";
 
 type CurrentPlayerCtx = {
   playerId: string | null;
-  kind: "SUBSCRIBER" | "WAITLIST" | null;
+  kind: "ABO" | "WAITLIST" | null;
   role: "ADMIN" | "PLAYER" | null;
 };
 
@@ -226,7 +226,7 @@ function PlayerChip({
   position,
 }: {
   firstName: string;
-  lastName: string;
+  lastName: string | null;
   position: string;
 }) {
   return (
@@ -234,7 +234,7 @@ function PlayerChip({
       <Avatar firstName={firstName} lastName={lastName} size="sm" />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium text-foreground truncate">
-          {firstName} {lastName}
+          {firstName}{lastName ? ` ${lastName}` : ""}
         </div>
         {position !== "ANY" && (
           <div className="text-[10px] uppercase tracking-widest text-muted">

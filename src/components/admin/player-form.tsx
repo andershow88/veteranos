@@ -43,8 +43,8 @@ export function PlayerForm({ player }: { player?: Defaults }) {
         <div className="grid sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="kind">Type</Label>
-            <Select id="kind" name="kind" defaultValue={player?.kind ?? "SUBSCRIBER"}>
-              <option value="SUBSCRIBER">Subscriber</option>
+            <Select id="kind" name="kind" defaultValue={player?.kind ?? "ABO"}>
+              <option value="ABO">Abo</option>
               <option value="WAITLIST">Waitlist</option>
             </Select>
           </div>

@@ -7,13 +7,13 @@ export type MatchSlot = {
 };
 
 export type ReplacementInfo = {
-  /** Subscriber who declined */
-  subscriber: Player;
+  /** Abo who declined */
+  abo: Player;
   /** Waitlist player who steps in (or null if nobody is available) */
   replacement: (Signup & { player: Player }) | null;
-  /** Original signup of the subscriber (with OUT status) */
+  /** Original signup of the abo (with OUT status) */
   outSignup: Signup;
-  /** Payment status between the waitlist player and the subscriber */
+  /** Payment status between the waitlist player and the abo */
   paymentStatus: PaymentStatus;
   paymentNote: string | null;
 };
@@ -27,9 +27,9 @@ export type MatchView = {
   locked: boolean;
   teamCount: number;
 
-  /** All active subscribers who are confirmed (IN status) */
+  /** All active abos who are confirmed (IN status) */
   attendees: Array<Signup & { player: Player }>;
-  /** Subscribers who declined (OUT status), sorted by rank */
+  /** Abos who declined (OUT status), sorted by rank */
   declined: Array<Signup & { player: Player }>;
   /** Waitlist players who signed up for this match */
   waitlist: Array<Signup & { player: Player }>;
@@ -44,7 +44,7 @@ export type MatchView = {
 
 /**
  * Returns the computed view of a match including the replacement assignment.
- * Strict order: waitlist player 1 -> first declined subscriber, waitlist 2 -> second, etc.
+ * Strict order: waitlist player 1 -> first declined abo, waitlist 2 -> second, etc.
  */
 export async function buildMatchView(matchId: string): Promise<MatchView | null> {
   const match = await db.match.findUnique({
@@ -105,22 +105,22 @@ function composeMatchView(match: {
   teams: Array<{ id: string }>;
 }): MatchView {
   const attendees = match.signups
-    .filter((s) => s.status === "IN" && s.player.kind === "SUBSCRIBER")
+    .filter((s) => s.status === "IN" && s.player.kind === "ABO")
     .sort((a, b) => a.player.rank - b.player.rank || a.rank - b.rank);
 
   const declined = match.signups
-    .filter((s) => s.status === "OUT" && s.player.kind === "SUBSCRIBER")
+    .filter((s) => s.status === "OUT" && s.player.kind === "ABO")
     .sort((a, b) => a.player.rank - b.player.rank || a.rank - b.rank);
 
   const waitlist = match.signups
     .filter((s) => s.status === "WAITLIST")
     .sort((a, b) => a.rank - b.rank || a.player.rank - b.player.rank);
 
-  // Waitlist order: the first listed waitlist player replaces the first declined subscriber.
+  // Waitlist order: the first listed waitlist player replaces the first declined abo.
   const replacements: ReplacementInfo[] = declined.map((out, idx) => {
     const replacement = waitlist[idx] ?? null;
     return {
-      subscriber: out.player,
+      abo: out.player,
       outSignup: out,
       replacement,
       paymentStatus: replacement?.paymentStatus ?? "NONE",
@@ -162,7 +162,7 @@ export function findMySignup(
 }
 
 export type PlayerKindGroup = {
-  subscribers: Player[];
+  abos: Player[];
   waitlisters: Player[];
 };
 
@@ -172,7 +172,7 @@ export async function getActivePlayersGrouped(): Promise<PlayerKindGroup> {
     orderBy: [{ kind: "asc" }, { rank: "asc" }, { lastName: "asc" }],
   });
   return {
-    subscribers: players.filter((p) => p.kind === "SUBSCRIBER"),
+    abos: players.filter((p) => p.kind === "ABO"),
     waitlisters: players.filter((p) => p.kind === "WAITLIST"),
   };
 }

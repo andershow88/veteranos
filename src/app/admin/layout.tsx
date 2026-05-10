@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { Users, CalendarDays, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Users, CalendarDays, LayoutDashboard, ShieldCheck, Link as LinkIcon } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -23,6 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <NavItem href="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>Dashboard</NavItem>
         <NavItem href="/admin/players" icon={<Users className="h-4 w-4" />}>Players</NavItem>
         <NavItem href="/admin/matches" icon={<CalendarDays className="h-4 w-4" />}>Matches</NavItem>
+        <NavItem href="/admin/invites" icon={<LinkIcon className="h-4 w-4" />}>Invites</NavItem>
       </nav>
 
       <div>{children}</div>

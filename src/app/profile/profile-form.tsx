@@ -8,7 +8,7 @@ import { updateProfileAction } from "@/server/profile-actions";
 
 type Defaults = {
   firstName: string;
-  lastName: string;
+  lastName: string | null;
   nickname: string | null;
   paypalName: string | null;
   paypalLink: string | null;
@@ -26,8 +26,8 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
           <Input id="firstName" name="firstName" defaultValue={defaults.firstName} required />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="lastName">Last name</Label>
-          <Input id="lastName" name="lastName" defaultValue={defaults.lastName} required />
+          <Label htmlFor="lastName">Last name (optional)</Label>
+          <Input id="lastName" name="lastName" defaultValue={defaults.lastName ?? ""} />
         </div>
       </div>
       <div className="space-y-1.5">

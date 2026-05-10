@@ -13,7 +13,7 @@ export default async function AdminPlayersPage() {
     orderBy: [{ kind: "asc" }, { rank: "asc" }, { lastName: "asc" }],
     include: { user: { select: { email: true } } },
   });
-  const subs = players.filter((p) => p.kind === "SUBSCRIBER");
+  const subs = players.filter((p) => p.kind === "ABO");
   const waitlist = players.filter((p) => p.kind === "WAITLIST");
 
   return (
@@ -27,7 +27,7 @@ export default async function AdminPlayersPage() {
         </Link>
       </div>
 
-      <PlayerListSection title="Subscribers" players={subs} tone="success" />
+      <PlayerListSection title="Abos" players={subs} tone="success" />
       <PlayerListSection title="Waitlist" players={waitlist} tone="info" />
     </div>
   );

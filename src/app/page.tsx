@@ -46,7 +46,7 @@ function Hero() {
           Veteranos. <span className="text-pitch-300">Play.</span> Win.
         </h1>
         <p className="max-w-2xl text-base sm:text-lg text-muted">
-          Your football matches in one place. Confirm, decline or queue up &mdash; we handle balanced teams,
+          Your football matches in one place. Confirm, decline or queue up &mdash; Edu handle balanced teams,
           waitlists and payments.
         </p>
       </div>

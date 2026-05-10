@@ -7,7 +7,7 @@ import { getCurrentUser, hashPassword, requireUser } from "@/lib/auth";
 
 const profileSchema = z.object({
   firstName: z.string().min(1),
-  lastName: z.string().min(1),
+  lastName: z.string().optional().nullable(),
   nickname: z.string().optional().nullable(),
   paypalName: z.string().optional().nullable(),
   paypalLink: z.string().url().optional().nullable().or(z.literal("")),
@@ -39,7 +39,11 @@ export async function updateProfileAction(_: ProfileState, formData: FormData): 
   await db.player.update({
     where: { id: user.player.id },
     data: {
-      ...parsed.data,
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName || null,
+      nickname: parsed.data.nickname || null,
+      phone: parsed.data.phone || null,
+      paypalName: parsed.data.paypalName || null,
       paypalLink: parsed.data.paypalLink || null,
     },
   });

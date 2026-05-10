@@ -23,7 +23,7 @@ const playerSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   nickname: z.string().optional().nullable(),
-  kind: z.enum(["SUBSCRIBER", "WAITLIST"]),
+  kind: z.enum(["ABO", "WAITLIST"]),
   rank: z.coerce.number().int().min(0).default(0),
   paypalName: z.string().optional().nullable(),
   paypalLink: z
@@ -195,12 +195,8 @@ export async function createMatchAction(
   const dt = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
   if (Number.isNaN(dt.getTime())) return { error: "Invalid date" };
 
-  const subs = await db.player.findMany({
-    where: { kind: "SUBSCRIBER", active: true },
-    orderBy: { rank: "asc" },
-    select: { id: true, rank: true },
-  });
-
+  // New matches start with an empty sign-up list. Every player must
+  // actively confirm or decline themselves.
   const match = await db.match.create({
     data: {
       date: dt,
@@ -208,14 +204,6 @@ export async function createMatchAction(
       location: parsed.data.location || null,
       notes: parsed.data.notes || null,
       teamCount: parsed.data.teamCount,
-      // Subscribers default to IN
-      signups: {
-        create: subs.map((s) => ({
-          playerId: s.id,
-          status: "IN",
-          rank: s.rank,
-        })),
-      },
     },
   });
 

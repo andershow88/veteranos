@@ -14,7 +14,7 @@ async function nextWaitlistRank(matchId: string) {
   return (top?.rank ?? 0) + 1;
 }
 
-/** Subscriber confirms participation or is freshly signed up. */
+/** Abo confirms participation or is freshly signed up. */
 export async function setAttendingAction(matchId: string) {
   await requireUser();
   const user = await getCurrentUser();
@@ -24,8 +24,8 @@ export async function setAttendingAction(matchId: string) {
   if (!match) throw new Error("Match not found");
   if (match.locked) throw new Error("Match is locked");
 
-  if (user.player.kind !== "SUBSCRIBER") {
-    throw new Error("Only subscribers can confirm here. Waitlist players use the waitlist.");
+  if (user.player.kind !== "ABO") {
+    throw new Error("Only abos can confirm here. Waitlist players use the waitlist.");
   }
 
   await db.signup.upsert({
@@ -43,7 +43,7 @@ export async function setAttendingAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
 }
 
-/** Subscriber declines. If a waitlist player is available, payment status flips to PENDING. */
+/** Abo declines. If a waitlist player is available, payment status flips to PENDING. */
 export async function setDeclinedAction(matchId: string) {
   await requireUser();
   const user = await getCurrentUser();
@@ -53,13 +53,13 @@ export async function setDeclinedAction(matchId: string) {
   if (!match) throw new Error("Match not found");
   if (match.locked) throw new Error("Match is locked");
 
-  if (user.player.kind !== "SUBSCRIBER") {
-    throw new Error("Only subscribers can decline.");
+  if (user.player.kind !== "ABO") {
+    throw new Error("Only abos can decline.");
   }
 
   // Decline order: count existing OUTs to assign rank
   const outRank = await db.signup.count({
-    where: { matchId, status: "OUT", player: { kind: "SUBSCRIBER" } },
+    where: { matchId, status: "OUT", player: { kind: "ABO" } },
   });
 
   await db.signup.upsert({
@@ -131,7 +131,7 @@ export async function leaveWaitlistAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
 }
 
-/** Admin: manually set the payment status between waitlist and subscriber. */
+/** Admin: manually set the payment status between waitlist and abo. */
 export async function setPaymentStatusAction(input: {
   signupId: string;
   status: PaymentStatus;
@@ -154,7 +154,7 @@ export async function setPaymentStatusAction(input: {
  */
 async function syncWaitlistPaymentStatuses(matchId: string) {
   const declined = await db.signup.findMany({
-    where: { matchId, status: "OUT", player: { kind: "SUBSCRIBER" } },
+    where: { matchId, status: "OUT", player: { kind: "ABO" } },
     orderBy: { rank: "asc" },
     select: { id: true },
   });
@@ -231,7 +231,7 @@ export async function adminSetSignupAction(input: {
   if (input.status === "WAITLIST") rank = await nextWaitlistRank(input.matchId);
   if (input.status === "OUT") {
     rank = await db.signup.count({
-      where: { matchId: input.matchId, status: "OUT", player: { kind: "SUBSCRIBER" } },
+      where: { matchId: input.matchId, status: "OUT", player: { kind: "ABO" } },
     });
   }
 

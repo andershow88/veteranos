@@ -8,9 +8,9 @@ import { formatMatchDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [playerCount, subscriberCount, waitlistCount, upcomingMatches, lastMatch] = await Promise.all([
+  const [playerCount, aboCount, waitlistCount, upcomingMatches, lastMatch] = await Promise.all([
     db.player.count({ where: { active: true } }),
-    db.player.count({ where: { active: true, kind: "SUBSCRIBER" } }),
+    db.player.count({ where: { active: true, kind: "ABO" } }),
     db.player.count({ where: { active: true, kind: "WAITLIST" } }),
     db.match.findMany({
       where: { date: { gte: new Date() } },
@@ -27,7 +27,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat title="Players" value={playerCount} subtitle={`${subscriberCount} subscribers · ${waitlistCount} waitlist`} />
+        <Stat title="Players" value={playerCount} subtitle={`${aboCount} abos · ${waitlistCount} waitlist`} />
         <Stat title="Upcoming matches" value={upcomingMatches.length} />
         <Stat title="Last match" value={lastMatch ? formatMatchDate(lastMatch.date) : "—"} small />
       </div>
@@ -87,7 +87,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardBody className="space-y-3">
             <p className="text-sm text-muted">
-              {playerCount} active players total. {subscriberCount} subscriber slots, {waitlistCount} on the waitlist.
+              {playerCount} active players total. {aboCount} abo slots, {waitlistCount} on the waitlist.
             </p>
             <Link href="/admin/players">
               <Button variant="secondary" size="sm">

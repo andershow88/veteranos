@@ -37,4 +37,4 @@ EXPOSE 3000
 #   1. db push    -> sync schema (creates tables on a fresh DB; no migration tracking)
 #   2. db:seed    -> idempotent admin upsert; '|| true' so a seed glitch never blocks boot
 #   3. next start -> serve traffic
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && (npm run db:seed || echo 'seed skipped') && npm run start"]
+CMD ["sh", "-c", "npx tsx prisma/prepare-db.ts && npx prisma db push --accept-data-loss --skip-generate && (npm run db:seed || echo 'seed skipped') && npm run start"]

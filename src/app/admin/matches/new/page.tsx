@@ -17,7 +17,7 @@ export default function NewMatchPage() {
         <CardHeader>
           <h2 className="font-display text-2xl tracking-wide">New match</h2>
           <p className="text-sm text-muted">
-            All active subscribers are automatically signed up with status &ldquo;in&rdquo;.
+            New matches start with an empty sign-up list. Every player must actively confirm or decline.
           </p>
         </CardHeader>
         <CardBody>

@@ -223,9 +223,9 @@ export async function generateTeamsForMatch(matchId: string) {
   });
   if (!match) throw new Error("Match not found");
 
-  // Active players = IN subscribers + waitlist replacements (for the first N OUTs)
-  const ins = match.signups.filter((s) => s.status === "IN" && s.player.kind === "SUBSCRIBER");
-  const outs = match.signups.filter((s) => s.status === "OUT" && s.player.kind === "SUBSCRIBER");
+  // Active players = IN abos + waitlist replacements (for the first N OUTs)
+  const ins = match.signups.filter((s) => s.status === "IN" && s.player.kind === "ABO");
+  const outs = match.signups.filter((s) => s.status === "OUT" && s.player.kind === "ABO");
   const waitlist = match.signups
     .filter((s) => s.status === "WAITLIST")
     .sort((a, b) => a.rank - b.rank);
