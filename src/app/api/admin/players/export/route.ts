@@ -26,11 +26,11 @@ export async function GET() {
         "Shooting",
         "Goalkeeping",
         "Active",
-    ].join(",");
+    ].join(";");
 
     const rows = players.map((p) =>
         [
-            `"${`${p.firstName} ${p.lastName ?? ""}`.trim()}"`,
+            `${p.firstName} ${p.lastName ?? ""}`.trim(),
             p.kind,
             p.rank,
             p.position,
@@ -44,11 +44,11 @@ export async function GET() {
             p.shooting,
             p.goalkeeping,
             p.active ? "Yes" : "No",
-        ].join(","),
+        ].join(";"),
     );
 
     const bom = "﻿";
-    const csv = bom + [header, ...rows].join("\n");
+    const csv = bom + [header, ...rows].join("\r\n");
 
     return new NextResponse(csv, {
         headers: {
