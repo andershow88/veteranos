@@ -13,8 +13,8 @@ export async function GET() {
 
     const header = [
         "Name",
-        "Typ",
-        "Rang",
+        "Type",
+        "Rank",
         "Position",
         "Overall",
         "Technique",
@@ -25,12 +25,12 @@ export async function GET() {
         "Passing",
         "Shooting",
         "Goalkeeping",
-        "Aktiv",
-    ].join(";");
+        "Active",
+    ].join(",");
 
     const rows = players.map((p) =>
         [
-            `${p.firstName} ${p.lastName ?? ""}`.trim(),
+            `"${`${p.firstName} ${p.lastName ?? ""}`.trim()}"`,
             p.kind,
             p.rank,
             p.position,
@@ -43,16 +43,17 @@ export async function GET() {
             p.passing,
             p.shooting,
             p.goalkeeping,
-            p.active ? "Ja" : "Nein",
-        ].join(";"),
+            p.active ? "Yes" : "No",
+        ].join(","),
     );
 
-    const csv = [header, ...rows].join("\n");
+    const bom = "﻿";
+    const csv = bom + [header, ...rows].join("\n");
 
     return new NextResponse(csv, {
         headers: {
             "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": `attachment; filename="veteranos-spieler-${new Date().toISOString().slice(0, 10)}.csv"`,
+            "Content-Disposition": `attachment; filename="veteranos-players-${new Date().toISOString().slice(0, 10)}.csv"`,
         },
     });
 }
