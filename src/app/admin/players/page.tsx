@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -20,11 +20,18 @@ export default async function AdminPlayersPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-2xl tracking-wide">Players</h2>
-        <Link href="/admin/players/new">
-          <Button>
-            <Plus className="h-4 w-4" /> New player
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <a href="/api/admin/players/export" download>
+            <Button variant="secondary">
+              <Download className="h-4 w-4" /> CSV Export
+            </Button>
+          </a>
+          <Link href="/admin/players/new">
+            <Button>
+              <Plus className="h-4 w-4" /> New player
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <PlayerListSection title="Abos" players={subs} tone="success" />
