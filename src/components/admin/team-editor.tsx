@@ -125,7 +125,7 @@ export function TeamEditor({
 
   function shareViaWhatsApp() {
     const dateStr = matchDate
-      ? new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(matchDate)
+      ? new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" }).format(new Date(matchDate))
       : "upcoming match";
 
     let text = `*Teams for ${dateStr}*\n\n`;
