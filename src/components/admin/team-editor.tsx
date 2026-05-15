@@ -137,7 +137,7 @@ export function TeamEditor({
       }
       text += "\n";
     }
-    text += "_Image copied to clipboard - paste it in the chat!_";
+    text += "See match details here: https://veteranos.club";
 
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     copyTeamsAsImage();
