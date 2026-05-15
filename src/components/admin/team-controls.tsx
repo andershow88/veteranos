@@ -24,10 +24,9 @@ type Props = {
   locked: boolean;
   teamCount: number;
   pool: PoolEntry[];
-  onTeamsGenerated?: () => void;
 };
 
-export function TeamControls({ matchId, hasTeams, locked, teamCount, pool, onTeamsGenerated }: Props) {
+export function TeamControls({ matchId, hasTeams, locked, teamCount, pool }: Props) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [useAll, setUseAll] = useState(false);
@@ -62,7 +61,6 @@ export function TeamControls({ matchId, hasTeams, locked, teamCount, pool, onTea
           useAllPlayers: useAll,
           excludePlayerIds: Array.from(excluded),
         });
-        onTeamsGenerated?.();
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to generate teams");
       }

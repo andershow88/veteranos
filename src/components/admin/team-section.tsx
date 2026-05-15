@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { TeamControls } from "./team-controls";
 import { TeamEditor } from "./team-editor";
 import type { Team, TeamSlot, Player } from "@prisma/client";
@@ -33,8 +32,6 @@ export function TeamSection({
   pool: PoolEntry[];
   teams: TeamWithSlots[];
 }) {
-  const [justGenerated, setJustGenerated] = useState(false);
-
   return (
     <div className="space-y-5">
       <TeamControls
@@ -43,14 +40,12 @@ export function TeamSection({
         locked={locked}
         teamCount={teamCount}
         pool={pool}
-        onTeamsGenerated={() => setJustGenerated(true)}
       />
       {hasTeams && (
         <TeamEditor
           teams={teams}
           matchId={matchId}
           matchDate={matchDate}
-          autoCopy={justGenerated}
         />
       )}
     </div>

@@ -132,13 +132,7 @@ function PlayerSlot({ slot }: { slot: TeamSlot & { player: Player } }) {
         <div className="text-sm font-medium text-foreground truncate">
           {slot.player.firstName} {slot.player.lastName}
         </div>
-        <div className="text-[10px] uppercase tracking-widest text-muted">
-          {labels[slot.position]} · {slot.player.overall}
-        </div>
       </div>
-      <Badge tone="outline" className="number-pill">
-        {slot.player.overall}
-      </Badge>
     </div>
   );
 }

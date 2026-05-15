@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Trophy, Shield, Sword, Zap, ArrowLeftRight, Loader2, Copy, Check, Share2 } from "lucide-react";
 import { toBlob, toPng } from "html-to-image";
 import type { Team, TeamSlot, Player, TeamColor } from "@prisma/client";
@@ -18,12 +18,10 @@ export function TeamEditor({
   teams,
   matchId,
   matchDate,
-  autoCopy,
 }: {
   teams: TeamWithSlots[];
   matchId: string;
   matchDate?: Date;
-  autoCopy?: boolean;
 }) {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
@@ -32,15 +30,6 @@ export function TeamEditor({
   const [copied, setCopied] = useState(false);
   const [copying, setCopying] = useState(false);
   const teamsRef = useRef<HTMLDivElement>(null);
-  const autoCopyDone = useRef(false);
-
-  useEffect(() => {
-    if (autoCopy && !autoCopyDone.current && teamsRef.current) {
-      autoCopyDone.current = true;
-      const timer = setTimeout(() => copyTeamsAsImage(), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [autoCopy]);
 
   const overalls = teams.map((t) => t.avgOverall);
   const spread = Math.max(...overalls) - Math.min(...overalls);
@@ -370,13 +359,7 @@ function EditorTeamCard({
                 <div className="text-sm font-medium text-foreground truncate">
                   {slot.player.firstName} {slot.player.lastName}
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-muted">
-                  {positionLabel(slot.position)} · {slot.player.overall}
-                </div>
               </div>
-              <Badge tone="outline" className="number-pill">
-                {slot.player.overall}
-              </Badge>
             </button>
           );
         })}
