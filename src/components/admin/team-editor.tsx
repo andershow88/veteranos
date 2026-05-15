@@ -133,7 +133,7 @@ export function TeamEditor({
       const label = TEAM_LABEL[t.color] ?? t.name;
       text += `${label} *${t.name.toUpperCase()}* (OVR ${Math.round(t.avgOverall)})\n`;
       for (const slot of t.slots) {
-        text += `- ${slot.player.firstName} ${slot.player.lastName ?? ""} (${slot.player.overall})\n`;
+        text += `- ${slot.player.firstName} ${slot.player.lastName ?? ""}\n`;
       }
       text += "\n";
     }
