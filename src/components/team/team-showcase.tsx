@@ -2,7 +2,7 @@ import { Trophy, Shield, Sword, Zap } from "lucide-react";
 import type { Team, TeamSlot, Player, TeamColor } from "@prisma/client";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { TEAM_PALETTE } from "@/server/team-generator";
+import { TEAM_PALETTE } from "@/lib/team-palette";
 
 type TeamWithSlots = Team & { slots: Array<TeamSlot & { player: Player }> };
 

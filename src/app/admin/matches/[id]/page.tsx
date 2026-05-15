@@ -3,15 +3,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Lock, Unlock, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MatchForm } from "@/components/admin/match-form";
 import { SignupManager } from "@/components/admin/signup-manager";
-import { TeamControls } from "@/components/admin/team-controls";
+import { TeamSection } from "@/components/admin/team-section";
 import { DeleteMatchButton } from "@/components/admin/delete-match-button";
-import { TeamShowcase } from "@/components/team/team-showcase";
 import { buildMatchView, getActivePlayersGrouped } from "@/server/match-queries";
-import { setMatchLockedAction } from "@/server/match-actions";
 import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -68,12 +65,6 @@ export default async function AdminMatchPage({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <ServerForm action={setMatchLockedAction.bind(null, id, !match.locked)}>
-                <Button variant="secondary" size="sm" type="submit">
-                  {match.locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                  {match.locked ? "Unlock" : "Lock list"}
-                </Button>
-              </ServerForm>
               <DeleteMatchButton matchId={id} matchLabel={formatMatchDate(match.date)} />
             </div>
           </div>
@@ -121,9 +112,10 @@ export default async function AdminMatchPage({
             {teams.length > 0 ? `${teams.length} teams generated` : "No teams yet"}
           </Badge>
         </CardHeader>
-        <CardBody className="space-y-5">
-          <TeamControls
+        <CardBody>
+          <TeamSection
             matchId={id}
+            matchDate={match.date}
             hasTeams={teams.length > 0}
             locked={match.locked}
             teamCount={match.teamCount}
@@ -145,21 +137,10 @@ export default async function AdminMatchPage({
                 overall: s.player.overall,
               })),
             ]}
+            teams={teams}
           />
-          {teams.length > 0 && <TeamShowcase teams={teams} />}
         </CardBody>
       </Card>
     </div>
   );
 }
-
-async function ServerForm({
-  action,
-  children,
-}: {
-  action: () => Promise<void>;
-  children: React.ReactNode;
-}) {
-  return <form action={action}>{children}</form>;
-}
-

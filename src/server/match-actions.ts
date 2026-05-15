@@ -80,6 +80,156 @@ export async function setDeclinedAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
 }
 
+/** Abo declines and picks a specific replacement — either an existing player
+ *  or a guest (no account). Bypasses the automatic waitlist assignment for
+ *  this particular slot. */
+export async function declineWithReplacementAction(input: {
+  matchId: string;
+  mode: "guest" | "existing";
+  /** mode=guest */
+  guestFirstName?: string;
+  guestLastName?: string;
+  guestOverall?: number;
+  /** mode=existing — the playerId of the chosen replacement */
+  existingPlayerId?: string;
+}) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const match = await db.match.findUnique({ where: { id: input.matchId } });
+  if (!match) throw new Error("Match not found");
+  if (match.locked) throw new Error("Match is locked");
+  if (user.player.kind !== "ABO") throw new Error("Only abos can decline.");
+
+  const outRank = await db.signup.count({
+    where: { matchId: input.matchId, status: "OUT", player: { kind: "ABO" } },
+  });
+
+  await db.signup.upsert({
+    where: { matchId_playerId: { matchId: input.matchId, playerId: user.player.id } },
+    create: { matchId: input.matchId, playerId: user.player.id, status: "OUT", rank: outRank },
+    update: { status: "OUT", rank: outRank },
+  });
+
+  let replacementPlayerId: string;
+
+  if (input.mode === "guest") {
+    if (!input.guestFirstName?.trim()) throw new Error("Guest name required");
+    const guest = await db.player.create({
+      data: {
+        firstName: input.guestFirstName.trim(),
+        lastName: input.guestLastName?.trim() || null,
+        kind: "WAITLIST",
+        rank: 999,
+        overall: Math.max(0, Math.min(100, input.guestOverall ?? 50)),
+        active: false,
+      },
+    });
+    replacementPlayerId = guest.id;
+  } else {
+    if (!input.existingPlayerId) throw new Error("Player selection required");
+    replacementPlayerId = input.existingPlayerId;
+  }
+
+  const waitlist = await db.signup.findMany({
+    where: { matchId: input.matchId, status: "WAITLIST" },
+    orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+    select: { id: true, rank: true },
+  });
+
+  const insertRank =
+    outRank < waitlist.length
+      ? waitlist[outRank].rank
+      : (waitlist.length > 0 ? waitlist[waitlist.length - 1].rank + 1 : 1);
+
+  await db.$transaction(async (tx) => {
+    for (let i = waitlist.length - 1; i >= 0; i--) {
+      if (waitlist[i].rank >= insertRank) {
+        await tx.signup.update({
+          where: { id: waitlist[i].id },
+          data: { rank: waitlist[i].rank + 1 },
+        });
+      }
+    }
+    await tx.signup.upsert({
+      where: { matchId_playerId: { matchId: input.matchId, playerId: replacementPlayerId } },
+      create: { matchId: input.matchId, playerId: replacementPlayerId, status: "WAITLIST", rank: insertRank },
+      update: { status: "WAITLIST", rank: insertRank },
+    });
+  });
+
+  await syncWaitlistPaymentStatuses(input.matchId);
+
+  revalidatePath("/");
+  revalidatePath(`/matches/${input.matchId}`);
+}
+
+/** Admin: assign an existing registered player to a specific declined abo slot. */
+export async function addExistingPlayerToMatchAction(input: {
+  matchId: string;
+  declinedIndex: number;
+  playerId: string;
+}) {
+  await requireAdmin();
+
+  const player = await db.player.findUnique({ where: { id: input.playerId } });
+  if (!player) throw new Error("Player not found");
+
+  const waitlist = await db.signup.findMany({
+    where: { matchId: input.matchId, status: "WAITLIST" },
+    orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+    select: { id: true, rank: true },
+  });
+
+  const insertRank =
+    input.declinedIndex < waitlist.length
+      ? waitlist[input.declinedIndex].rank
+      : (waitlist.length > 0 ? waitlist[waitlist.length - 1].rank + 1 : 1);
+
+  await db.$transaction(async (tx) => {
+    for (let i = waitlist.length - 1; i >= 0; i--) {
+      if (waitlist[i].rank >= insertRank) {
+        await tx.signup.update({
+          where: { id: waitlist[i].id },
+          data: { rank: waitlist[i].rank + 1 },
+        });
+      }
+    }
+    await tx.signup.upsert({
+      where: { matchId_playerId: { matchId: input.matchId, playerId: input.playerId } },
+      create: { matchId: input.matchId, playerId: input.playerId, status: "WAITLIST", rank: insertRank },
+      update: { status: "WAITLIST", rank: insertRank },
+    });
+  });
+
+  await syncWaitlistPaymentStatuses(input.matchId);
+
+  revalidatePath("/");
+  revalidatePath(`/matches/${input.matchId}`);
+  revalidatePath(`/admin/matches/${input.matchId}`);
+}
+
+/** Returns waitlist players available for manual assignment on a match. */
+export async function getWaitlistPlayersForMatch(matchId: string) {
+  const signedUpIds = (
+    await db.signup.findMany({
+      where: { matchId },
+      select: { playerId: true },
+    })
+  ).map((s) => s.playerId);
+
+  return db.player.findMany({
+    where: {
+      active: true,
+      kind: "WAITLIST",
+      id: { notIn: signedUpIds },
+    },
+    orderBy: [{ rank: "asc" }, { lastName: "asc" }],
+    select: { id: true, firstName: true, lastName: true, overall: true },
+  });
+}
+
 /** Waitlist player adds themselves to a match. */
 export async function joinWaitlistAction(matchId: string) {
   await requireUser();
@@ -256,6 +406,67 @@ export async function adminSetSignupAction(input: {
   revalidatePath("/");
   revalidatePath(`/matches/${input.matchId}`);
   revalidatePath("/admin/matches");
+}
+
+/** Admin: assign a guest player (no account) to a specific declined abo slot.
+ *  Creates a Player record and inserts them into the waitlist at the given
+ *  position, pushing existing waitlist players down by one rank. */
+export async function addGuestToMatchAction(input: {
+  matchId: string;
+  /** 0-based position in the declined list this guest replaces */
+  declinedIndex: number;
+  firstName: string;
+  lastName: string;
+  overall: number;
+}) {
+  await requireAdmin();
+
+  const guest = await db.player.create({
+    data: {
+      firstName: input.firstName.trim(),
+      lastName: input.lastName.trim() || null,
+      kind: "WAITLIST",
+      rank: 999,
+      overall: Math.max(0, Math.min(100, input.overall)),
+      active: false,
+    },
+  });
+
+  const waitlist = await db.signup.findMany({
+    where: { matchId: input.matchId, status: "WAITLIST" },
+    orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+    select: { id: true, rank: true },
+  });
+
+  const insertRank =
+    input.declinedIndex < waitlist.length
+      ? waitlist[input.declinedIndex].rank
+      : (waitlist.length > 0 ? waitlist[waitlist.length - 1].rank + 1 : 1);
+
+  await db.$transaction(async (tx) => {
+    for (let i = waitlist.length - 1; i >= 0; i--) {
+      if (waitlist[i].rank >= insertRank) {
+        await tx.signup.update({
+          where: { id: waitlist[i].id },
+          data: { rank: waitlist[i].rank + 1 },
+        });
+      }
+    }
+    await tx.signup.create({
+      data: {
+        matchId: input.matchId,
+        playerId: guest.id,
+        status: "WAITLIST",
+        rank: insertRank,
+      },
+    });
+  });
+
+  await syncWaitlistPaymentStatuses(input.matchId);
+
+  revalidatePath("/");
+  revalidatePath(`/matches/${input.matchId}`);
+  revalidatePath(`/admin/matches/${input.matchId}`);
 }
 
 /**

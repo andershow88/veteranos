@@ -286,3 +286,148 @@ export async function deleteTeamsAction(matchId: string) {
   revalidatePath(`/matches/${matchId}`);
   revalidatePath(`/admin/matches/${matchId}`);
 }
+
+export async function swapTeamPlayersAction(slotIdA: string, slotIdB: string) {
+  await requireAdmin();
+
+  const matchId = await db.$transaction(async (tx) => {
+    // 1. Fetch both slots with team + player data
+    const slotA = await tx.teamSlot.findUnique({
+      where: { id: slotIdA },
+      include: { team: true, player: true },
+    });
+    const slotB = await tx.teamSlot.findUnique({
+      where: { id: slotIdB },
+      include: { team: true, player: true },
+    });
+
+    if (!slotA || !slotB) throw new Error("Slot not found");
+    if (slotA.teamId === slotB.teamId)
+      throw new Error("Both slots belong to the same team");
+
+    // 2. Determine new positions based on the swapped player
+    const pickPos = (p: typeof slotA.player) => {
+      if (p.position !== "ANY") return p.position;
+      if (p.goalkeeping >= 70) return "GOALKEEPER" as const;
+      if (p.defense >= p.offense + 8) return "DEFENDER" as const;
+      if (p.offense >= p.defense + 8) return "STRIKER" as const;
+      return "MIDFIELDER" as const;
+    };
+
+    const posForB = pickPos(slotA.player); // player A going to team B
+    const posForA = pickPos(slotB.player); // player B going to team A
+
+    // 3. Swap playerIds and update positions
+    // Use a temp disconnect to avoid unique constraint conflicts
+    await tx.teamSlot.update({
+      where: { id: slotIdA },
+      data: { playerId: slotB.playerId, position: posForA },
+    });
+    await tx.teamSlot.update({
+      where: { id: slotIdB },
+      data: { playerId: slotA.playerId, position: posForB },
+    });
+
+    // 4. Recalculate stats for both affected teams
+    const matchId = slotA.team.matchId;
+    const affectedTeamIds = [slotA.teamId, slotB.teamId];
+
+    // Fetch all teams for the match (needed for comment generation)
+    const allTeams = await tx.team.findMany({
+      where: { matchId },
+      include: { slots: { include: { player: true } } },
+    });
+
+    for (const teamId of affectedTeamIds) {
+      const team = allTeams.find((t) => t.id === teamId);
+      if (!team) continue;
+
+      // Re-fetch fresh slots after swap
+      const freshSlots = await tx.teamSlot.findMany({
+        where: { teamId },
+        include: { player: true },
+      });
+      const players = freshSlots.map((s) => s.player);
+
+      const avgFn = (fn: (p: typeof players[0]) => number) =>
+        players.length
+          ? players.reduce((s, p) => s + fn(p), 0) / players.length
+          : 0;
+
+      const avgOverall = avgFn((p) => p.overall);
+      const avgDefense = avgFn((p) => p.defense);
+      const avgOffense = avgFn((p) => p.offense);
+      const avgSpeed = avgFn((p) => p.speed);
+
+      // Build comment: compare this team to all others
+      const avgTechnique = avgFn((p) => p.technique);
+      const allDefs = allTeams.map((t) => {
+        if (t.id === teamId) return avgDefense;
+        const ps = t.slots.map((s) => s.player);
+        return ps.length ? ps.reduce((s, p) => s + p.defense, 0) / ps.length : 0;
+      });
+      const allOffs = allTeams.map((t) => {
+        if (t.id === teamId) return avgOffense;
+        const ps = t.slots.map((s) => s.player);
+        return ps.length ? ps.reduce((s, p) => s + p.offense, 0) / ps.length : 0;
+      });
+      const allSpeeds = allTeams.map((t) => {
+        if (t.id === teamId) return avgSpeed;
+        const ps = t.slots.map((s) => s.player);
+        return ps.length ? ps.reduce((s, p) => s + p.speed, 0) / ps.length : 0;
+      });
+      const allTechs = allTeams.map((t) => {
+        if (t.id === teamId) return avgTechnique;
+        const ps = t.slots.map((s) => s.player);
+        return ps.length ? ps.reduce((s, p) => s + p.technique, 0) / ps.length : 0;
+      });
+
+      const isBestDef = avgDefense >= Math.max(...allDefs);
+      const isBestOff = avgOffense >= Math.max(...allOffs);
+      const isBestSpeed = avgSpeed >= Math.max(...allSpeeds);
+      const isBestTech = avgTechnique >= Math.max(...allTechs);
+
+      const traits: string[] = [];
+      if (isBestDef && isBestOff) traits.push("complete package");
+      else if (isBestDef) traits.push("defensively rock-solid");
+      else if (isBestOff) traits.push("dangerous up front");
+      if (isBestSpeed) traits.push("turbo-fast");
+      if (isBestTech) traits.push("technically gifted");
+      const gks = players.filter(
+        (p) => p.position === "GOALKEEPER" || p.goalkeeping >= 70,
+      );
+      if (gks.length === 0) traits.push("no proper keeper");
+
+      const ovr = Math.round(avgOverall);
+      const phrases = [
+        `OVR ${ovr}/100 — ${traits.length ? traits.join(", ") : "balanced across the board"}.`,
+        isBestOff && isBestDef
+          ? "Whoever beats this lot earns it. Favorites tag stamped on."
+          : isBestOff
+          ? "May leak goals at the back, but the attack is on fire."
+          : isBestDef
+          ? "Built like a fortress. Get past them first, then talk."
+          : isBestSpeed
+          ? "If it turns into a foot race, these guys win it."
+          : "The team with character — could be today's surprise.",
+      ];
+
+      await tx.team.update({
+        where: { id: teamId },
+        data: {
+          avgOverall,
+          avgDefense,
+          avgOffense,
+          avgSpeed,
+          comment: phrases.join(" "),
+        },
+      });
+    }
+
+    return matchId;
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/matches/${matchId}`);
+  revalidatePath(`/admin/matches/${matchId}`);
+}

@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { CalendarPlus, Sparkles } from "lucide-react";
-import { listUpcomingMatches } from "@/server/match-queries";
+import { listUpcomingMatches, getLockedMatchWithTeams } from "@/server/match-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
+import { TeamShowcase } from "@/components/team/team-showcase";
 import { Button } from "@/components/ui/button";
+import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [matches, user] = await Promise.all([listUpcomingMatches(), getCurrentUser()]);
+  const [matches, user, lockedMatch] = await Promise.all([
+    listUpcomingMatches(),
+    getCurrentUser(),
+    getLockedMatchWithTeams(),
+  ]);
 
   const currentPlayer = {
     playerId: user?.player?.id ?? null,
@@ -19,6 +25,28 @@ export default async function HomePage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-8 sm:py-12">
       <Hero />
+
+      {lockedMatch && lockedMatch.teams.length > 0 && (
+        <section className="mb-10 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.25em] text-pitch-300">
+                {formatMatchDate(lockedMatch.date)}
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl tracking-wide text-foreground">
+                Teams are set
+              </h2>
+            </div>
+            <Link
+              href={`/matches/${lockedMatch.id}`}
+              className="text-sm font-semibold text-pitch-300 hover:text-pitch-200 transition"
+            >
+              Match details →
+            </Link>
+          </div>
+          <TeamShowcase teams={lockedMatch.teams} />
+        </section>
+      )}
 
       {matches.length === 0 ? (
         <EmptyState isAdmin={user?.role === "ADMIN"} />

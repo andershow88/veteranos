@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { RefreshCcw, Trash2, Loader2, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { RefreshCcw, Trash2, Loader2, Info, ChevronDown, ChevronUp, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { generateTeamsAction, deleteTeamsAction } from "@/server/admin-actions";
+import { setMatchLockedAction } from "@/server/match-actions";
 
 type PoolEntry = {
   id: string;
@@ -22,11 +23,11 @@ type Props = {
   hasTeams: boolean;
   locked: boolean;
   teamCount: number;
-  /** All draftable players for this match: IN abos + waitlist signups, sorted. */
   pool: PoolEntry[];
+  onTeamsGenerated?: () => void;
 };
 
-export function TeamControls({ matchId, hasTeams, locked, teamCount, pool }: Props) {
+export function TeamControls({ matchId, hasTeams, locked, teamCount, pool, onTeamsGenerated }: Props) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [useAll, setUseAll] = useState(false);
@@ -61,6 +62,7 @@ export function TeamControls({ matchId, hasTeams, locked, teamCount, pool }: Pro
           useAllPlayers: useAll,
           excludePlayerIds: Array.from(excluded),
         });
+        onTeamsGenerated?.();
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to generate teams");
       }
@@ -76,6 +78,10 @@ export function TeamControls({ matchId, hasTeams, locked, teamCount, pool }: Pro
     });
     if (!ok) return;
     start(() => deleteTeamsAction(matchId));
+  };
+
+  const toggleLock = () => {
+    start(() => setMatchLockedAction(matchId, !locked));
   };
 
   return (
@@ -161,7 +167,7 @@ export function TeamControls({ matchId, hasTeams, locked, teamCount, pool }: Pro
           {!useAll && includedPool.length > standardLimit && (
             <span className="text-amber-300/80">
               {" "}
-              ({includedPool.length - standardLimit} player{includedPool.length - standardLimit === 1 ? "" : "s"} past the standard limit will sit out — enable &ldquo;Use all&rdquo; to include them.)
+              ({includedPool.length - standardLimit}{" "}player{includedPool.length - standardLimit === 1 ? "" : "s"}{" "}past the standard limit will sit out — enable &ldquo;Use all&rdquo; to include them.)
             </span>
           )}
         </div>
@@ -173,9 +179,15 @@ export function TeamControls({ matchId, hasTeams, locked, teamCount, pool }: Pro
           {hasTeams ? "Regenerate teams" : "Generate teams"}
         </Button>
         {hasTeams && (
-          <Button variant="danger" onClick={remove} disabled={pending}>
-            <Trash2 className="h-4 w-4" /> Delete teams
-          </Button>
+          <>
+            <Button variant={locked ? "secondary" : "primary"} onClick={toggleLock} disabled={pending}>
+              {locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+              {locked ? "Unlock list" : "Lock & publish"}
+            </Button>
+            <Button variant="danger" onClick={remove} disabled={pending}>
+              <Trash2 className="h-4 w-4" /> Delete teams
+            </Button>
+          </>
         )}
       </div>
 

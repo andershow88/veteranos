@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, MapPin, Users, ListOrdered, Lock, Trophy, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Users, ListOrdered, Lock, Trophy, ArrowRight, Share2 } from "lucide-react";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
@@ -184,12 +184,23 @@ export function MatchCard({
               <span />
             )}
             {currentPlayer.role === "ADMIN" && (
-              <Link
-                href={`/admin/matches/${view.id}`}
-                className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
-              >
-                Admin →
-              </Link>
+              <div className="flex items-center gap-3">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent("Hey guys, just a reminder to sign up for the next game!\n\nhttps://veteranos.club")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-muted hover:text-emerald-400 transition"
+                  title="Send WhatsApp reminder"
+                >
+                  <Share2 className="h-3 w-3" /> WhatsApp
+                </a>
+                <Link
+                  href={`/admin/matches/${view.id}`}
+                  className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
+                >
+                  Admin →
+                </Link>
+              </div>
             )}
           </div>
         )}

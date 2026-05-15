@@ -243,4 +243,22 @@ export async function getPaymentsForPlayer(playerId: string): Promise<{
   return { youOwe, owedToYou };
 }
 
+export async function getLockedMatchWithTeams() {
+  const match = await db.match.findFirst({
+    where: {
+      locked: true,
+      date: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) },
+      teams: { some: {} },
+    },
+    orderBy: { date: "asc" },
+    include: {
+      teams: {
+        orderBy: { color: "asc" },
+        include: { slots: { include: { player: true } } },
+      },
+    },
+  });
+  return match;
+}
+
 export type { Player, PlayerKind, Signup, SignupStatus, PaymentStatus };
