@@ -283,8 +283,6 @@ export async function generateTeamsAction(
   await requireAdmin();
   await generateTeamsForMatch(matchId, options);
 
-  sendPushToAll("⚽ Teams are set!", "Check your team for the next match!", `/matches/${matchId}`).catch(() => {});
-
   revalidatePath("/");
   revalidatePath(`/matches/${matchId}`);
   revalidatePath(`/admin/matches/${matchId}`);

@@ -369,7 +369,12 @@ export async function setMatchLockedAction(matchId: string, locked: boolean) {
   await db.match.update({ where: { id: matchId }, data: { locked } });
 
   if (locked) {
-    sendPushToAll("🔒 Sign-ups locked", "The lineup is set — teams coming soon!", `/matches/${matchId}`).catch(() => {});
+    const match = await db.match.findUnique({ where: { id: matchId }, include: { teams: true } });
+    if (match?.teams && match.teams.length > 0) {
+      sendPushToAll("⚽ Teams are set!", "Check your team for the next match!", `/matches/${matchId}`).catch(() => {});
+    } else {
+      sendPushToAll("🔒 Sign-ups locked", "The lineup is set — teams coming soon!", `/matches/${matchId}`).catch(() => {});
+    }
   }
 
   revalidatePath("/");
