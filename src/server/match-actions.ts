@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getCurrentUser, requireAdmin, requireUser } from "@/lib/auth";
 import type { PaymentStatus, SignupStatus } from "@prisma/client";
+import { sendPushToAll } from "@/lib/push";
 
 async function nextWaitlistRank(matchId: string) {
   const top = await db.signup.findFirst({
@@ -75,6 +76,9 @@ export async function setDeclinedAction(matchId: string) {
 
   // If a waitlist player at position [outRank] exists, mark payment as PENDING.
   await syncWaitlistPaymentStatuses(matchId);
+
+  const name = `${user.player.firstName} ${user.player.lastName ?? ""}`.trim();
+  sendPushToAll("😔 Player declined", `${name} can't make it`, `/matches/${matchId}`).catch(() => {});
 
   revalidatePath("/");
   revalidatePath(`/matches/${matchId}`);
@@ -160,6 +164,12 @@ export async function declineWithReplacementAction(input: {
   });
 
   await syncWaitlistPaymentStatuses(input.matchId);
+
+  const replacement = await db.player.findUnique({ where: { id: replacementPlayerId } });
+  if (replacement) {
+    const rName = `${replacement.firstName} ${replacement.lastName ?? ""}`.trim();
+    sendPushToAll("🔄 New player in!", `${rName} is joining the match`, `/matches/${input.matchId}`).catch(() => {});
+  }
 
   revalidatePath("/");
   revalidatePath(`/matches/${input.matchId}`);
@@ -357,6 +367,11 @@ async function renumberWaitlist(matchId: string) {
 export async function setMatchLockedAction(matchId: string, locked: boolean) {
   await requireAdmin();
   await db.match.update({ where: { id: matchId }, data: { locked } });
+
+  if (locked) {
+    sendPushToAll("🔒 Sign-ups locked", "The lineup is set — teams coming soon!", `/matches/${matchId}`).catch(() => {});
+  }
+
   revalidatePath("/");
   revalidatePath(`/matches/${matchId}`);
   revalidatePath("/admin/matches");

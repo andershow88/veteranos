@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { hashPassword, requireAdmin } from "@/lib/auth";
 import { generateTeamsForMatch } from "./team-generator";
+import { sendPushToAll } from "@/lib/push";
 
 const skillsSchema = {
   overall: z.coerce.number().int().min(0).max(100).default(50),
@@ -220,6 +221,9 @@ export async function createMatchAction(
     },
   });
 
+  const dateStr = dt.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" });
+  sendPushToAll("⚽ New match!", `${dateStr} — Sign up now!`, `/matches/${match.id}`).catch(() => {});
+
   revalidatePath("/");
   revalidatePath("/admin/matches");
   redirect(`/admin/matches/${match.id}`);
@@ -254,6 +258,10 @@ export async function updateMatchAction(
       teamCount: parsed.data.teamCount,
     },
   });
+
+  const dateStr = dt.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" });
+  sendPushToAll("📋 Match updated", `${dateStr} — details changed`, `/matches/${matchId}`).catch(() => {});
+
   revalidatePath("/");
   revalidatePath(`/admin/matches/${matchId}`);
   revalidatePath(`/matches/${matchId}`);
@@ -274,6 +282,9 @@ export async function generateTeamsAction(
 ) {
   await requireAdmin();
   await generateTeamsForMatch(matchId, options);
+
+  sendPushToAll("⚽ Teams are set!", "Check your team for the next match!", `/matches/${matchId}`).catch(() => {});
+
   revalidatePath("/");
   revalidatePath(`/matches/${matchId}`);
   revalidatePath(`/admin/matches/${matchId}`);
