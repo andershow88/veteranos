@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { NotificationPrompt } from "@/components/pwa/notification-prompt";
 import { getCurrentUser } from "@/lib/auth";
 
 const inter = Inter({
@@ -85,6 +86,7 @@ export default async function RootLayout({
         </footer>
         <ServiceWorkerRegister />
         <InstallPrompt />
+        <NotificationPrompt />
       </body>
     </html>
   );

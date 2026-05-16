@@ -218,3 +218,11 @@ model TeamSlot {
   @@unique([teamId, playerId])
   @@index([teamId])
 }
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
