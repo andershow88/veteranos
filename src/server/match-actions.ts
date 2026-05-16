@@ -371,7 +371,7 @@ export async function setMatchLockedAction(matchId: string, locked: boolean) {
   if (locked) {
     const match = await db.match.findUnique({ where: { id: matchId }, include: { teams: true } });
     if (match?.teams && match.teams.length > 0) {
-      sendPushToAll("⚽ Teams are set!", "Check your team for the next match!", `/matches/${matchId}`).catch(() => {});
+      sendPushToAll("⚽ Teams are set!", "Check your team for the next match!", "/").catch(() => {});
     } else {
       sendPushToAll("🔒 Sign-ups locked", "The lineup is set — teams coming soon!", `/matches/${matchId}`).catch(() => {});
     }
