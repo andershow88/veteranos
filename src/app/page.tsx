@@ -67,17 +67,19 @@ function Hero() {
     <section className="relative mb-10 overflow-hidden rounded-3xl border border-border-strong/60 glass pitch-stripes p-6 sm:p-10">
       <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pitch-500/20 blur-3xl pointer-events-none" />
       <div className="absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-pitch-400/15 blur-3xl pointer-events-none" />
-      <div className="relative flex flex-col gap-4">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-pitch-500/40 bg-pitch-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pitch-200">
-          <Sparkles className="h-3 w-3" /> Upcoming matches
+      <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="flex flex-col gap-4">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-pitch-500/40 bg-pitch-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pitch-200">
+            <Sparkles className="h-3 w-3" /> Upcoming matches
+          </div>
+          <h1 className="font-display text-4xl sm:text-6xl tracking-wide text-foreground">
+            Veteranos. <span className="text-pitch-300">Play.</span> Win.
+          </h1>
+          <p className="max-w-2xl text-base sm:text-lg text-muted">
+            Your football matches in one place. Confirm, decline or queue up &mdash; Edu handle balanced teams,
+            waitlists and payments.
+          </p>
         </div>
-        <h1 className="font-display text-4xl sm:text-6xl tracking-wide text-foreground">
-          Veteranos. <span className="text-pitch-300">Play.</span> Win.
-        </h1>
-        <p className="max-w-2xl text-base sm:text-lg text-muted">
-          Your football matches in one place. Confirm, decline or queue up &mdash; Edu handle balanced teams,
-          waitlists and payments.
-        </p>
         <WeatherWidget />
       </div>
     </section>

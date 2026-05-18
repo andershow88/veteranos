@@ -1,26 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, CloudDrizzle, Wind, Droplets } from "lucide-react";
+import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, CloudDrizzle } from "lucide-react";
 
-type CurrentWeather = {
-  temperature: number;
-  code: number;
-};
-
-type DailyForecast = {
-  date: string;
-  dayName: string;
-  code: number;
-  tempMax: number;
-  tempMin: number;
-};
-
-type WeatherData = {
-  current: CurrentWeather;
-  daily: DailyForecast[];
-  locationName: string;
-};
+type CurrentWeather = { temperature: number; code: number };
+type DailyForecast = { date: string; dayName: string; code: number; tempMax: number; tempMin: number };
+type WeatherData = { current: CurrentWeather; daily: DailyForecast[]; locationName: string };
 
 const LAT = 48.1351;
 const LON = 11.582;
@@ -30,15 +15,14 @@ function wmoLabel(code: number): string {
   if (code === 0) return "Clear sky";
   if (code <= 3) return "Partly cloudy";
   if (code <= 48) return "Fog";
-  if (code <= 55) return "Drizzle";
-  if (code <= 57) return "Freezing drizzle";
+  if (code <= 57) return "Drizzle";
   if (code <= 65) return "Rain";
   if (code <= 67) return "Freezing rain";
   if (code <= 77) return "Snow";
-  if (code <= 82) return "Rain showers";
+  if (code <= 82) return "Showers";
   if (code <= 86) return "Snow showers";
   if (code <= 99) return "Thunderstorm";
-  return "Unknown";
+  return "";
 }
 
 function WmoIcon({ code, className = "h-5 w-5" }: { code: number; className?: string }) {
@@ -55,28 +39,23 @@ function WmoIcon({ code, className = "h-5 w-5" }: { code: number; className?: st
 }
 
 function dayShort(dateStr: string): string {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "short" });
+  return new Date(dateStr + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
 }
 
 export function WeatherWidget() {
   const [data, setData] = useState<WeatherData | null>(null);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
     const cached = sessionStorage.getItem("vet-weather");
     if (cached) {
       try {
-        const parsed = JSON.parse(cached);
-        if (parsed._ts && Date.now() - parsed._ts < 30 * 60 * 1000) {
-          setData(parsed);
-          return;
-        }
+        const p = JSON.parse(cached);
+        if (p._ts && Date.now() - p._ts < 30 * 60 * 1000) { setData(p); return; }
       } catch {}
     }
 
     const url =
-      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+      `https://api.open-meteo.com/v1/dwd-icon?latitude=${LAT}&longitude=${LON}` +
       `&current=temperature_2m,weather_code` +
       `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
       `&timezone=Europe/Berlin&forecast_days=5`;
@@ -85,10 +64,7 @@ export function WeatherWidget() {
       .then((r) => r.json())
       .then((json) => {
         const result: WeatherData = {
-          current: {
-            temperature: Math.round(json.current.temperature_2m),
-            code: json.current.weather_code,
-          },
+          current: { temperature: Math.round(json.current.temperature_2m), code: json.current.weather_code },
           daily: json.daily.time.map((date: string, i: number) => ({
             date,
             dayName: dayShort(date),
@@ -101,46 +77,46 @@ export function WeatherWidget() {
         setData(result);
         sessionStorage.setItem("vet-weather", JSON.stringify({ ...result, _ts: Date.now() }));
       })
-      .catch(() => setError(true));
+      .catch(() => {});
   }, []);
 
-  if (error || !data) return null;
+  if (!data) return null;
 
-  const today = data.daily[0];
   const forecast = data.daily.slice(1);
 
   return (
-    <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4">
+    <div className="flex flex-col items-center lg:items-end gap-3 shrink-0">
       {/* Current */}
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-pitch-700/30 text-pitch-300">
-          <WmoIcon code={data.current.code} className="h-5 w-5" />
+        <div className="grid h-12 w-12 place-items-center rounded-xl bg-pitch-700/30 text-pitch-300">
+          <WmoIcon code={data.current.code} className="h-6 w-6" />
         </div>
-        <div>
-          <div className="text-2xl font-bold text-foreground number-pill">
-            {data.current.temperature}°
+        <div className="text-right">
+          <div className="text-3xl font-bold text-foreground number-pill leading-none">
+            {data.current.temperature}°C
           </div>
-          <div className="text-[10px] uppercase tracking-widest text-muted">
+          <div className="text-[10px] uppercase tracking-widest text-muted mt-0.5">
             {data.locationName} · {wmoLabel(data.current.code)}
           </div>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="hidden sm:block h-10 w-px bg-border/60" />
-
-      {/* 4-day forecast */}
+      {/* Forecast */}
       <div className="flex items-center gap-3">
         {forecast.map((d) => (
-          <div key={d.date} className="flex flex-col items-center gap-0.5">
+          <div key={d.date} className="flex flex-col items-center gap-0.5 min-w-10">
             <span className="text-[9px] font-bold uppercase tracking-widest text-muted">{d.dayName}</span>
             <WmoIcon code={d.code} className="h-4 w-4 text-pitch-300" />
-            <div className="text-[10px] number-pill text-foreground">
+            <div className="text-[10px] number-pill text-foreground leading-tight">
               <span className="font-semibold">{d.tempMax}°</span>
               <span className="text-muted ml-0.5">{d.tempMin}°</span>
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="text-[8px] uppercase tracking-widest text-muted/50">
+        DWD · Open-Meteo
       </div>
     </div>
   );
