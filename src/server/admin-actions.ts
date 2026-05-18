@@ -296,6 +296,37 @@ export async function deleteTeamsAction(matchId: string) {
   revalidatePath(`/admin/matches/${matchId}`);
 }
 
+const quickSkillSchema = z.object({
+  position: z.enum(["GOALKEEPER", "DEFENDER", "MIDFIELDER", "STRIKER", "ANY"]),
+  overall: z.coerce.number().int().min(0).max(100),
+  technique: z.coerce.number().int().min(0).max(100),
+  speed: z.coerce.number().int().min(0).max(100),
+  stamina: z.coerce.number().int().min(0).max(100),
+  defense: z.coerce.number().int().min(0).max(100),
+  offense: z.coerce.number().int().min(0).max(100),
+  passing: z.coerce.number().int().min(0).max(100),
+  shooting: z.coerce.number().int().min(0).max(100),
+  goalkeeping: z.coerce.number().int().min(0).max(100),
+});
+
+export async function updatePlayerSkillsAction(
+  playerId: string,
+  data: z.infer<typeof quickSkillSchema>,
+): Promise<{ ok?: boolean; error?: string }> {
+  await requireAdmin();
+  const parsed = quickSkillSchema.safeParse(data);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  await db.player.update({
+    where: { id: playerId },
+    data: parsed.data,
+  });
+
+  revalidatePath("/admin/skills");
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function swapTeamPlayersAction(slotIdA: string, slotIdB: string) {
   await requireAdmin();
 
