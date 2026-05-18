@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Save, Loader2, Check, AlertCircle } from "lucide-react";
+import { useState, useMemo, useTransition } from "react";
+import { Save, Loader2, Check, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, Search, X } from "lucide-react";
 import { updatePlayerSkillsAction } from "@/server/admin-actions";
 import type { Position } from "@prisma/client";
 
@@ -24,38 +24,22 @@ type PlayerRow = {
 };
 
 const SKILL_KEYS = [
-  "overall",
-  "technique",
-  "speed",
-  "stamina",
-  "defense",
-  "offense",
-  "passing",
-  "shooting",
-  "goalkeeping",
+  "overall", "technique", "speed", "stamina",
+  "defense", "offense", "passing", "shooting", "goalkeeping",
 ] as const;
 
 const SKILL_SHORT: Record<string, string> = {
-  overall: "OVR",
-  technique: "TEC",
-  speed: "SPD",
-  stamina: "STA",
-  defense: "DEF",
-  offense: "OFF",
-  passing: "PAS",
-  shooting: "SHO",
-  goalkeeping: "GK",
+  overall: "OVR", technique: "TEC", speed: "SPD", stamina: "STA",
+  defense: "DEF", offense: "OFF", passing: "PAS", shooting: "SHO", goalkeeping: "GK",
 };
 
 const POSITIONS: Position[] = ["ANY", "GOALKEEPER", "DEFENDER", "MIDFIELDER", "STRIKER"];
 const POS_SHORT: Record<string, string> = {
-  ANY: "ANY",
-  GOALKEEPER: "GK",
-  DEFENDER: "DEF",
-  MIDFIELDER: "MID",
-  STRIKER: "STR",
+  ANY: "ANY", GOALKEEPER: "GK", DEFENDER: "DEF", MIDFIELDER: "MID", STRIKER: "STR",
 };
 
+type SortKey = "name" | "kind" | "position" | typeof SKILL_KEYS[number];
+type SortDir = "asc" | "desc";
 type RowState = "idle" | "saving" | "saved" | "error";
 
 export function SkillsTable({ players }: { players: PlayerRow[] }) {
@@ -63,46 +47,184 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
     players.map((p) => ({ ...p, _state: "idle" as RowState, _error: "" })),
   );
 
-  function updateCell(idx: number, key: string, value: string | number) {
+  // Filters
+  const [search, setSearch] = useState("");
+  const [filterKind, setFilterKind] = useState<"ALL" | "ABO" | "WAITLIST">("ALL");
+  const [filterPos, setFilterPos] = useState<"ALL" | Position>("ALL");
+  const [filterActive, setFilterActive] = useState<"ALL" | "YES" | "NO">("ALL");
+
+  // Sort
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "name" ? "asc" : "desc");
+    }
+  }
+
+  const filtered = useMemo(() => {
+    let result = rows;
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (r) =>
+          r.firstName.toLowerCase().includes(q) ||
+          (r.lastName ?? "").toLowerCase().includes(q),
+      );
+    }
+    if (filterKind !== "ALL") result = result.filter((r) => r.kind === filterKind);
+    if (filterPos !== "ALL") result = result.filter((r) => r.position === filterPos);
+    if (filterActive === "YES") result = result.filter((r) => r.active);
+    if (filterActive === "NO") result = result.filter((r) => !r.active);
+
+    const sorted = [...result].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "name") {
+        cmp = `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+      } else if (sortKey === "kind") {
+        cmp = a.kind.localeCompare(b.kind);
+      } else if (sortKey === "position") {
+        cmp = a.position.localeCompare(b.position);
+      } else {
+        cmp = (a[sortKey] as number) - (b[sortKey] as number);
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  }, [rows, search, filterKind, filterPos, filterActive, sortKey, sortDir]);
+
+  const hasFilters = search || filterKind !== "ALL" || filterPos !== "ALL" || filterActive !== "ALL";
+
+  function updateCell(id: string, key: string, value: string | number) {
     setRows((prev) =>
-      prev.map((r, i) =>
-        i === idx ? { ...r, [key]: value, _state: "idle" as RowState } : r,
+      prev.map((r) =>
+        r.id === id ? { ...r, [key]: value, _state: "idle" as RowState } : r,
       ),
     );
   }
 
+  function SortIcon({ col }: { col: SortKey }) {
+    if (sortKey !== col) return <ArrowUpDown className="h-2.5 w-2.5 opacity-30" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-2.5 w-2.5 text-pitch-400" />
+      : <ArrowDown className="h-2.5 w-2.5 text-pitch-400" />;
+  }
+
+  function Th({ col, children, className = "" }: { col: SortKey; children: React.ReactNode; className?: string }) {
+    return (
+      <th
+        onClick={() => toggleSort(col)}
+        className={`px-1.5 py-2.5 font-bold text-muted whitespace-nowrap cursor-pointer hover:text-foreground select-none transition ${className}`}
+      >
+        <span className="inline-flex items-center gap-1">
+          {children}
+          <SortIcon col={col} />
+        </span>
+      </th>
+    );
+  }
+
   return (
-    <table className="w-full text-xs border-collapse">
-      <thead>
-        <tr className="border-b border-border text-left">
-          <th className="sticky left-0 z-10 bg-bg-elevated px-3 py-2.5 font-bold text-muted whitespace-nowrap">Player</th>
-          <th className="px-2 py-2.5 font-bold text-muted whitespace-nowrap">Type</th>
-          <th className="px-2 py-2.5 font-bold text-muted whitespace-nowrap">POS</th>
-          {SKILL_KEYS.map((k) => (
-            <th key={k} className="px-1.5 py-2.5 font-bold text-muted text-center whitespace-nowrap">
-              {SKILL_SHORT[k]}
-            </th>
-          ))}
-          <th className="px-2 py-2.5 font-bold text-muted text-center whitespace-nowrap w-16"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r, idx) => (
-          <SkillRow
-            key={r.id}
-            row={r}
-            onChange={(key, val) => updateCell(idx, key, val)}
-            onStateChange={(state, error) =>
-              setRows((prev) =>
-                prev.map((x, i) =>
-                  i === idx ? { ...x, _state: state, _error: error ?? "" } : x,
-                ),
-              )
-            }
+    <div>
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-border/60">
+        <div className="relative flex-1 min-w-40 max-w-64">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search player…"
+            className="w-full bg-transparent border border-border/60 rounded-lg pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-subtle focus:border-pitch-500 focus:outline-none"
           />
-        ))}
-      </tbody>
-    </table>
+        </div>
+        <select
+          value={filterKind}
+          onChange={(e) => setFilterKind(e.target.value as typeof filterKind)}
+          className="bg-transparent border border-border/60 rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-pitch-500 focus:outline-none"
+        >
+          <option value="ALL">All types</option>
+          <option value="ABO">Abo</option>
+          <option value="WAITLIST">Waitlist</option>
+        </select>
+        <select
+          value={filterPos}
+          onChange={(e) => setFilterPos(e.target.value as typeof filterPos)}
+          className="bg-transparent border border-border/60 rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-pitch-500 focus:outline-none"
+        >
+          <option value="ALL">All positions</option>
+          {POSITIONS.map((p) => (
+            <option key={p} value={p}>{POS_SHORT[p]}</option>
+          ))}
+        </select>
+        <select
+          value={filterActive}
+          onChange={(e) => setFilterActive(e.target.value as typeof filterActive)}
+          className="bg-transparent border border-border/60 rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-pitch-500 focus:outline-none"
+        >
+          <option value="ALL">Active & inactive</option>
+          <option value="YES">Active only</option>
+          <option value="NO">Inactive only</option>
+        </select>
+        {hasFilters && (
+          <button
+            onClick={() => { setSearch(""); setFilterKind("ALL"); setFilterPos("ALL"); setFilterActive("ALL"); }}
+            className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted hover:text-danger transition"
+            title="Clear all filters"
+          >
+            <X className="h-3 w-3" /> Clear
+          </button>
+        )}
+        <span className="text-[10px] text-muted ml-auto">
+          {filtered.length} of {rows.length}
+        </span>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs border-collapse">
+          <thead>
+            <tr className="border-b border-border text-left">
+              <Th col="name" className="sticky left-0 z-10 bg-bg-elevated px-3">Player</Th>
+              <Th col="kind" className="px-2">Type</Th>
+              <Th col="position" className="px-2">POS</Th>
+              {SKILL_KEYS.map((k) => (
+                <Th key={k} col={k} className="text-center">{SKILL_SHORT[k]}</Th>
+              ))}
+              <th className="px-2 py-2.5 w-16"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={13} className="px-4 py-8 text-center text-sm text-subtle">
+                  No players match your filters.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((r) => (
+                <SkillRow
+                  key={r.id}
+                  row={r}
+                  onChange={(key, val) => updateCell(r.id, key, val)}
+                  onStateChange={(state, error) =>
+                    setRows((prev) =>
+                      prev.map((x) =>
+                        x.id === r.id ? { ...x, _state: state, _error: error ?? "" } : x,
+                      ),
+                    )
+                  }
+                />
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -116,7 +238,6 @@ function SkillRow({
   onStateChange: (state: RowState, error?: string) => void;
 }) {
   const [pending, startTransition] = useTransition();
-  const isDirty = row._state === "idle";
 
   function save() {
     onStateChange("saving");
