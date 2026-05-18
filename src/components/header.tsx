@@ -38,8 +38,8 @@ export function Header({ user }: Props) {
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
-          <ThemeToggle />
           {user?.role === "ADMIN" && <AdminDetailsToggle />}
+          <ThemeToggle />
           {user ? (
             <>
               <div className="hidden lg:flex items-center gap-2 rounded-full border border-border/60 bg-surface px-3 py-1.5 max-w-56">

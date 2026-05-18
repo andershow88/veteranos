@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
 export function AdminDetailsToggle() {
+  const pathname = usePathname();
   const [show, setShow] = useState(false);
+
+  const isMatchPage = pathname === "/" || pathname.startsWith("/matches");
 
   useEffect(() => {
     const stored = localStorage.getItem("admin-show-details");
@@ -20,6 +24,8 @@ export function AdminDetailsToggle() {
     document.documentElement.classList.toggle("show-admin-details", next);
     localStorage.setItem("admin-show-details", String(next));
   }
+
+  if (!isMatchPage) return null;
 
   return (
     <button
