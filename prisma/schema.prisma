@@ -130,6 +130,10 @@ model Player {
 
   active      Boolean    @default(true)
 
+  // FIFO rotation: updated when a waitlist player actually plays in a match.
+  // Waitlist rank is sorted by this field (nulls first = never played = highest priority).
+  lastPlayedAt DateTime?
+
   signups     Signup[]
   teamSlots   TeamSlot[]
 

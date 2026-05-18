@@ -254,7 +254,8 @@ export async function joinWaitlistAction(matchId: string) {
     throw new Error("Only waitlist players can join the waitlist.");
   }
 
-  const rank = await nextWaitlistRank(matchId);
+  // Insert with a temporary high rank; renumberWaitlist will sort by FIFO.
+  const tempRank = await nextWaitlistRank(matchId);
 
   await db.signup.upsert({
     where: { matchId_playerId: { matchId, playerId: user.player.id } },
@@ -262,11 +263,12 @@ export async function joinWaitlistAction(matchId: string) {
       matchId,
       playerId: user.player.id,
       status: "WAITLIST",
-      rank,
+      rank: tempRank,
     },
-    update: { status: "WAITLIST", rank },
+    update: { status: "WAITLIST", rank: tempRank },
   });
 
+  await renumberWaitlist(matchId);
   await syncWaitlistPaymentStatuses(matchId);
 
   revalidatePath("/");
@@ -350,11 +352,23 @@ async function syncWaitlistPaymentStatuses(matchId: string) {
   ]);
 }
 
+/**
+ * Re-sorts and renumbers the waitlist using FIFO rotation:
+ *   1. Players who never played (lastPlayedAt IS NULL) come first
+ *   2. Among those who played, the one who played LONGEST AGO comes first
+ *   3. Tie-breaker: signup creation time (earlier = higher priority)
+ */
 async function renumberWaitlist(matchId: string) {
   const wls = await db.signup.findMany({
     where: { matchId, status: "WAITLIST" },
-    orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
-    select: { id: true },
+    include: { player: { select: { lastPlayedAt: true } } },
+    orderBy: { createdAt: "asc" },
+  });
+  wls.sort((a, b) => {
+    const aDate = a.player.lastPlayedAt?.getTime() ?? 0;
+    const bDate = b.player.lastPlayedAt?.getTime() ?? 0;
+    if (aDate !== bDate) return aDate - bDate;
+    return a.createdAt.getTime() - b.createdAt.getTime();
   });
   await db.$transaction(
     wls.map((s, idx) =>
@@ -369,8 +383,19 @@ export async function setMatchLockedAction(matchId: string, locked: boolean) {
   await db.match.update({ where: { id: matchId }, data: { locked } });
 
   if (locked) {
-    const match = await db.match.findUnique({ where: { id: matchId }, include: { teams: true } });
+    const match = await db.match.findUnique({
+      where: { id: matchId },
+      include: { teams: { include: { slots: true } } },
+    });
     if (match?.teams && match.teams.length > 0) {
+      // FIFO rotation: mark waitlist players who actually play as "just played".
+      const teamPlayerIds = match.teams.flatMap((t) => t.slots.map((s) => s.playerId));
+      if (teamPlayerIds.length > 0) {
+        await db.player.updateMany({
+          where: { id: { in: teamPlayerIds }, kind: "WAITLIST" },
+          data: { lastPlayedAt: match.date },
+        });
+      }
       sendPushToAll("⚽ Teams are set!", "Check your team for the next match!", "/").catch(() => {});
     }
   }
