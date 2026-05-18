@@ -7,6 +7,7 @@ import { formatMatchDate, formatRelativeMatchDate } from "@/lib/utils";
 import type { MatchView } from "@/server/match-queries";
 import { SignupControls } from "./signup-controls";
 import { ReplacementRow } from "./replacement-row";
+import { AdminDetailsToggle } from "./admin-details-toggle";
 
 type CurrentPlayerCtx = {
   playerId: string | null;
@@ -58,6 +59,7 @@ export function MatchCard({
             <Badge tone="info">
               <Users className="h-3 w-3" /> {totalPlaying} playing
             </Badge>
+            {currentPlayer.role === "ADMIN" && <AdminDetailsToggle />}
           </div>
         </div>
       </CardHeader>
@@ -89,6 +91,7 @@ export function MatchCard({
                   firstName={s.player.firstName}
                   lastName={s.player.lastName}
                   position={s.player.position}
+                  overall={currentPlayer.role === "ADMIN" ? s.player.overall : undefined}
                   src={s.player.avatarUrl}
                 />
               ))}
@@ -158,6 +161,11 @@ export function MatchCard({
                     <span className="text-sm truncate flex-1 min-w-0">
                       {s.player.firstName} {s.player.lastName}
                     </span>
+                    {currentPlayer.role === "ADMIN" && (
+                      <span className="admin-ovr number-pill text-xs font-bold text-pitch-400 shrink-0">
+                        {s.player.overall}
+                      </span>
+                    )}
                     {isReplacing && (
                       <Badge tone="success" className="shrink-0">
                         stepping in
@@ -246,11 +254,13 @@ function PlayerChip({
   firstName,
   lastName,
   position,
+  overall,
   src,
 }: {
   firstName: string;
   lastName: string | null;
   position: string;
+  overall?: number;
   src?: string | null;
 }) {
   return (
@@ -266,6 +276,11 @@ function PlayerChip({
           </div>
         )}
       </div>
+      {typeof overall === "number" && (
+        <span className="admin-ovr number-pill text-xs font-bold text-pitch-400 shrink-0">
+          {overall}
+        </span>
+      )}
     </div>
   );
 }

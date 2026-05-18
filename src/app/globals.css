@@ -195,6 +195,9 @@
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" on, "lnum" on;
   }
+
+  .admin-ovr { display: none; }
+  .show-admin-details .admin-ovr { display: inline-flex; }
 }
 
 @keyframes shine {
