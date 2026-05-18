@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
-import { Save, Loader2, Check, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, Search, X } from "lucide-react";
+import { useState, useMemo, useTransition, useRef, useCallback } from "react";
+import { Loader2, Check, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, Search, X } from "lucide-react";
 import { updatePlayerSkillsAction } from "@/server/admin-actions";
 import type { Position } from "@prisma/client";
 
@@ -99,12 +99,42 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
 
   const hasFilters = search || filterKind !== "ALL" || filterPos !== "ALL" || filterActive !== "ALL";
 
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const autoSave = useCallback((id: string, updated: PlayerRow & { _state: RowState; _error: string }) => {
+    if (saveTimers.current[id]) clearTimeout(saveTimers.current[id]);
+    saveTimers.current[id] = setTimeout(async () => {
+      setRows((prev) => prev.map((r) => r.id === id ? { ...r, _state: "saving" as RowState } : r));
+      const result = await updatePlayerSkillsAction(id, {
+        position: updated.position,
+        overall: updated.overall,
+        technique: updated.technique,
+        speed: updated.speed,
+        stamina: updated.stamina,
+        defense: updated.defense,
+        offense: updated.offense,
+        passing: updated.passing,
+        shooting: updated.shooting,
+        goalkeeping: updated.goalkeeping,
+      });
+      if (result.ok) {
+        setRows((prev) => prev.map((r) => r.id === id ? { ...r, _state: "saved" as RowState } : r));
+        setTimeout(() => setRows((prev) => prev.map((r) => r.id === id && r._state === "saved" ? { ...r, _state: "idle" as RowState } : r)), 1500);
+      } else {
+        setRows((prev) => prev.map((r) => r.id === id ? { ...r, _state: "error" as RowState, _error: result.error ?? "" } : r));
+      }
+    }, 500);
+  }, []);
+
   function updateCell(id: string, key: string, value: string | number) {
-    setRows((prev) =>
-      prev.map((r) =>
+    setRows((prev) => {
+      const next = prev.map((r) =>
         r.id === id ? { ...r, [key]: value, _state: "idle" as RowState } : r,
-      ),
-    );
+      );
+      const updated = next.find((r) => r.id === id);
+      if (updated) autoSave(id, updated);
+      return next;
+    });
   }
 
   function SortIcon({ col }: { col: SortKey }) {
@@ -211,13 +241,6 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
                   key={r.id}
                   row={r}
                   onChange={(key, val) => updateCell(r.id, key, val)}
-                  onStateChange={(state, error) =>
-                    setRows((prev) =>
-                      prev.map((x) =>
-                        x.id === r.id ? { ...x, _state: state, _error: error ?? "" } : x,
-                      ),
-                    )
-                  }
                 />
               ))
             )}
@@ -231,38 +254,10 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
 function SkillRow({
   row,
   onChange,
-  onStateChange,
 }: {
   row: PlayerRow & { _state: RowState; _error: string };
   onChange: (key: string, value: string | number) => void;
-  onStateChange: (state: RowState, error?: string) => void;
 }) {
-  const [pending, startTransition] = useTransition();
-
-  function save() {
-    onStateChange("saving");
-    startTransition(async () => {
-      const result = await updatePlayerSkillsAction(row.id, {
-        position: row.position,
-        overall: row.overall,
-        technique: row.technique,
-        speed: row.speed,
-        stamina: row.stamina,
-        defense: row.defense,
-        offense: row.offense,
-        passing: row.passing,
-        shooting: row.shooting,
-        goalkeeping: row.goalkeeping,
-      });
-      if (result.ok) {
-        onStateChange("saved");
-        setTimeout(() => onStateChange("idle"), 2000);
-      } else {
-        onStateChange("error", result.error);
-      }
-    });
-  }
-
   const rowBg = !row.active
     ? "opacity-50"
     : row.kind === "ABO"
@@ -304,8 +299,8 @@ function SkillRow({
           />
         </td>
       ))}
-      <td className="px-2 py-1.5 text-center">
-        {row._state === "saving" || pending ? (
+      <td className="px-2 py-1.5 text-center w-8">
+        {row._state === "saving" ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin text-pitch-400 mx-auto" />
         ) : row._state === "saved" ? (
           <Check className="h-3.5 w-3.5 text-pitch-400 mx-auto" />
@@ -313,15 +308,7 @@ function SkillRow({
           <span title={row._error}>
             <AlertCircle className="h-3.5 w-3.5 text-danger mx-auto" />
           </span>
-        ) : (
-          <button
-            onClick={save}
-            className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold text-pitch-300 hover:text-pitch-100 hover:bg-pitch-700/30 transition"
-            title="Save this row"
-          >
-            <Save className="h-3 w-3" /> Save
-          </button>
-        )}
+        ) : null}
       </td>
     </tr>
   );
