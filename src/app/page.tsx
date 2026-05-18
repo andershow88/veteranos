@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarPlus, Sparkles } from "lucide-react";
 import { WeatherWidget } from "@/components/weather-widget";
+import { RainRadar } from "@/components/rain-radar";
 import { listUpcomingMatches, getLockedMatchWithTeams } from "@/server/match-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
@@ -80,7 +81,10 @@ function Hero() {
             waitlists and payments.
           </p>
         </div>
-        <WeatherWidget />
+        <div className="flex flex-col sm:flex-row items-center lg:items-end gap-4">
+          <WeatherWidget />
+          <RainRadar />
+        </div>
       </div>
     </section>
   );
