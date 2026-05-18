@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarPlus, Sparkles } from "lucide-react";
+import { WeatherWidget } from "@/components/weather-widget";
 import { listUpcomingMatches, getLockedMatchWithTeams } from "@/server/match-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
@@ -77,6 +78,7 @@ function Hero() {
           Your football matches in one place. Confirm, decline or queue up &mdash; Edu handle balanced teams,
           waitlists and payments.
         </p>
+        <WeatherWidget />
       </div>
     </section>
   );
