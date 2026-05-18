@@ -7,7 +7,6 @@ import { formatMatchDate, formatRelativeMatchDate } from "@/lib/utils";
 import type { MatchView } from "@/server/match-queries";
 import { SignupControls } from "./signup-controls";
 import { ReplacementRow } from "./replacement-row";
-import { AdminDetailsToggle } from "./admin-details-toggle";
 
 type CurrentPlayerCtx = {
   playerId: string | null;
@@ -59,7 +58,6 @@ export function MatchCard({
             <Badge tone="info">
               <Users className="h-3 w-3" /> {totalPlaying} playing
             </Badge>
-            {currentPlayer.role === "ADMIN" && <AdminDetailsToggle />}
           </div>
         </div>
       </CardHeader>

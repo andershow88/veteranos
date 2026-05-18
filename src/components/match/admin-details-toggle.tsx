@@ -24,11 +24,10 @@ export function AdminDetailsToggle() {
   return (
     <button
       onClick={toggle}
-      className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted hover:text-pitch-300 transition"
+      className="grid h-10 w-10 place-items-center rounded-xl text-foreground/80 hover:text-foreground hover:bg-surface-2 transition"
       title={show ? "Hide player details" : "Show player details (OVR)"}
     >
-      {show ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-      {show ? "Hide details" : "Details"}
+      {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
     </button>
   );
 }
