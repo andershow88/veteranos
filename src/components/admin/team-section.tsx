@@ -20,6 +20,7 @@ export function TeamSection({
   matchDate,
   hasTeams,
   locked,
+  isPast,
   teamCount,
   pool,
   teams,
@@ -28,6 +29,7 @@ export function TeamSection({
   matchDate: Date;
   hasTeams: boolean;
   locked: boolean;
+  isPast?: boolean;
   teamCount: number;
   pool: PoolEntry[];
   teams: TeamWithSlots[];
@@ -38,6 +40,7 @@ export function TeamSection({
         matchId={matchId}
         hasTeams={hasTeams}
         locked={locked}
+        isPast={isPast}
         teamCount={teamCount}
         pool={pool}
       />

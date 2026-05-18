@@ -35,6 +35,8 @@ export default async function AdminMatchPage({
 
   const dateStr = match.date.toISOString().slice(0, 10);
   const timeStr = match.date.toTimeString().slice(0, 5);
+  const isPast = match.date.getTime() < Date.now();
+  const readOnly = (match.locked || isPast) as boolean;
 
   return (
     <div className="space-y-6">
@@ -64,14 +66,16 @@ export default async function AdminMatchPage({
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <DeleteMatchButton matchId={id} matchLabel={formatMatchDate(match.date)} />
-            </div>
+            {!isPast && (
+              <div className="flex flex-wrap gap-2">
+                <DeleteMatchButton matchId={id} matchLabel={formatMatchDate(match.date)} />
+              </div>
+            )}
           </div>
         </CardHeader>
       </Card>
 
-      <Card>
+      {!readOnly && <Card>
         <CardHeader>
           <h3 className="font-display text-xl tracking-wide">Edit match</h3>
         </CardHeader>
@@ -88,7 +92,7 @@ export default async function AdminMatchPage({
             }}
           />
         </CardBody>
-      </Card>
+      </Card>}
 
       <Card>
         <CardHeader className="flex items-center justify-between">
@@ -98,7 +102,7 @@ export default async function AdminMatchPage({
           </div>
         </CardHeader>
         <CardBody>
-          <SignupManager view={view} allPlayers={allPlayers} />
+          <SignupManager view={view} allPlayers={allPlayers} readOnly={readOnly} />
         </CardBody>
       </Card>
 
@@ -118,6 +122,7 @@ export default async function AdminMatchPage({
             matchDate={match.date}
             hasTeams={teams.length > 0}
             locked={match.locked}
+            isPast={isPast}
             teamCount={match.teamCount}
             pool={[
               ...view.attendees.map((s) => ({

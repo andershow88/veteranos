@@ -27,9 +27,10 @@ import type { Player, PaymentStatus, SignupStatus } from "@prisma/client";
 type Props = {
   view: MatchView;
   allPlayers: { abos: Player[]; waitlisters: Player[] };
+  readOnly?: boolean;
 };
 
-export function SignupManager({ view, allPlayers }: Props) {
+export function SignupManager({ view, allPlayers, readOnly }: Props) {
   const [pending, startTransition] = useTransition();
   const [selectedPlayer, setSelectedPlayer] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<SignupStatus>("IN");
@@ -50,63 +51,65 @@ export function SignupManager({ view, allPlayers }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Add manually */}
-      <div className="rounded-xl border border-border-strong/60 bg-surface/50 p-4">
-        <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-pitch-300 mb-3">
-          Add player manually
-        </h4>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex-1 min-w-45">
-            <Select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)}>
-              <option value="">Choose player…</option>
-              {availableSubs.length > 0 && (
-                <optgroup label="Abos">
-                  {availableSubs.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.firstName} {p.lastName}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-              {availableWls.length > 0 && (
-                <optgroup label="Waitlist">
-                  {availableWls.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.firstName} {p.lastName}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </Select>
-          </div>
-          <div className="w-44">
-            <Select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as SignupStatus)}
+      {/* Add manually — hidden when read-only */}
+      {!readOnly && (
+        <div className="rounded-xl border border-border-strong/60 bg-surface/50 p-4">
+          <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-pitch-300 mb-3">
+            Add player manually
+          </h4>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex-1 min-w-45">
+              <Select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)}>
+                <option value="">Choose player…</option>
+                {availableSubs.length > 0 && (
+                  <optgroup label="Abos">
+                    {availableSubs.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.firstName} {p.lastName}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {availableWls.length > 0 && (
+                  <optgroup label="Waitlist">
+                    {availableWls.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.firstName} {p.lastName}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </Select>
+            </div>
+            <div className="w-44">
+              <Select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as SignupStatus)}
+              >
+                <option value="IN">In</option>
+                <option value="OUT">Out</option>
+                <option value="WAITLIST">Waitlist</option>
+              </Select>
+            </div>
+            <Button
+              disabled={!selectedPlayer || pending}
+              onClick={() => {
+                if (!selectedPlayer) return;
+                setStatus(selectedPlayer, selectedStatus);
+                setSelectedPlayer("");
+              }}
             >
-              <option value="IN">In</option>
-              <option value="OUT">Out</option>
-              <option value="WAITLIST">Waitlist</option>
-            </Select>
+              {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+              <ListPlus className="h-4 w-4" /> Add
+            </Button>
           </div>
-          <Button
-            disabled={!selectedPlayer || pending}
-            onClick={() => {
-              if (!selectedPlayer) return;
-              setStatus(selectedPlayer, selectedStatus);
-              setSelectedPlayer("");
-            }}
-          >
-            {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-            <ListPlus className="h-4 w-4" /> Add
-          </Button>
         </div>
-      </div>
+      )}
 
       <SignupSection
         title={`Confirmed (${view.attendees.length})`}
         rows={view.attendees}
-        renderActions={(s) => (
+        renderActions={readOnly ? undefined : (s) => (
           <>
             <IconBtn onClick={() => setStatus(s.playerId, "OUT")} title="Mark as out">
               <X className="h-3.5 w-3.5" />
@@ -124,12 +127,13 @@ export function SignupManager({ view, allPlayers }: Props) {
         replacements={view.replacements}
         allPlayers={allPlayers}
         onSetStatus={setStatus}
+        readOnly={readOnly}
       />
 
       <SignupSection
         title={`Waitlist (${view.waitlist.length})`}
         rows={view.waitlist}
-        renderActions={(s) => (
+        renderActions={readOnly ? undefined : (s) => (
           <>
             <PaymentControls signupId={s.id} status={s.paymentStatus} />
             <IconBtn onClick={() => setStatus(s.playerId, "REMOVE")} variant="danger" title="Remove">
@@ -148,12 +152,14 @@ function DeclinedSection({
   replacements,
   allPlayers,
   onSetStatus,
+  readOnly,
 }: {
   matchId: string;
   rows: MatchView["declined"];
   replacements: MatchView["replacements"];
   allPlayers: { abos: Player[]; waitlisters: Player[] };
   onSetStatus: (playerId: string, status: SignupStatus | "REMOVE") => void;
+  readOnly?: boolean;
 }) {
   const [overrideIdx, setOverrideIdx] = useState<number | null>(null);
 
@@ -187,22 +193,24 @@ function DeclinedSection({
                     </div>
                     <SignupTimestamp signup={s} />
                   </div>
-                  <div className="flex items-center gap-1.5 ml-auto">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      title="Override replacement"
-                      onClick={() => setOverrideIdx(overrideIdx === idx ? null : idx)}
-                    >
-                      <UserPlus className="h-3.5 w-3.5" />
-                    </Button>
-                    <IconBtn onClick={() => onSetStatus(s.playerId, "IN")} title="Mark as in">
-                      <Check className="h-3.5 w-3.5" />
-                    </IconBtn>
-                    <IconBtn onClick={() => onSetStatus(s.playerId, "REMOVE")} variant="danger" title="Remove">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </IconBtn>
-                  </div>
+                  {!readOnly && (
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title="Override replacement"
+                        onClick={() => setOverrideIdx(overrideIdx === idx ? null : idx)}
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </Button>
+                      <IconBtn onClick={() => onSetStatus(s.playerId, "IN")} title="Mark as in">
+                        <Check className="h-3.5 w-3.5" />
+                      </IconBtn>
+                      <IconBtn onClick={() => onSetStatus(s.playerId, "REMOVE")} variant="danger" title="Remove">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </IconBtn>
+                    </div>
+                  )}
                 </div>
                 {overrideIdx === idx && (
                   <ReplacementOverrideForm
@@ -366,7 +374,7 @@ function SignupSection({
 }: {
   title: string;
   rows: MatchView["attendees"];
-  renderActions: (row: MatchView["attendees"][number]) => React.ReactNode;
+  renderActions?: (row: MatchView["attendees"][number]) => React.ReactNode;
 }) {
   return (
     <div>
@@ -391,7 +399,7 @@ function SignupSection({
                 </div>
                 <SignupTimestamp signup={s} />
               </div>
-              <div className="flex items-center gap-1.5 ml-auto">{renderActions(s)}</div>
+              {renderActions && <div className="flex items-center gap-1.5 ml-auto">{renderActions(s)}</div>}
             </div>
           ))}
         </div>
