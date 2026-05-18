@@ -161,7 +161,7 @@ export function MatchCard({
                     </span>
                     {currentPlayer.role === "ADMIN" && (
                       <span className="admin-ovr number-pill text-xs font-bold text-pitch-400 shrink-0">
-                        {s.player.overall}
+                        {s.player.position !== "ANY" ? labelPosition(s.player.position).slice(0, 3).toUpperCase() + " " : ""}{s.player.overall}
                       </span>
                     )}
                     {isReplacing && (
@@ -276,7 +276,7 @@ function PlayerChip({
       </div>
       {typeof overall === "number" && (
         <span className="admin-ovr number-pill text-xs font-bold text-pitch-400 shrink-0">
-          {overall}
+          {position !== "ANY" ? labelPosition(position).slice(0, 3).toUpperCase() + " " : ""}{overall}
         </span>
       )}
     </div>
