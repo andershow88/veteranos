@@ -1,16 +1,69 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bg: #07120a;
-  --color-bg-elevated: #0d1d12;
-  --color-surface: #102818;
-  --color-surface-2: #163a21;
-  --color-border: #1d4a2c;
-  --color-border-strong: #2a6b40;
+/* ── Light / Dark Mode via CSS custom properties ────────────── */
+:root {
+  --bg: #f4f7f5;
+  --bg-elevated: #ffffff;
+  --surface: #e8f0eb;
+  --surface-2: #dce8e0;
+  --border: #c4d6cb;
+  --border-strong: #9ab8a5;
+  --foreground: #1a2e22;
+  --muted: #5a7d67;
+  --subtle: #7a9e88;
+  --glass-from: rgba(255, 255, 255, 0.7);
+  --glass-to: rgba(240, 248, 243, 0.8);
+  --glass-border: rgba(154, 184, 165, 0.5);
+  --selection-bg: #10b981;
+  --selection-fg: #ffffff;
+  --body-gradient-a: rgba(16, 185, 129, 0.06);
+  --body-gradient-b: rgba(52, 211, 153, 0.04);
+  --body-gradient-base-start: #f4f7f5;
+  --body-gradient-base-end: #edf2ef;
+  --shadow-card: rgba(0, 0, 0, 0.08);
+  --ring-glow: rgba(16, 185, 129, 0.2);
+  --stripe-a: rgba(0, 0, 0, 0.015);
+  --stripe-b: rgba(0, 0, 0, 0.03);
+  --btn-primary-text: #ffffff;
+}
 
-  --color-foreground: #ecfdf5;
-  --color-muted: #94c2a4;
-  --color-subtle: #6f9e80;
+.dark {
+  --bg: #0c1a10;
+  --bg-elevated: #132119;
+  --surface: #18301f;
+  --surface-2: #1f4029;
+  --border: #275a36;
+  --border-strong: #348a4a;
+  --foreground: #e8f5ec;
+  --muted: #8bbf9c;
+  --subtle: #6a9e7c;
+  --glass-from: rgba(31, 64, 41, 0.55);
+  --glass-to: rgba(19, 33, 25, 0.65);
+  --glass-border: rgba(52, 138, 74, 0.45);
+  --selection-bg: #10b981;
+  --selection-fg: #06140c;
+  --body-gradient-a: rgba(132, 255, 156, 0.07);
+  --body-gradient-b: rgba(16, 185, 129, 0.08);
+  --body-gradient-base-start: #0c1a10;
+  --body-gradient-base-end: #080f0a;
+  --shadow-card: rgba(0, 0, 0, 0.45);
+  --ring-glow: rgba(16, 185, 129, 0.35);
+  --stripe-a: rgba(255, 255, 255, 0.02);
+  --stripe-b: rgba(255, 255, 255, 0.04);
+  --btn-primary-text: #06140c;
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
 
   --color-pitch-50: #ecfdf5;
   --color-pitch-100: #d1fae5;
@@ -46,24 +99,24 @@
 
 @layer base {
   html, body {
-    background-color: var(--color-bg);
-    color: var(--color-foreground);
+    background-color: var(--bg);
+    color: var(--foreground);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
     font-family: var(--font-sans);
     background-image:
-      radial-gradient(60rem 40rem at 80% -10%, rgba(132, 255, 156, 0.08), transparent 60%),
-      radial-gradient(50rem 35rem at -10% 10%, rgba(16, 185, 129, 0.10), transparent 55%),
-      linear-gradient(180deg, #07120a 0%, #050a07 100%);
+      radial-gradient(60rem 40rem at 80% -10%, var(--body-gradient-a), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 10%, var(--body-gradient-b), transparent 55%),
+      linear-gradient(180deg, var(--body-gradient-base-start) 0%, var(--body-gradient-base-end) 100%);
     background-attachment: fixed;
     min-height: 100vh;
   }
 
   ::selection {
-    background: var(--color-pitch-500);
-    color: #06140c;
+    background: var(--selection-bg);
+    color: var(--selection-fg);
   }
 
   h1, h2, h3, h4 {
@@ -73,22 +126,22 @@
 
 @layer components {
   .glass {
-    background: linear-gradient(180deg, rgba(22, 58, 33, 0.55), rgba(13, 29, 18, 0.65));
-    border: 1px solid color-mix(in oklab, var(--color-border-strong) 65%, transparent);
+    background: linear-gradient(180deg, var(--glass-from), var(--glass-to));
+    border: 1px solid var(--glass-border);
     backdrop-filter: blur(8px);
   }
   .pitch-stripes {
     background-image:
       repeating-linear-gradient(
         90deg,
-        rgba(255,255,255,0.02) 0 2rem,
-        rgba(255,255,255,0.04) 2rem 4rem
+        var(--stripe-a) 0 2rem,
+        var(--stripe-b) 2rem 4rem
       );
   }
   .ring-pitch {
     box-shadow:
       0 0 0 1px color-mix(in oklab, var(--color-pitch-500) 30%, transparent),
-      0 8px 30px -10px rgba(16, 185, 129, 0.35);
+      0 8px 30px -10px var(--ring-glow);
   }
 
   .badge {
@@ -100,13 +153,16 @@
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    border: 1px solid color-mix(in oklab, var(--color-border-strong) 60%, transparent);
-    background: color-mix(in oklab, var(--color-surface-2) 70%, transparent);
+    border: 1px solid var(--glass-border);
+    background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+    color: var(--color-pitch-700);
+  }
+  .dark .badge {
     color: var(--color-pitch-100);
   }
 
   .scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 999px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 
   .number-pill {

@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07120a",
+  themeColor: "#0c1a10",
   width: "device-width",
   initialScale: 1,
   // Keeps the app's chrome consistent when launched in standalone mode.
@@ -61,7 +61,10 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased dark`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;document.documentElement.classList.toggle('dark',d)}catch(e){}})()` }} />
+      </head>
       <body
         className="min-h-full flex flex-col"
         // Reserves space for iOS home indicator and Android gesture bar so

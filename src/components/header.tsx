@@ -2,6 +2,7 @@ import Link from "next/link";
 import { logoutAction } from "@/server/auth-actions";
 import { Button } from "./ui/button";
 import { Trophy, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 
 type Props = {
   user: { email: string; role: "ADMIN" | "PLAYER"; playerName: string | null } | null;
@@ -36,6 +37,7 @@ export function Header({ user }: Props) {
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
+          <ThemeToggle />
           {user ? (
             <>
               <div className="hidden lg:flex items-center gap-2 rounded-full border border-border/60 bg-surface px-3 py-1.5 max-w-56">
