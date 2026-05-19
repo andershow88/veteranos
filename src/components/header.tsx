@@ -17,8 +17,8 @@ export function Header({ user }: Props) {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4 px-3 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2 group min-w-0">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-linear-to-br from-pitch-400 to-pitch-700 shadow-[0_8px_30px_-8px_rgba(16,185,129,0.6)] group-hover:scale-105 transition-transform">
-            <Trophy className="h-5 w-5 text-[#06140c]" strokeWidth={2.5} />
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-linear-to-br from-pitch-400 to-pitch-700 shadow-[0_8px_30px_-8px_rgba(59,130,246,0.6)] group-hover:scale-105 transition-transform">
+            <Trophy className="h-5 w-5 text-white" strokeWidth={2.5} />
           </span>
           <div className="leading-tight min-w-0">
             <div className="font-display text-xl sm:text-2xl tracking-[0.18em] text-pitch-100 truncate">

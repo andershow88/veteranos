@@ -3,12 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pitch-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pitch-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]",
   {
     variants: {
       variant: {
         primary:
-          "bg-linear-to-br from-pitch-500 to-pitch-700 text-white shadow-[0_4px_20px_-4px_rgba(16,185,129,0.5)] hover:shadow-[0_6px_30px_-4px_rgba(16,185,129,0.7)] hover:from-pitch-400 hover:to-pitch-600 dark:from-pitch-400 dark:to-pitch-600 dark:text-[#06140c] dark:hover:from-pitch-300 dark:hover:to-pitch-500",
+          "bg-linear-to-br from-pitch-500 to-pitch-700 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:shadow-[0_6px_30px_-4px_rgba(59,130,246,0.7)] hover:from-pitch-400 hover:to-pitch-600 dark:from-pitch-400 dark:to-pitch-600 dark:text-white dark:hover:from-pitch-300 dark:hover:to-pitch-500",
         secondary:
           "bg-surface-2 text-foreground border-2 border-border-strong hover:bg-surface hover:border-pitch-500",
         ghost:
