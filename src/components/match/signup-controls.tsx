@@ -24,7 +24,7 @@ type Props = {
   mySignup: (Signup & { player: Player }) | null;
 };
 
-type WaitlistOption = { id: string; firstName: string; lastName: string | null; overall: number };
+type WaitlistOption = { id: string; firstName: string; lastName: string | null; overall: number; _onMatchWaitlist: boolean };
 
 export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Props) {
   const [pending, startTransition] = useTransition();
@@ -200,30 +200,27 @@ function DeclineOptions({
           ) : waitlistPlayers.length === 0 ? (
             <div className="text-xs text-muted py-2">No available waitlist players.</div>
           ) : (
-            <div className="grid gap-1.5 max-h-48 overflow-auto scrollbar-thin">
-              {waitlistPlayers.map((p) => (
-                <label
-                  key={p.id}
-                  className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition ${
-                    selectedPlayerId === p.id
-                      ? "border-pitch-500 bg-pitch-700/20"
-                      : "border-border/60 bg-surface/30 hover:border-pitch-500/40"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="replacement"
-                    value={p.id}
-                    checked={selectedPlayerId === p.id}
-                    onChange={() => setSelectedPlayerId(p.id)}
-                    className="sr-only"
-                  />
-                  <span className="text-sm flex-1 truncate">
-                    {p.firstName} {p.lastName}
-                  </span>
-                  <span className="number-pill text-xs text-muted">OVR {p.overall}</span>
-                </label>
-              ))}
+            <div className="grid gap-1.5 max-h-56 overflow-auto scrollbar-thin">
+              {(() => {
+                const onMatch = waitlistPlayers.filter((p) => p._onMatchWaitlist);
+                const global = waitlistPlayers.filter((p) => !p._onMatchWaitlist);
+                return (
+                  <>
+                    {onMatch.length > 0 && (
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-muted pt-1">Signed up for this match</div>
+                    )}
+                    {onMatch.map((p) => (
+                      <PlayerRadio key={p.id} player={p} selected={selectedPlayerId === p.id} onSelect={setSelectedPlayerId} />
+                    ))}
+                    {global.length > 0 && (
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-muted pt-2 border-t border-border/40 mt-1">All waitlist players</div>
+                    )}
+                    {global.map((p) => (
+                      <PlayerRadio key={p.id} player={p} selected={selectedPlayerId === p.id} onSelect={setSelectedPlayerId} />
+                    ))}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -271,5 +268,30 @@ function ModeButton({
         <div className="text-[10px] text-muted">{desc}</div>
       </div>
     </button>
+  );
+}
+
+function PlayerRadio({ player, selected, onSelect }: { player: WaitlistOption; selected: boolean; onSelect: (id: string) => void }) {
+  return (
+    <label
+      className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition ${
+        selected
+          ? "border-pitch-500 bg-pitch-700/20"
+          : "border-border/60 bg-surface/30 hover:border-pitch-500/40"
+      }`}
+    >
+      <input
+        type="radio"
+        name="replacement"
+        value={player.id}
+        checked={selected}
+        onChange={() => onSelect(player.id)}
+        className="sr-only"
+      />
+      <span className="text-sm flex-1 truncate">
+        {player.firstName} {player.lastName}
+      </span>
+      <span className="number-pill text-xs text-muted">OVR {player.overall}</span>
+    </label>
   );
 }

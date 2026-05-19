@@ -222,22 +222,26 @@ export async function addExistingPlayerToMatchAction(input: {
 
 /** Returns waitlist players available for manual assignment on a match. */
 export async function getWaitlistPlayersForMatch(matchId: string) {
-  const signedUpIds = (
-    await db.signup.findMany({
-      where: { matchId },
-      select: { playerId: true },
-    })
-  ).map((s) => s.playerId);
+  const [signedUpOnWaitlist, allWaitlistPlayers] = await Promise.all([
+    db.signup.findMany({
+      where: { matchId, status: "WAITLIST" },
+      orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+      select: { playerId: true, player: { select: { id: true, firstName: true, lastName: true, overall: true, lastPlayedAt: true } } },
+    }),
+    db.player.findMany({
+      where: { active: true, kind: "WAITLIST" },
+      orderBy: [{ lastPlayedAt: "asc" }, { lastName: "asc" }],
+      select: { id: true, firstName: true, lastName: true, overall: true, lastPlayedAt: true },
+    }),
+  ]);
 
-  return db.player.findMany({
-    where: {
-      active: true,
-      kind: "WAITLIST",
-      id: { notIn: signedUpIds },
-    },
-    orderBy: [{ rank: "asc" }, { lastName: "asc" }],
-    select: { id: true, firstName: true, lastName: true, overall: true },
-  });
+  const onWaitlistIds = new Set(signedUpOnWaitlist.map((s) => s.playerId));
+  const matchWaitlist = signedUpOnWaitlist.map((s) => ({ ...s.player, _onMatchWaitlist: true }));
+  const globalWaitlist = allWaitlistPlayers
+    .filter((p) => !onWaitlistIds.has(p.id))
+    .map((p) => ({ ...p, _onMatchWaitlist: false }));
+
+  return [...matchWaitlist, ...globalWaitlist];
 }
 
 /** Waitlist player adds themselves to a match. */
