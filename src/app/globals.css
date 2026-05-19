@@ -210,19 +210,78 @@
   animation: shine 6s linear infinite;
 }
 
-/* Club theme overrides — activated when .club-theme is on <html> */
+/* ── Club theme ── activated when .club-theme is on <html> ────── */
+
 .club-theme {
   --selection-bg: var(--club-primary);
-  --ring-glow: color-mix(in srgb, var(--club-primary) 40%, transparent);
 }
-.club-theme .glass {
-  border-color: color-mix(in srgb, var(--club-primary) 25%, var(--glass-border));
-}
+
+/* Header: gradient tint + accent border */
 .club-theme header {
-  border-bottom-color: color-mix(in srgb, var(--club-primary) 30%, var(--border));
+  border-bottom-color: color-mix(in srgb, var(--club-primary) 40%, var(--border));
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--club-primary) 6%, var(--bg)) 0%,
+    var(--bg) 100%
+  );
 }
+
+/* Glass panels: club-tinted border */
+.club-theme .glass {
+  border-color: var(--glass-border);
+}
+
+/* Ring glow on cards */
 .club-theme .ring-pitch {
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--club-primary) 30%, transparent),
-    0 8px 30px -10px color-mix(in srgb, var(--club-primary) 40%, transparent);
+    0 8px 30px -10px color-mix(in srgb, var(--club-primary) 45%, transparent);
+}
+
+/* Footer accent */
+.club-theme footer {
+  border-top-color: color-mix(in srgb, var(--club-primary) 25%, var(--border));
+}
+
+/* Primary buttons use club color */
+.club-theme [data-slot="button-primary"],
+.club-theme .btn-primary-club {
+  --tw-gradient-from: var(--p400);
+  --tw-gradient-to: var(--p600);
+  color: var(--btn-primary-text, #fff);
+}
+
+/* Focus rings */
+.club-theme :focus-visible {
+  outline-color: var(--club-primary);
+}
+
+/* Badge component tints */
+.club-theme .badge {
+  border-color: var(--glass-border);
+  background: color-mix(in srgb, var(--club-primary) 8%, var(--surface-2));
+}
+
+/* Active nav links */
+.club-theme .nav-active {
+  background: color-mix(in srgb, var(--club-primary) 12%, transparent);
+  color: var(--club-primary);
+}
+
+/* Section headings accent bar */
+.club-theme .section-accent::before {
+  content: "";
+  display: block;
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--club-primary);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Scrollbar thumb in club color */
+.club-theme .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--club-primary) 50%, var(--border-strong));
 }

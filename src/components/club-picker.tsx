@@ -89,17 +89,19 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
           <button
             key={c.slug}
             onClick={() => onPick(c.slug)}
-            className={`flex flex-col items-center gap-1.5 rounded-xl border-2 px-2 py-3 transition hover:scale-105 ${
+            className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 px-2 py-3 transition-all duration-200 hover:scale-105 ${
               selected === c.slug
-                ? "border-pitch-500 bg-pitch-700/20 shadow-lg"
-                : "border-border/40 bg-surface/30 hover:border-pitch-500/40"
+                ? "border-pitch-500 bg-pitch-700/20 shadow-lg shadow-pitch-500/20 ring-2 ring-pitch-500/30"
+                : "border-border/40 bg-surface/30 hover:border-pitch-500/40 hover:shadow-md"
             }`}
             title={c.name}
           >
             {c.badge ? (
-              <img src={c.badge} alt={c.name} width={48} height={48} className="h-12 w-12 object-contain" />
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white shadow-sm">
+                <img src={c.badge} alt={c.name} width={40} height={40} className="h-10 w-10 object-contain" />
+              </span>
             ) : (
-              <div className="h-12 w-12 grid place-items-center text-muted text-lg">—</div>
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-surface/60 text-muted text-lg">—</span>
             )}
             <span className="text-[9px] font-medium text-foreground/80 text-center leading-tight line-clamp-2 w-full">
               {c.name}
@@ -135,63 +137,114 @@ function darkenColor(c: { r: number; g: number; b: number }, amount: number) {
   };
 }
 
-function rgbHex(c: { r: number; g: number; b: number }) {
+type RGB = { r: number; g: number; b: number };
+
+function rgbHex(c: RGB) {
   return `#${c.r.toString(16).padStart(2, "0")}${c.g.toString(16).padStart(2, "0")}${c.b.toString(16).padStart(2, "0")}`;
 }
+
+function rgba(c: RGB, a: number) {
+  return `rgba(${c.r},${c.g},${c.b},${a})`;
+}
+
+function luminance(c: RGB) {
+  const [rs, gs, bs] = [c.r, c.g, c.b].map((ch) => {
+    const s = ch / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function effectivePrimary(club: Club): { color: RGB; hex: string } {
+  const p = hexToRgb(club.primaryColor);
+  if (luminance(p) > 0.7) {
+    const s = hexToRgb(club.secondaryColor);
+    if (luminance(s) < 0.7) return { color: s, hex: club.secondaryColor };
+    return { color: { r: 55, g: 55, b: 55 }, hex: "#373737" };
+  }
+  return { color: p, hex: club.primaryColor };
+}
+
+const ALL_PROPS = [
+  "--club-primary", "--club-secondary", "--club-primary-raw",
+  "--p50", "--p100", "--p200", "--p300", "--p400", "--p500", "--p600", "--p700", "--p800", "--p900",
+  "--accent", "--accent-2", "--selection-bg", "--ring-glow",
+  "--border-strong", "--glass-border", "--btn-primary-text",
+  "--body-gradient-a", "--body-gradient-b",
+  "--glass-from", "--glass-to",
+  "--surface", "--surface-2", "--border",
+  "--stripe-a", "--stripe-b",
+];
 
 export function applyClubTheme(club: Club) {
   const root = document.documentElement;
   if (club.slug === "none") {
     root.classList.remove("club-theme");
-    // Remove all inline overrides
-    const props = ["--club-primary", "--club-secondary",
-      "--p50", "--p100", "--p200", "--p300", "--p400", "--p500", "--p600", "--p700", "--p800", "--p900",
-      "--accent", "--accent-2", "--selection-bg", "--ring-glow",
-      "--border-strong", "--glass-border"];
-    props.forEach((p) => root.style.removeProperty(p));
+    ALL_PROPS.forEach((p) => root.style.removeProperty(p));
     localStorage.removeItem("club-theme");
     return;
   }
 
-  const primary = hexToRgb(club.primaryColor);
+  const { color: primary, hex: primaryHex } = effectivePrimary(club);
   const isDark = root.classList.contains("dark");
+  const lum = luminance(primary);
+  const s = root.style;
 
   if (isDark) {
-    // Dark mode: light tints of primary for text, dark shades for backgrounds
-    root.style.setProperty("--p50", rgbHex(mixColor(primary, 0.95)));
-    root.style.setProperty("--p100", rgbHex(mixColor(primary, 0.88)));
-    root.style.setProperty("--p200", rgbHex(mixColor(primary, 0.75)));
-    root.style.setProperty("--p300", rgbHex(mixColor(primary, 0.55)));
-    root.style.setProperty("--p400", rgbHex(mixColor(primary, 0.35)));
-    root.style.setProperty("--p500", club.primaryColor);
-    root.style.setProperty("--p600", rgbHex(darkenColor(primary, 0.2)));
-    root.style.setProperty("--p700", rgbHex(darkenColor(primary, 0.45)));
-    root.style.setProperty("--p800", rgbHex(darkenColor(primary, 0.6)));
-    root.style.setProperty("--p900", rgbHex(darkenColor(primary, 0.75)));
-    root.style.setProperty("--accent", rgbHex(mixColor(primary, 0.55)));
-    root.style.setProperty("--accent-2", rgbHex(mixColor(primary, 0.35)));
+    s.setProperty("--p50", rgbHex(mixColor(primary, 0.95)));
+    s.setProperty("--p100", rgbHex(mixColor(primary, 0.88)));
+    s.setProperty("--p200", rgbHex(mixColor(primary, 0.75)));
+    s.setProperty("--p300", rgbHex(mixColor(primary, 0.55)));
+    s.setProperty("--p400", rgbHex(mixColor(primary, 0.35)));
+    s.setProperty("--p500", primaryHex);
+    s.setProperty("--p600", rgbHex(darkenColor(primary, 0.2)));
+    s.setProperty("--p700", rgbHex(darkenColor(primary, 0.45)));
+    s.setProperty("--p800", rgbHex(darkenColor(primary, 0.6)));
+    s.setProperty("--p900", rgbHex(darkenColor(primary, 0.75)));
+    s.setProperty("--accent", rgbHex(mixColor(primary, 0.55)));
+    s.setProperty("--accent-2", rgbHex(mixColor(primary, 0.35)));
+    s.setProperty("--body-gradient-a", rgba(primary, 0.1));
+    s.setProperty("--body-gradient-b", rgba(primary, 0.12));
+    const surfBase = darkenColor(primary, 0.75);
+    s.setProperty("--surface", rgbHex(mixColor(surfBase, 0.7)));
+    s.setProperty("--surface-2", rgbHex(mixColor(surfBase, 0.6)));
+    s.setProperty("--border", rgbHex(mixColor(primary, 0.78)));
+    s.setProperty("--glass-from", rgba(darkenColor(primary, 0.7), 0.6));
+    s.setProperty("--glass-to", rgba(darkenColor(primary, 0.8), 0.7));
+    s.setProperty("--stripe-a", rgba(primary, 0.03));
+    s.setProperty("--stripe-b", rgba(primary, 0.06));
   } else {
-    // Light mode: dark shades for text, light tints for backgrounds
-    root.style.setProperty("--p50", rgbHex(darkenColor(primary, 0.7)));
-    root.style.setProperty("--p100", rgbHex(darkenColor(primary, 0.55)));
-    root.style.setProperty("--p200", rgbHex(darkenColor(primary, 0.35)));
-    root.style.setProperty("--p300", rgbHex(darkenColor(primary, 0.15)));
-    root.style.setProperty("--p400", club.primaryColor);
-    root.style.setProperty("--p500", club.primaryColor);
-    root.style.setProperty("--p600", rgbHex(mixColor(primary, 0.35)));
-    root.style.setProperty("--p700", rgbHex(mixColor(primary, 0.88)));
-    root.style.setProperty("--p800", rgbHex(mixColor(primary, 0.92)));
-    root.style.setProperty("--p900", rgbHex(mixColor(primary, 0.96)));
-    root.style.setProperty("--accent", rgbHex(darkenColor(primary, 0.15)));
-    root.style.setProperty("--accent-2", rgbHex(darkenColor(primary, 0.3)));
+    s.setProperty("--p50", rgbHex(darkenColor(primary, 0.7)));
+    s.setProperty("--p100", rgbHex(darkenColor(primary, 0.55)));
+    s.setProperty("--p200", rgbHex(darkenColor(primary, 0.35)));
+    s.setProperty("--p300", rgbHex(darkenColor(primary, 0.15)));
+    s.setProperty("--p400", primaryHex);
+    s.setProperty("--p500", primaryHex);
+    s.setProperty("--p600", rgbHex(mixColor(primary, 0.35)));
+    s.setProperty("--p700", rgbHex(mixColor(primary, 0.88)));
+    s.setProperty("--p800", rgbHex(mixColor(primary, 0.92)));
+    s.setProperty("--p900", rgbHex(mixColor(primary, 0.96)));
+    s.setProperty("--accent", rgbHex(darkenColor(primary, 0.15)));
+    s.setProperty("--accent-2", rgbHex(darkenColor(primary, 0.3)));
+    s.setProperty("--body-gradient-a", rgba(primary, 0.06));
+    s.setProperty("--body-gradient-b", rgba(primary, 0.04));
+    s.setProperty("--surface", rgbHex(mixColor(primary, 0.9)));
+    s.setProperty("--surface-2", rgbHex(mixColor(primary, 0.85)));
+    s.setProperty("--border", rgbHex(mixColor(primary, 0.75)));
+    s.setProperty("--glass-from", rgba(mixColor(primary, 0.92), 0.82));
+    s.setProperty("--glass-to", rgba(mixColor(primary, 0.95), 0.9));
+    s.setProperty("--stripe-a", rgba(primary, 0.03));
+    s.setProperty("--stripe-b", rgba(primary, 0.05));
   }
 
-  root.style.setProperty("--club-primary", club.primaryColor);
-  root.style.setProperty("--club-secondary", club.secondaryColor);
-  root.style.setProperty("--selection-bg", club.primaryColor);
-  root.style.setProperty("--ring-glow", `rgba(${primary.r},${primary.g},${primary.b},0.4)`);
-  root.style.setProperty("--border-strong", rgbHex(isDark ? mixColor(primary, 0.35) : darkenColor(primary, 0.15)));
-  root.style.setProperty("--glass-border", `rgba(${primary.r},${primary.g},${primary.b},0.35)`);
+  s.setProperty("--club-primary", primaryHex);
+  s.setProperty("--club-primary-raw", `${primary.r},${primary.g},${primary.b}`);
+  s.setProperty("--club-secondary", club.secondaryColor);
+  s.setProperty("--selection-bg", primaryHex);
+  s.setProperty("--ring-glow", rgba(primary, 0.4));
+  s.setProperty("--border-strong", rgbHex(isDark ? mixColor(primary, 0.35) : darkenColor(primary, 0.15)));
+  s.setProperty("--glass-border", rgba(primary, 0.35));
+  s.setProperty("--btn-primary-text", lum > 0.4 ? "#0a0a0a" : "#ffffff");
 
   root.classList.add("club-theme");
   localStorage.setItem("club-theme", JSON.stringify({
