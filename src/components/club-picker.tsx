@@ -97,8 +97,8 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
             title={c.name}
           >
             {c.badge ? (
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-white shadow-sm">
-                <img src={c.badge} alt={c.name} width={40} height={40} className="h-10 w-10 object-contain" />
+              <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-white shadow-sm">
+                <img src={c.badge} alt={c.name} className="absolute inset-0 h-full w-full object-contain p-1" />
               </span>
             ) : (
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-surface/60 text-muted text-lg">—</span>
@@ -214,22 +214,22 @@ export function applyClubTheme(club: Club) {
     s.setProperty("--stripe-a", rgba(primary, 0.03));
     s.setProperty("--stripe-b", rgba(primary, 0.06));
   } else {
-    s.setProperty("--p50", rgbHex(darkenColor(primary, 0.7)));
-    s.setProperty("--p100", rgbHex(darkenColor(primary, 0.55)));
-    s.setProperty("--p200", rgbHex(darkenColor(primary, 0.35)));
-    s.setProperty("--p300", rgbHex(darkenColor(primary, 0.15)));
+    s.setProperty("--p50", rgbHex(darkenColor(primary, 0.65)));
+    s.setProperty("--p100", rgbHex(darkenColor(primary, 0.45)));
+    s.setProperty("--p200", rgbHex(darkenColor(primary, 0.25)));
+    s.setProperty("--p300", primaryHex);
     s.setProperty("--p400", primaryHex);
     s.setProperty("--p500", primaryHex);
-    s.setProperty("--p600", rgbHex(mixColor(primary, 0.35)));
-    s.setProperty("--p700", rgbHex(mixColor(primary, 0.88)));
-    s.setProperty("--p800", rgbHex(mixColor(primary, 0.92)));
-    s.setProperty("--p900", rgbHex(mixColor(primary, 0.96)));
-    s.setProperty("--accent", rgbHex(darkenColor(primary, 0.15)));
-    s.setProperty("--accent-2", rgbHex(darkenColor(primary, 0.3)));
-    s.setProperty("--body-gradient-a", rgba(primary, 0.06));
-    s.setProperty("--body-gradient-b", rgba(primary, 0.04));
-    s.setProperty("--surface", rgbHex(mixColor(primary, 0.9)));
-    s.setProperty("--surface-2", rgbHex(mixColor(primary, 0.85)));
+    s.setProperty("--p600", rgbHex(mixColor(primary, 0.25)));
+    s.setProperty("--p700", rgbHex(mixColor(primary, 0.82)));
+    s.setProperty("--p800", rgbHex(mixColor(primary, 0.88)));
+    s.setProperty("--p900", rgbHex(mixColor(primary, 0.93)));
+    s.setProperty("--accent", rgbHex(darkenColor(primary, 0.1)));
+    s.setProperty("--accent-2", rgbHex(darkenColor(primary, 0.25)));
+    s.setProperty("--body-gradient-a", rgba(primary, 0.1));
+    s.setProperty("--body-gradient-b", rgba(primary, 0.07));
+    s.setProperty("--surface", rgbHex(mixColor(primary, 0.85)));
+    s.setProperty("--surface-2", rgbHex(mixColor(primary, 0.78)));
     s.setProperty("--border", rgbHex(mixColor(primary, 0.75)));
     s.setProperty("--glass-from", rgba(mixColor(primary, 0.92), 0.82));
     s.setProperty("--glass-to", rgba(mixColor(primary, 0.95), 0.9));

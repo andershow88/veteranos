@@ -35,8 +35,8 @@ export function ClubBadgeHeader({ fallback }: { fallback: ReactNode }) {
   if (!badge) return <>{fallback}</>;
 
   return (
-    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white shadow-[0_4px_20px_-4px] shadow-pitch-500/40 group-hover:scale-105 transition-transform overflow-hidden">
-      <img src={badge} alt="" width={28} height={28} className="h-7 w-7 object-contain" />
+    <span className="relative h-9 w-9 shrink-0 rounded-xl bg-white shadow-[0_4px_20px_-4px] shadow-pitch-500/40 group-hover:scale-105 transition-transform overflow-hidden">
+      <img src={badge} alt="" className="absolute inset-0 h-full w-full object-contain p-0.5" />
     </span>
   );
 }

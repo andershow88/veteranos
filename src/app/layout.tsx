@@ -61,11 +61,11 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased dark`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: [
           "(function(){try{",
-          "var r=document.documentElement,t=localStorage.getItem('theme'),d=t?t==='dark':true;",
+          "var r=document.documentElement,t=localStorage.getItem('theme'),d=t?t==='dark':false;",
           "r.classList.toggle('dark',d);",
           "var c=localStorage.getItem('club-theme');",
           "if(!c)return;",
@@ -95,10 +95,10 @@ export default async function RootLayout({
           "s.setProperty('--glass-to',ra(Math.round(pr*0.2),Math.round(pg*0.2),Math.round(pb*0.2),0.7));",
           "s.setProperty('--stripe-a',ra(pr,pg,pb,0.03));s.setProperty('--stripe-b',ra(pr,pg,pb,0.06));",
           "}else{",
-          "s.setProperty('--p50',dk(pr,pg,pb,.7));s.setProperty('--p100',dk(pr,pg,pb,.55));s.setProperty('--p200',dk(pr,pg,pb,.35));s.setProperty('--p300',dk(pr,pg,pb,.15));s.setProperty('--p400',ph);s.setProperty('--p500',ph);s.setProperty('--p600',mx(pr,pg,pb,.35));s.setProperty('--p700',mx(pr,pg,pb,.88));s.setProperty('--p800',mx(pr,pg,pb,.92));s.setProperty('--p900',mx(pr,pg,pb,.96));",
-          "s.setProperty('--accent',dk(pr,pg,pb,.15));s.setProperty('--accent-2',dk(pr,pg,pb,.3));",
-          "s.setProperty('--body-gradient-a',ra(pr,pg,pb,0.06));s.setProperty('--body-gradient-b',ra(pr,pg,pb,0.04));",
-          "s.setProperty('--surface',mx(pr,pg,pb,.9));s.setProperty('--surface-2',mx(pr,pg,pb,.85));",
+          "s.setProperty('--p50',dk(pr,pg,pb,.65));s.setProperty('--p100',dk(pr,pg,pb,.45));s.setProperty('--p200',dk(pr,pg,pb,.25));s.setProperty('--p300',ph);s.setProperty('--p400',ph);s.setProperty('--p500',ph);s.setProperty('--p600',mx(pr,pg,pb,.25));s.setProperty('--p700',mx(pr,pg,pb,.82));s.setProperty('--p800',mx(pr,pg,pb,.88));s.setProperty('--p900',mx(pr,pg,pb,.93));",
+          "s.setProperty('--accent',dk(pr,pg,pb,.1));s.setProperty('--accent-2',dk(pr,pg,pb,.25));",
+          "s.setProperty('--body-gradient-a',ra(pr,pg,pb,0.1));s.setProperty('--body-gradient-b',ra(pr,pg,pb,0.07));",
+          "s.setProperty('--surface',mx(pr,pg,pb,.85));s.setProperty('--surface-2',mx(pr,pg,pb,.78));",
           "s.setProperty('--border',mx(pr,pg,pb,.75));",
           "s.setProperty('--glass-from',ra(Math.round(pr+(255-pr)*0.92),Math.round(pg+(255-pg)*0.92),Math.round(pb+(255-pb)*0.92),0.82));",
           "s.setProperty('--glass-to',ra(Math.round(pr+(255-pr)*0.95),Math.round(pg+(255-pg)*0.95),Math.round(pb+(255-pb)*0.95),0.9));",
