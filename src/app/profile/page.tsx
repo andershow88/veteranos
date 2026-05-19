@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Clock, Wallet, ArrowRight } from "lucide-react";
+import { CheckCircle2, Clock, Wallet, ArrowRight, Shield } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
@@ -8,6 +8,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarUploader } from "@/components/ui/avatar-uploader";
 import { Badge } from "@/components/ui/badge";
+import { ClubPicker } from "@/components/club-picker";
 import { getPaymentsForPlayer, type PaymentEntry } from "@/server/match-queries";
 import { formatMatchDate } from "@/lib/utils";
 
@@ -105,6 +106,21 @@ export default async function ProfilePage() {
                 phone: player.phone,
               }}
             />
+          </CardBody>
+        </Card>
+      )}
+
+      {player && (
+        <Card>
+          <CardHeader>
+            <h2 className="font-display text-2xl tracking-wide flex items-center gap-2">
+              <Shield className="h-5 w-5 text-pitch-300" />
+              My club
+            </h2>
+            <p className="text-sm text-muted">Pick your favorite club. The app theme will adapt to your club colors.</p>
+          </CardHeader>
+          <CardBody>
+            <ClubPicker currentSlug={player.clubSlug} />
           </CardBody>
         </Card>
       )}

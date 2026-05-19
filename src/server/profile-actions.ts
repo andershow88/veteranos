@@ -53,6 +53,21 @@ export async function updateProfileAction(_: ProfileState, formData: FormData): 
   return { ok: true };
 }
 
+export async function setClubAction(clubSlug: string | null): Promise<{ ok?: boolean; error?: string }> {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) return { error: "No player profile" };
+
+  await db.player.update({
+    where: { id: user.player.id },
+    data: { clubSlug: clubSlug || null },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/");
+  return { ok: true };
+}
+
 export async function changePasswordAction(_: ProfileState, formData: FormData): Promise<ProfileState> {
   await requireUser();
   const user = await getCurrentUser();

@@ -209,3 +209,20 @@
   background-size: 200% 100%;
   animation: shine 6s linear infinite;
 }
+
+/* Club theme overrides — activated when .club-theme is on <html> */
+.club-theme {
+  --selection-bg: var(--club-primary);
+  --ring-glow: color-mix(in srgb, var(--club-primary) 40%, transparent);
+}
+.club-theme .glass {
+  border-color: color-mix(in srgb, var(--club-primary) 25%, var(--glass-border));
+}
+.club-theme header {
+  border-bottom-color: color-mix(in srgb, var(--club-primary) 30%, var(--border));
+}
+.club-theme .ring-pitch {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--club-primary) 30%, transparent),
+    0 8px 30px -10px color-mix(in srgb, var(--club-primary) 40%, transparent);
+}

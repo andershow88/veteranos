@@ -63,7 +63,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${bebas.variable} h-full antialiased dark`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;document.documentElement.classList.toggle('dark',d)}catch(e){}})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;document.documentElement.classList.toggle('dark',d);var c=localStorage.getItem('club-theme');if(c){var o=JSON.parse(c);if(o.slug&&o.slug!=='none'){document.documentElement.style.setProperty('--club-primary',o.primary);document.documentElement.style.setProperty('--club-secondary',o.secondary);document.documentElement.classList.add('club-theme')}}}catch(e){}})()` }} />
       </head>
       <body
         className="min-h-full flex flex-col"

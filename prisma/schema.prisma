@@ -130,6 +130,9 @@ model Player {
 
   active      Boolean    @default(true)
 
+  // Favorite club — slug from CLUBS registry (e.g. "eu_01" = Arsenal)
+  clubSlug    String?
+
   // FIFO rotation: updated when a waitlist player actually plays in a match.
   // Waitlist rank is sorted by this field (nulls first = never played = highest priority).
   lastPlayedAt DateTime?
