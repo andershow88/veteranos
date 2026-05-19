@@ -6,7 +6,7 @@
  *   - bump CACHE_VERSION whenever you want to discard old caches
  */
 
-const CACHE_VERSION = "veteranos-v1";
+const CACHE_VERSION = "veteranos-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
