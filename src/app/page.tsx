@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
 import { TeamShowcase } from "@/components/team/team-showcase";
 import { Button } from "@/components/ui/button";
+import { TricolorStripe } from "@/components/tricolor-stripe";
 import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -86,6 +87,7 @@ function Hero() {
           <RainRadar />
         </div>
       </div>
+      <TricolorStripe className="hero-tricolor" />
     </section>
   );
 }

@@ -166,7 +166,7 @@ function effectivePrimary(club: Club): { color: RGB; hex: string } {
 }
 
 const ALL_PROPS = [
-  "--club-primary", "--club-secondary", "--club-primary-raw",
+  "--club-primary", "--club-secondary", "--club-tertiary", "--club-primary-raw",
   "--p50", "--p100", "--p200", "--p300", "--p400", "--p500", "--p600", "--p700", "--p800", "--p900",
   "--accent", "--accent-2", "--selection-bg", "--ring-glow",
   "--border-strong", "--glass-border", "--btn-primary-text",
@@ -179,7 +179,7 @@ const ALL_PROPS = [
 export function applyClubTheme(club: Club) {
   const root = document.documentElement;
   if (club.slug === "none") {
-    root.classList.remove("club-theme");
+    root.classList.remove("club-theme", "club-tricolor");
     ALL_PROPS.forEach((p) => root.style.removeProperty(p));
     localStorage.removeItem("club-theme");
     return;
@@ -246,8 +246,18 @@ export function applyClubTheme(club: Club) {
   s.setProperty("--glass-border", rgba(primary, 0.35));
   s.setProperty("--btn-primary-text", lum > 0.4 ? "#0a0a0a" : "#ffffff");
 
+  if (club.tertiaryColor) {
+    s.setProperty("--club-tertiary", club.tertiaryColor);
+  } else {
+    s.removeProperty("--club-tertiary");
+  }
+
   root.classList.add("club-theme");
+  if (club.tertiaryColor) root.classList.add("club-tricolor");
+  else root.classList.remove("club-tricolor");
+
   localStorage.setItem("club-theme", JSON.stringify({
     slug: club.slug, primary: club.primaryColor, secondary: club.secondaryColor,
+    tertiary: club.tertiaryColor ?? null,
   }));
 }

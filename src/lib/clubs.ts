@@ -4,6 +4,7 @@ export type Club = {
   badge: string;
   primaryColor: string;
   secondaryColor: string;
+  tertiaryColor?: string;
 };
 
 export const CLUBS: Club[] = [
@@ -35,6 +36,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/br2_03.png",
     primaryColor: "#0056a8",
     secondaryColor: "#e53935",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "br2_04",
@@ -91,6 +93,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/br2_11.png",
     primaryColor: "#9e1a37",
     secondaryColor: "#006b3f",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "br2_12",
@@ -98,6 +101,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/br2_12.png",
     primaryColor: "#0d47a1",
     secondaryColor: "#1a1a1a",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "br2_13",
@@ -140,6 +144,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/br2_18.png",
     primaryColor: "#fc0d1b",
     secondaryColor: "#1a1a1a",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "br2_19",
@@ -190,6 +195,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/br1_05.png",
     primaryColor: "#c0392b",
     secondaryColor: "#1a1a1a",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "br1_06",
@@ -225,6 +231,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/br1_10.png",
     primaryColor: "#1258b8",
     secondaryColor: "#e53935",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "br1_11",
@@ -317,6 +324,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/eu_03.png",
     primaryColor: "#cb3524",
     secondaryColor: "#004d98",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "eu_04",
@@ -324,6 +332,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/eu_04.png",
     primaryColor: "#004d98",
     secondaryColor: "#a50044",
+    tertiaryColor: "#edbb00",
   },
   {
     slug: "eu_05",
@@ -394,6 +403,7 @@ export const CLUBS: Club[] = [
     badge: "/clubs/eu_14.png",
     primaryColor: "#fb090b",
     secondaryColor: "#1a1a1a",
+    tertiaryColor: "#ffffff",
   },
   {
     slug: "eu_15",

@@ -112,6 +112,7 @@ export default async function RootLayout({
           "s.setProperty('--border-strong',d?mx(pr,pg,pb,.35):dk(pr,pg,pb,.15));",
           "s.setProperty('--glass-border',ra(pr,pg,pb,0.35));",
           "s.setProperty('--btn-primary-text',lum>0.4?'#0a0a0a':'#ffffff');",
+          "if(o.tertiary){s.setProperty('--club-tertiary',o.tertiary);r.classList.add('club-tricolor')}",
           "r.classList.add('club-theme');",
           "}catch(e){}})();"
         ].join("") }} />

@@ -285,3 +285,27 @@
 .club-theme .scrollbar-thin::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--club-primary) 50%, var(--border-strong));
 }
+
+/* ── Tricolor stripes for clubs with 3 colors ──────────────── */
+.club-tricolor .tricolor-bar {
+  display: flex;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0.85;
+}
+.club-tricolor .tricolor-bar > span {
+  flex: 1;
+}
+
+.club-tricolor .hero-tricolor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  display: flex;
+}
+.club-tricolor .hero-tricolor > span {
+  flex: 1;
+}
