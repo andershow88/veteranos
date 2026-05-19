@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Check, Loader2, Search, X } from "lucide-react";
-import Image from "next/image";
 import { CLUBS, type Club } from "@/lib/clubs";
 import { setClubAction } from "@/server/profile-actions";
 
@@ -98,7 +97,7 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
             title={c.name}
           >
             {c.badge ? (
-              <Image src={c.badge} alt={c.name} width={48} height={48} className="h-12 w-12 object-contain" />
+              <img src={c.badge} alt={c.name} width={48} height={48} className="h-12 w-12 object-contain" />
             ) : (
               <div className="h-12 w-12 grid place-items-center text-muted text-lg">—</div>
             )}
@@ -115,14 +114,87 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
   );
 }
 
+function hexToRgb(hex: string) {
+  const h = hex.replace("#", "");
+  return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
+}
+
+function mixColor(c: { r: number; g: number; b: number }, white: number) {
+  return {
+    r: Math.round(c.r + (255 - c.r) * white),
+    g: Math.round(c.g + (255 - c.g) * white),
+    b: Math.round(c.b + (255 - c.b) * white),
+  };
+}
+
+function darkenColor(c: { r: number; g: number; b: number }, amount: number) {
+  return {
+    r: Math.round(c.r * (1 - amount)),
+    g: Math.round(c.g * (1 - amount)),
+    b: Math.round(c.b * (1 - amount)),
+  };
+}
+
+function rgbHex(c: { r: number; g: number; b: number }) {
+  return `#${c.r.toString(16).padStart(2, "0")}${c.g.toString(16).padStart(2, "0")}${c.b.toString(16).padStart(2, "0")}`;
+}
+
 export function applyClubTheme(club: Club) {
   const root = document.documentElement;
-  root.style.setProperty("--club-primary", club.primaryColor);
-  root.style.setProperty("--club-secondary", club.secondaryColor);
   if (club.slug === "none") {
     root.classList.remove("club-theme");
-  } else {
-    root.classList.add("club-theme");
+    // Remove all inline overrides
+    const props = ["--club-primary", "--club-secondary",
+      "--p50", "--p100", "--p200", "--p300", "--p400", "--p500", "--p600", "--p700", "--p800", "--p900",
+      "--accent", "--accent-2", "--selection-bg", "--ring-glow",
+      "--border-strong", "--glass-border"];
+    props.forEach((p) => root.style.removeProperty(p));
+    localStorage.removeItem("club-theme");
+    return;
   }
-  localStorage.setItem("club-theme", JSON.stringify({ slug: club.slug, primary: club.primaryColor, secondary: club.secondaryColor }));
+
+  const primary = hexToRgb(club.primaryColor);
+  const isDark = root.classList.contains("dark");
+
+  if (isDark) {
+    // Dark mode: light tints of primary for text, dark shades for backgrounds
+    root.style.setProperty("--p50", rgbHex(mixColor(primary, 0.95)));
+    root.style.setProperty("--p100", rgbHex(mixColor(primary, 0.88)));
+    root.style.setProperty("--p200", rgbHex(mixColor(primary, 0.75)));
+    root.style.setProperty("--p300", rgbHex(mixColor(primary, 0.55)));
+    root.style.setProperty("--p400", rgbHex(mixColor(primary, 0.35)));
+    root.style.setProperty("--p500", club.primaryColor);
+    root.style.setProperty("--p600", rgbHex(darkenColor(primary, 0.2)));
+    root.style.setProperty("--p700", rgbHex(darkenColor(primary, 0.45)));
+    root.style.setProperty("--p800", rgbHex(darkenColor(primary, 0.6)));
+    root.style.setProperty("--p900", rgbHex(darkenColor(primary, 0.75)));
+    root.style.setProperty("--accent", rgbHex(mixColor(primary, 0.55)));
+    root.style.setProperty("--accent-2", rgbHex(mixColor(primary, 0.35)));
+  } else {
+    // Light mode: dark shades for text, light tints for backgrounds
+    root.style.setProperty("--p50", rgbHex(darkenColor(primary, 0.7)));
+    root.style.setProperty("--p100", rgbHex(darkenColor(primary, 0.55)));
+    root.style.setProperty("--p200", rgbHex(darkenColor(primary, 0.35)));
+    root.style.setProperty("--p300", rgbHex(darkenColor(primary, 0.15)));
+    root.style.setProperty("--p400", club.primaryColor);
+    root.style.setProperty("--p500", club.primaryColor);
+    root.style.setProperty("--p600", rgbHex(mixColor(primary, 0.35)));
+    root.style.setProperty("--p700", rgbHex(mixColor(primary, 0.88)));
+    root.style.setProperty("--p800", rgbHex(mixColor(primary, 0.92)));
+    root.style.setProperty("--p900", rgbHex(mixColor(primary, 0.96)));
+    root.style.setProperty("--accent", rgbHex(darkenColor(primary, 0.15)));
+    root.style.setProperty("--accent-2", rgbHex(darkenColor(primary, 0.3)));
+  }
+
+  root.style.setProperty("--club-primary", club.primaryColor);
+  root.style.setProperty("--club-secondary", club.secondaryColor);
+  root.style.setProperty("--selection-bg", club.primaryColor);
+  root.style.setProperty("--ring-glow", `rgba(${primary.r},${primary.g},${primary.b},0.4)`);
+  root.style.setProperty("--border-strong", rgbHex(isDark ? mixColor(primary, 0.35) : darkenColor(primary, 0.15)));
+  root.style.setProperty("--glass-border", `rgba(${primary.r},${primary.g},${primary.b},0.35)`);
+
+  root.classList.add("club-theme");
+  localStorage.setItem("club-theme", JSON.stringify({
+    slug: club.slug, primary: club.primaryColor, secondary: club.secondaryColor,
+  }));
 }

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
+import { applyClubTheme } from "@/components/club-picker";
+import { getClub } from "@/lib/clubs";
 
 export function ThemeToggle() {
   const [dark, setDark] = useState(true);
@@ -18,6 +20,13 @@ export function ThemeToggle() {
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
+    try {
+      const stored = localStorage.getItem("club-theme");
+      if (stored) {
+        const { slug } = JSON.parse(stored);
+        if (slug && slug !== "none") applyClubTheme(getClub(slug));
+      }
+    } catch {}
   }
 
   return (
