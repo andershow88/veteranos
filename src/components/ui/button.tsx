@@ -8,7 +8,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-linear-to-br from-pitch-500 to-pitch-700 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:shadow-[0_6px_30px_-4px_rgba(59,130,246,0.7)] hover:from-pitch-400 hover:to-pitch-600 dark:from-pitch-400 dark:to-pitch-600 dark:text-white dark:hover:from-pitch-300 dark:hover:to-pitch-500",
+          "bg-linear-to-br from-pitch-500 to-pitch-700 text-white shadow-[0_4px_20px_-4px_rgba(20,184,166,0.5)] hover:shadow-[0_6px_30px_-4px_rgba(20,184,166,0.7)] hover:from-pitch-400 hover:to-pitch-600 dark:from-pitch-400 dark:to-pitch-600 dark:text-[#0a1414] dark:hover:from-pitch-300 dark:hover:to-pitch-500",
         secondary:
           "bg-surface-2 text-foreground border-2 border-border-strong hover:bg-surface hover:border-pitch-500",
         ghost:

@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f1520",
+  themeColor: "#0c1616",
   width: "device-width",
   initialScale: 1,
   // Keeps the app's chrome consistent when launched in standalone mode.
