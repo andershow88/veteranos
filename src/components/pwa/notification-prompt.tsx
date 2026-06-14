@@ -43,6 +43,8 @@ export function NotificationPrompt() {
             if (Notification.permission === "granted") {
                 checkExistingSub();
             } else if (Notification.permission !== "denied") {
+                // Initialise the prompt mode from the notification permission (intentional).
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setMode("subscribe");
             }
         } else if (isIOS() && !isStandalone()) {
@@ -149,7 +151,7 @@ export function NotificationPrompt() {
                                 1. Tap <Share className="inline h-3.5 w-3.5 text-pitch-400 -mt-0.5" /> <strong>Share</strong>
                             </div>
                             <div className="text-xs text-foreground leading-relaxed">
-                                2. Tap <strong>"Add to Home Screen"</strong>
+                                2. Tap <strong>&ldquo;Add to Home Screen&rdquo;</strong>
                             </div>
                             <div className="text-xs text-foreground leading-relaxed">
                                 3. Open the app and enable notifications

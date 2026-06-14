@@ -57,7 +57,7 @@ export function Header({ user }: Props) {
                 </span>
               </div>
               <form action={logoutAction}>
-                <Button variant="ghost" size="icon" title="Logout">
+                <Button variant="ghost" size="icon" title="Log out" aria-label="Log out">
                   <LogOut className="h-4 w-4" />
                 </Button>
               </form>

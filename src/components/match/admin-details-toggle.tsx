@@ -13,6 +13,8 @@ export function AdminDetailsToggle() {
   useEffect(() => {
     const stored = localStorage.getItem("admin-show-details");
     if (stored === "true") {
+      // Restore the saved toggle state on mount (intentional).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShow(true);
       document.documentElement.classList.add("show-admin-details");
     }
@@ -30,6 +32,8 @@ export function AdminDetailsToggle() {
   return (
     <button
       onClick={toggle}
+      aria-label={show ? "Hide player details" : "Show player details"}
+      aria-pressed={show}
       className="grid h-10 w-10 place-items-center rounded-xl text-foreground/80 hover:text-foreground hover:bg-surface-2 transition"
       title={show ? "Hide player details" : "Show player details (OVR)"}
     >

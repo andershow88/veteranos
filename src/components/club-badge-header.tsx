@@ -12,6 +12,8 @@ export function ClubBadgeHeader({ fallback }: { fallback: ReactNode }) {
       if (stored) {
         const { slug } = JSON.parse(stored);
         const club = CLUBS.find((c) => c.slug === slug);
+        // Read the stored club badge on mount (intentional).
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (club?.badge) setBadge(club.badge);
       }
     } catch {}

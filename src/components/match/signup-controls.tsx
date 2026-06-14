@@ -142,6 +142,7 @@ function DeclineOptions({
 
   useEffect(() => {
     if (mode === "existing" && waitlistPlayers.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true);
       getWaitlistPlayersForMatch(matchId).then((players) => {
         setWaitlistPlayers(players);

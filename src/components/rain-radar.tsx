@@ -18,14 +18,6 @@ function latLonToTile(lat: number, lon: number, zoom: number) {
   return { x, y };
 }
 
-function tileToLatLon(x: number, y: number, zoom: number) {
-  const n = 2 ** zoom;
-  const lon = (x / n) * 360 - 180;
-  const latRad = Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / n)));
-  const lat = (latRad * 180) / Math.PI;
-  return { lat, lon };
-}
-
 export function RainRadar() {
   const [frames, setFrames] = useState<RadarFrame[]>([]);
   const [frameIdx, setFrameIdx] = useState(0);
@@ -56,6 +48,8 @@ export function RainRadar() {
 
   useEffect(() => {
     if (!loaded || frames.length === 0) return;
+    // Restart the animation from the first frame when a new set loads (intentional).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFrameIdx(0);
     intervalRef.current = setInterval(() => {
       setFrameIdx((prev) => (prev + 1) % frames.length);

@@ -5,7 +5,6 @@ import { Trophy, Shield, Sword, Zap, ArrowLeftRight, Loader2, Copy, Check, Share
 import { toBlob, toPng } from "html-to-image";
 import type { Team, TeamSlot, Player, TeamColor } from "@prisma/client";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { TEAM_PALETTE } from "@/lib/team-palette";
@@ -17,7 +16,6 @@ const TEAM_LABEL: Record<string, string> = { BLUE: "[BLUE]", RED: "[RED]", WHITE
 
 export function TeamEditor({
   teams,
-  matchId,
   matchDate,
 }: {
   teams: TeamWithSlots[];
@@ -396,17 +394,6 @@ function StatBadge({
       <span className="number-pill ml-1">{Math.round(value)}</span>
     </span>
   );
-}
-
-function positionLabel(pos: string) {
-  const labels: Record<string, string> = {
-    GOALKEEPER: "Goal",
-    DEFENDER: "Defense",
-    MIDFIELDER: "Midfield",
-    STRIKER: "Attack",
-    ANY: "—",
-  };
-  return labels[pos] ?? pos;
 }
 
 function balanceVerdict(spread: number) {

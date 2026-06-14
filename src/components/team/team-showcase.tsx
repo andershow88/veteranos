@@ -1,7 +1,6 @@
 import { Trophy, Shield, Sword, Zap } from "lucide-react";
 import type { Team, TeamSlot, Player, TeamColor } from "@prisma/client";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { TEAM_PALETTE } from "@/lib/team-palette";
 
 type TeamWithSlots = Team & { slots: Array<TeamSlot & { player: Player }> };
@@ -118,13 +117,6 @@ function StatBadge({
 }
 
 function PlayerSlot({ slot }: { slot: TeamSlot & { player: Player } }) {
-  const labels: Record<string, string> = {
-    GOALKEEPER: "Goal",
-    DEFENDER: "Defense",
-    MIDFIELDER: "Midfield",
-    STRIKER: "Attack",
-    ANY: "—",
-  };
   return (
     <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-surface-2 transition">
       <Avatar firstName={slot.player.firstName} lastName={slot.player.lastName} size="sm" src={slot.player.avatarUrl} />

@@ -50,7 +50,12 @@ export function WeatherWidget() {
     if (cached) {
       try {
         const p = JSON.parse(cached);
-        if (p._ts && Date.now() - p._ts < 30 * 60 * 1000) { setData(p); return; }
+        if (p._ts && Date.now() - p._ts < 30 * 60 * 1000) {
+          // Hydrate from the fresh session cache on mount (intentional).
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setData(p);
+          return;
+        }
       } catch {}
     }
 

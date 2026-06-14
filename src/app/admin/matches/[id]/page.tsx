@@ -35,6 +35,8 @@ export default async function AdminMatchPage({
 
   const dateStr = match.date.toISOString().slice(0, 10);
   const timeStr = match.date.toTimeString().slice(0, 5);
+  // Server component: request-time comparison is intentional.
+  // eslint-disable-next-line react-hooks/purity
   const isPast = match.date.getTime() < Date.now();
   const readOnly = (match.locked || isPast) as boolean;
 

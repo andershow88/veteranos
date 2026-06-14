@@ -41,14 +41,20 @@ export function ConfirmDialog({
   // prompt) and always sits above everything else.
   return createPortal(
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[1000] flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose(false);
       }}
     >
-      <div className="w-full max-w-md rounded-2xl glass shadow-2xl overflow-hidden">
-        <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-border/60">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        className="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl glass shadow-2xl sm:max-w-md sm:rounded-2xl"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <header className="flex items-start justify-between gap-3 border-b border-border/60 px-5 py-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
             <span
               className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
                 isDanger ? "bg-danger-surface text-danger-ink" : "bg-pitch-700/30 text-pitch-300"
@@ -56,7 +62,7 @@ export function ConfirmDialog({
             >
               <AlertTriangle className="h-5 w-5" />
             </span>
-            <h3 className="font-display text-xl tracking-wide leading-tight pt-1.5">
+            <h3 id="confirm-dialog-title" className="pt-1.5 font-display text-xl leading-tight tracking-wide">
               {options.title}
             </h3>
           </div>
