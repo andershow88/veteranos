@@ -188,7 +188,7 @@ export default function HandoutPage() {
                 title="As a Subscriber"
                 points={[
                   <span key="in"><Check className="inline h-3.5 w-3.5 text-pitch-300" /> <strong>I&apos;m in</strong> &mdash; confirms your slot.</span>,
-                  <span key="out"><X className="inline h-3.5 w-3.5 text-red-300" /> <strong>Can&apos;t make it</strong> &mdash; frees your slot for the waitlist.</span>,
+                  <span key="out"><X className="inline h-3.5 w-3.5 text-danger-ink" /> <strong>Can&apos;t make it</strong> &mdash; frees your slot for the waitlist.</span>,
                   "You can flip your answer until the admin locks the match.",
                 ]}
               />
@@ -503,7 +503,7 @@ function Callout({
 }) {
   const cls =
     tone === "warn"
-      ? "border-amber-700/40 bg-amber-900/15 text-amber-100"
+      ? "border-warning-line bg-warning-surface text-warning-ink"
       : "border-pitch-600/40 bg-pitch-700/15 text-pitch-100";
   return (
     <div className={`flex items-start gap-3 rounded-xl border ${cls} px-3 py-2.5 text-sm`}>

@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { RefreshCcw, Trash2, Loader2, Info, ChevronDown, ChevronUp, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -96,9 +97,9 @@ export function TeamControls({ matchId, hasTeams, locked, isPast, teamCount, poo
   if (locked) {
     return (
       <div className="space-y-3">
-        <div className="rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-xs text-amber-200">
+        <Alert tone="warning" className="text-xs">
           Sign-ups and teams are locked. Unlock to make changes.
-        </div>
+        </Alert>
         <Button variant="secondary" onClick={toggleLock} disabled={pending}>
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Unlock className="h-4 w-4" />}
           Unlock list
@@ -110,9 +111,9 @@ export function TeamControls({ matchId, hasTeams, locked, isPast, teamCount, poo
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-xs text-amber-200">
+      <Alert tone="warning" className="text-xs">
         Tip: lock the list first so sign-ups stop changing, then generate teams.
-      </div>
+      </Alert>
 
       <div className="rounded-xl border border-border/60 bg-surface/40 px-3 py-2.5 space-y-3">
         <div className="text-xs text-muted inline-flex items-center gap-2">
@@ -187,7 +188,7 @@ export function TeamControls({ matchId, hasTeams, locked, isPast, teamCount, poo
         <div className="text-[11px] text-pitch-300/80 number-pill border-t border-border/60 pt-2">
           → {willUse} player{willUse === 1 ? "" : "s"} will be drafted into the {teamCount} teams.
           {!useAll && includedPool.length > standardLimit && (
-            <span className="text-amber-300/80">
+            <span className="text-warning-ink/80">
               {" "}
               ({includedPool.length - standardLimit}{" "}player{includedPool.length - standardLimit === 1 ? "" : "s"}{" "}past the standard limit will sit out — enable &ldquo;Use all&rdquo; to include them.)
             </span>
@@ -213,11 +214,7 @@ export function TeamControls({ matchId, hasTeams, locked, isPast, teamCount, poo
         )}
       </div>
 
-      {error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="danger">{error}</Alert>}
 
       {dialog}
     </div>

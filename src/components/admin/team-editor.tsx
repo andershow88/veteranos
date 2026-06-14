@@ -7,6 +7,7 @@ import type { Team, TeamSlot, Player, TeamColor } from "@prisma/client";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { TEAM_PALETTE } from "@/lib/team-palette";
 import { swapTeamPlayersAction } from "@/server/admin-actions";
 
@@ -164,7 +165,7 @@ export function TeamEditor({
             {copying ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : copied ? (
-              <Check className="h-4 w-4 text-emerald-400" />
+              <Check className="h-4 w-4 text-success" />
             ) : (
               <Copy className="h-4 w-4" />
             )}
@@ -187,15 +188,15 @@ export function TeamEditor({
 
       {/* Hint bar when a player is selected */}
       {selectedPlayer && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-600/40 bg-amber-900/25 px-4 py-2.5 text-sm font-medium text-amber-200 animate-in fade-in slide-in-from-top-2 duration-200">
-          <ArrowLeftRight className="h-4 w-4 shrink-0 text-amber-400" />
+        <Alert tone="warning" className="animate-in fade-in slide-in-from-top-2 duration-200">
+          <ArrowLeftRight className="mr-2 inline h-4 w-4 shrink-0 text-warning-ink" />
           <span>
             <strong>
               {selectedPlayer.firstName} {selectedPlayer.lastName}
             </strong>{" "}
             selected — tap a player in another team to swap
           </span>
-        </div>
+        </Alert>
       )}
 
       {/* Loading overlay hint */}
@@ -206,11 +207,7 @@ export function TeamEditor({
         </div>
       )}
 
-      {error && (
-        <div className="rounded-xl border border-red-700/40 bg-red-900/20 px-4 py-2.5 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="danger">{error}</Alert>}
 
       <div
         ref={teamsRef}

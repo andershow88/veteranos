@@ -120,9 +120,9 @@ export default async function EditPlayerPage({
         </>
       )}
 
-      <Card className="border-red-900/40">
+      <Card className="border-danger-line">
         <CardHeader>
-          <h3 className="font-display text-xl tracking-wide text-red-200">Danger zone</h3>
+          <h3 className="font-display text-xl tracking-wide text-danger-ink">Danger zone</h3>
           <p className="text-xs text-muted">
             Deletes the player profile, the account (if any), sign-ups across all matches,
             and any team-slot assignments. This cannot be undone.

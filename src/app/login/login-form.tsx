@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Mail, Lock, Loader2 } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { loginAction } from "@/server/auth-actions";
@@ -42,11 +43,7 @@ export function LoginForm() {
         </div>
       </div>
 
-      {state?.error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {state.error}
-        </div>
-      )}
+      {state?.error && <Alert tone="danger">{state.error}</Alert>}
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

@@ -7,6 +7,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
 import { TeamShowcase } from "@/components/team/team-showcase";
 import { Button } from "@/components/ui/button";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -35,13 +37,27 @@ export default async function HomePage() {
       {matches.length === 0 ? (
         <>
           {showTeams && <TeamsSection lockedMatch={lockedMatch} />}
-          <EmptyState isAdmin={user?.role === "ADMIN"} />
+          <EmptyState
+            icon={<CalendarPlus className="h-6 w-6" />}
+            title="No matches scheduled yet"
+            description="Once a match is created, it will show up here."
+            action={
+              user?.role === "ADMIN" ? (
+                <Link href="/admin/matches/new">
+                  <Button>
+                    <CalendarPlus className="h-4 w-4" />
+                    Create new match
+                  </Button>
+                </Link>
+              ) : undefined
+            }
+          />
         </>
       ) : (
         <>
           {/* Focus: the next match */}
           <section className="space-y-3">
-            <SectionLabel>Next match</SectionLabel>
+            <SectionHeading>Next match</SectionHeading>
             <MatchCard view={nextMatch} currentPlayer={currentPlayer} />
           </section>
 
@@ -49,7 +65,7 @@ export default async function HomePage() {
 
           {moreMatches.length > 0 && (
             <section className="space-y-3">
-              <SectionLabel>More upcoming</SectionLabel>
+              <SectionHeading>More upcoming</SectionHeading>
               <div className="grid gap-6 lg:grid-cols-2">
                 {moreMatches.map((m) => (
                   <MatchCard key={m.id} view={m} currentPlayer={currentPlayer} />
@@ -116,31 +132,5 @@ function TeamsSection({
       </div>
       <TeamShowcase teams={lockedMatch.teams} />
     </section>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-pitch-300">{children}</h2>
-  );
-}
-
-function EmptyState({ isAdmin }: { isAdmin: boolean }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-border-strong/60 bg-surface/40 px-6 py-16 text-center">
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-pitch-700/30 text-pitch-300">
-        <CalendarPlus className="h-6 w-6" />
-      </div>
-      <h2 className="mt-4 font-display text-2xl tracking-wide">No matches scheduled yet</h2>
-      <p className="mt-1 text-sm text-muted">Once a match is created, it will show up here.</p>
-      {isAdmin && (
-        <Link href="/admin/matches/new" className="mt-6 inline-block">
-          <Button>
-            <CalendarPlus className="h-4 w-4" />
-            Create new match
-          </Button>
-        </Link>
-      )}
-    </div>
   );
 }

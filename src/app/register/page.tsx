@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { getSession } from "@/lib/auth";
 import { findUsableInvite } from "@/server/invite-actions";
 import { RegisterForm } from "./register-form";
@@ -49,14 +49,13 @@ export default async function RegisterPage({
 function InvalidInvite({ hasToken }: { hasToken: boolean }) {
   return (
     <div className="space-y-3">
-      <div className="rounded-xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200 inline-flex items-start gap-2">
-        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+      <Alert tone="warning">
         <span>
           {hasToken
             ? "This invitation link is invalid, expired or used up."
             : "Registration requires an invitation link. Ask an admin to send you one."}
         </span>
-      </div>
+      </Alert>
     </div>
   );
 }

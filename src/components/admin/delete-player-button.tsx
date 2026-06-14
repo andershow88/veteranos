@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { deletePlayerAction } from "@/server/admin-actions";
 
@@ -54,11 +55,7 @@ export function DeletePlayerButton({
           You cannot delete your own account. Promote another admin first, then delete it from a different admin session.
         </p>
       )}
-      {error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="danger">{error}</Alert>}
       {dialog}
     </div>
   );

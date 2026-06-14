@@ -53,10 +53,10 @@ export function ReplacementRow({
         <div className="flex items-center gap-2 min-w-0">
           <Avatar firstName={info.abo.firstName} lastName={info.abo.lastName} size="sm" src={info.abo.avatarUrl} />
           <div className="min-w-0">
-            <div className="text-sm text-foreground/80 line-through decoration-red-400/50 truncate">
+            <div className="truncate text-sm text-foreground/80 line-through decoration-danger-line">
               {info.abo.firstName} {info.abo.lastName}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-red-300/80">
+            <div className="text-[10px] uppercase tracking-widest text-danger-ink">
               Subscriber · declined
             </div>
           </div>
@@ -105,7 +105,7 @@ export function ReplacementRow({
               <div className="flex-1 min-w-0 text-xs text-muted">
                 <span className="font-semibold text-foreground">You owe</span> {info.abo.firstName} for taking their spot.
                 {!info.abo.paypalLink && !info.abo.paypalName && (
-                  <span className="block text-[11px] text-amber-300/80 mt-1">
+                  <span className="mt-1 block text-[11px] text-warning-ink">
                     No PayPal info on file — coordinate payment directly, then mark as paid.
                   </span>
                 )}

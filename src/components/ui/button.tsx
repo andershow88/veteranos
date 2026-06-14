@@ -8,13 +8,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-linear-to-br from-pitch-500 to-pitch-700 text-white shadow-[0_4px_20px_-4px_rgba(20,184,166,0.5)] hover:shadow-[0_6px_30px_-4px_rgba(20,184,166,0.7)] hover:from-pitch-400 hover:to-pitch-600 dark:from-pitch-400 dark:to-pitch-600 dark:text-[#0a1414] dark:hover:from-pitch-300 dark:hover:to-pitch-500",
+          "bg-linear-to-br from-pitch-500 to-pitch-700 text-white shadow-[0_4px_20px_-4px_var(--ring-glow)] hover:shadow-[0_6px_30px_-4px_var(--ring-glow)] hover:from-pitch-400 hover:to-pitch-600 dark:from-pitch-400 dark:to-pitch-600 dark:text-[#0a1414] dark:hover:from-pitch-300 dark:hover:to-pitch-500",
         secondary:
           "bg-surface-2 text-foreground border-2 border-border-strong hover:bg-surface hover:border-pitch-500",
         ghost:
           "text-foreground/90 hover:text-foreground hover:bg-surface-2 border border-transparent hover:border-border",
         danger:
-          "bg-linear-to-br from-red-600 to-red-800 text-white shadow-[0_4px_20px_-4px_rgba(239,68,68,0.4)] hover:from-red-500 hover:to-red-700",
+          "bg-danger text-white shadow-[0_4px_20px_-4px_var(--color-danger)] hover:brightness-110",
         outline:
           "border-2 border-border-strong bg-transparent text-foreground hover:bg-surface-2 hover:border-pitch-500",
       },

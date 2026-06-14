@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { Loader2, CheckCircle2, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import {
@@ -44,16 +45,8 @@ export function CreateInviteForm() {
         </div>
       </div>
 
-      {state?.error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {state.error}
-        </div>
-      )}
-      {state?.ok && (
-        <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/20 px-3 py-2 text-sm text-pitch-200 inline-flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" /> Created. Copy the link below.
-        </div>
-      )}
+      {state?.error && <Alert tone="danger">{state.error}</Alert>}
+      {state?.ok && <Alert tone="success">Created. Copy the link below.</Alert>}
 
       <Button type="submit" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}

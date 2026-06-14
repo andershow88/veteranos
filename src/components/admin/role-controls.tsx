@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from "react";
 import { ShieldCheck, ShieldOff, Loader2 } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { promoteToAdminAction, demoteToPlayerAction } from "@/server/role-actions";
@@ -82,11 +83,7 @@ export function RoleControls({ userId, role, isSelf, isLastAdmin }: Props) {
         </p>
       )}
 
-      {error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="danger">{error}</Alert>}
 
       {dialog}
     </div>

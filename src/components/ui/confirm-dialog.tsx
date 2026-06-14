@@ -51,7 +51,7 @@ export function ConfirmDialog({
           <div className="flex items-start gap-3 flex-1 min-w-0">
             <span
               className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${
-                isDanger ? "bg-red-900/30 text-red-300" : "bg-pitch-700/30 text-pitch-300"
+                isDanger ? "bg-danger-surface text-danger-ink" : "bg-pitch-700/30 text-pitch-300"
               }`}
             >
               <AlertTriangle className="h-5 w-5" />

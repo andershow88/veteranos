@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { KeyRound, Loader2, Copy, Check, Mail } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { adminGenerateResetLinkAction } from "@/server/password-reset-actions";
 
@@ -70,11 +71,7 @@ export function ResetLinkControls({ userId }: { userId: string }) {
         </div>
       )}
 
-      {error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+      {error && <Alert tone="danger">{error}</Alert>}
     </div>
   );
 }

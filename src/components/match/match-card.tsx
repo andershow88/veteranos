@@ -230,7 +230,7 @@ export function MatchCard({
                   href={waShareUrl("Hey guys, just a reminder to sign up for the next game!\n\nhttps://veteranos.club")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-muted hover:text-emerald-400 transition"
+                  className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-muted transition hover:text-success"
                   title="Send WhatsApp reminder"
                 >
                   <Share2 className="h-3 w-3" /> WhatsApp

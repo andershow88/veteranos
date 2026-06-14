@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { registerAction } from "@/server/auth-actions";
@@ -78,11 +79,7 @@ export function RegisterForm({ token }: { token: string }) {
         </div>
       </Section>
 
-      {state?.error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {state.error}
-        </div>
-      )}
+      {state?.error && <Alert tone="danger">{state.error}</Alert>}
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

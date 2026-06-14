@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { getSession } from "@/lib/auth";
 import { findUsableResetToken } from "@/server/password-reset-actions";
 import { ResetPasswordForm } from "./reset-form";
@@ -27,10 +27,9 @@ export default async function ResetPasswordPage({
           {row ? (
             <ResetPasswordForm token={row.token} />
           ) : (
-            <div className="rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-3 text-sm text-amber-200 inline-flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+            <Alert tone="warning">
               <span>This reset link is invalid, used, or expired. Request a new one from the forgot-password page or your admin.</span>
-            </div>
+            </Alert>
           )}
           <div className="mt-6 text-center text-xs text-subtle">
             <Link href="/login" className="font-semibold text-pitch-300 hover:text-pitch-200">

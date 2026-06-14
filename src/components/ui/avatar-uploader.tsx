@@ -6,6 +6,7 @@ import type { Area, Point } from "react-easy-crop";
 import { Camera, Trash2, X, Loader2, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "./button";
 import { Avatar } from "./avatar";
+import { Alert } from "@/components/ui/alert";
 import { useConfirm } from "./confirm-dialog";
 import {
   updateAvatarAction,
@@ -129,9 +130,7 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-1.5 text-xs text-red-200">
-          {error}
-        </div>
+        <Alert tone="danger">{error}</Alert>
       )}
 
       {imageSrc && (
@@ -202,9 +201,7 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
               </div>
 
               {error && (
-                <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-1.5 text-xs text-red-200">
-                  {error}
-                </div>
+                <Alert tone="danger">{error}</Alert>
               )}
             </div>
 

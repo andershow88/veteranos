@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { Loader2, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import {
@@ -19,10 +20,9 @@ export function ForgotPasswordForm() {
   if (state?.status === "ok") {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-pitch-600/40 bg-pitch-700/15 px-3 py-2 text-sm text-pitch-200 inline-flex items-start gap-2">
-          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+        <Alert tone="success">
           <span>Identity confirmed. Continue to choose a new password — the link expires in one hour.</span>
-        </div>
+        </Alert>
         <Link href={state.url}>
           <Button size="lg" className="w-full">
             Set new password
@@ -47,18 +47,13 @@ export function ForgotPasswordForm() {
       </div>
 
       {state?.status === "name_mismatch" && (
-        <div className="rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-sm text-amber-200 inline-flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+        <Alert tone="warning">
           <span>
             That first and last name don&apos;t match a player on file (or match more than one). Please contact an admin to generate a reset link for you.
           </span>
-        </div>
+        </Alert>
       )}
-      {state?.status === "error" && (
-        <div className="rounded-lg border border-red-700/40 bg-red-900/20 px-3 py-2 text-sm text-red-200">
-          {state.error}
-        </div>
-      )}
+      {state?.status === "error" && <Alert tone="danger">{state.error}</Alert>}
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

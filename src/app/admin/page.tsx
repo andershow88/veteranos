@@ -61,7 +61,7 @@ export default async function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-2">
                     {m.locked && (
-                      <span className="inline-flex items-center gap-1 text-xs text-amber-300">
+                      <span className="inline-flex items-center gap-1 text-xs text-warning-ink">
                         <Lock className="h-3 w-3" /> locked
                       </span>
                     )}
