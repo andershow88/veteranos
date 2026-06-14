@@ -7,19 +7,27 @@ import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+// A match counts as "upcoming" until a few hours after kickoff — keep this in
+// sync with /admin/matches so a match that already started today doesn't
+// suddenly disappear from the dashboard.
+function pastCutoff() {
+  return new Date(Date.now() - 1000 * 60 * 60 * 6);
+}
+
 export default async function AdminDashboard() {
+  const cutoff = pastCutoff();
   const [playerCount, aboCount, waitlistCount, upcomingMatches, lastMatch] = await Promise.all([
     db.player.count({ where: { active: true } }),
     db.player.count({ where: { active: true, kind: "ABO" } }),
     db.player.count({ where: { active: true, kind: "WAITLIST" } }),
+    // No limit: the admin must see every upcoming match (box is scrollable).
     db.match.findMany({
-      where: { date: { gte: new Date() } },
+      where: { date: { gte: cutoff } },
       orderBy: { date: "asc" },
-      take: 5,
       include: { _count: { select: { signups: true } } },
     }),
     db.match.findFirst({
-      where: { date: { lt: new Date() } },
+      where: { date: { lt: cutoff } },
       orderBy: { date: "desc" },
     }),
   ]);
@@ -45,7 +53,7 @@ export default async function AdminDashboard() {
               </Button>
             </Link>
           </CardHeader>
-          <CardBody className="space-y-2">
+          <CardBody className="max-h-[26rem] space-y-2 overflow-y-auto pr-1">
             {upcomingMatches.length === 0 ? (
               <p className="text-sm text-muted">No upcoming matches.</p>
             ) : (
