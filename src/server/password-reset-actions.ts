@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { hashPassword, requireAdmin } from "@/lib/auth";
@@ -21,15 +21,38 @@ const resetSchema = z.object({
 });
 
 export type ForgotState =
-  | { status: "ok"; url: string }
-  | { status: "name_mismatch" }
+  | { status: "sent" }
   | { status: "error"; error: string }
   | undefined;
 
 export type ResetState = { status?: "ok"; error?: string } | undefined;
 
+/** Raw token goes into the link/email; only its hash is ever stored. */
 function generateToken(): string {
   return randomBytes(32).toString("base64url");
+}
+function hashToken(raw: string): string {
+  return createHash("sha256").update(raw).digest("hex");
+}
+
+/** Invalidate all open tokens for a user, then create a fresh (hashed) one. */
+async function issueResetToken(userId: string, source: string): Promise<string> {
+  const raw = generateToken();
+  await db.$transaction([
+    db.passwordResetToken.updateMany({
+      where: { userId, usedAt: null },
+      data: { usedAt: new Date() },
+    }),
+    db.passwordResetToken.create({
+      data: {
+        token: hashToken(raw),
+        userId,
+        expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+        source,
+      },
+    }),
+  ]);
+  return raw;
 }
 
 async function getBaseUrl() {
@@ -40,13 +63,12 @@ async function getBaseUrl() {
 }
 
 /**
- * Public: request a password reset using only first + last name.
+ * Public: request a password reset by name.
  *
- * If we find an unambiguous match (exactly one player with a linked
- * account), we generate a fresh token and return its URL so the user
- * can set a new password immediately on the same device. Zero or
- * multiple matches return name_mismatch so we don't leak account
- * existence either way.
+ * SECURITY: never returns a token/link to the requester. If there's an
+ * unambiguous match with a linked account, the link is emailed to the
+ * registered address (or logged server-side when email isn't configured).
+ * The response is ALWAYS a generic "sent" so account existence isn't leaked.
  */
 export async function requestPasswordResetAction(
   _: ForgotState,
@@ -72,28 +94,32 @@ export async function requestPasswordResetAction(
     take: 2, // we only care whether it's exactly 1
   });
 
-  if (matches.length !== 1 || !matches[0].user) {
-    return { status: "name_mismatch" };
+  if (matches.length === 1 && matches[0].user) {
+    const user = matches[0].user;
+    try {
+      const raw = await issueResetToken(user.id, "self");
+      const url = buildPasswordResetUrl(await getBaseUrl(), raw);
+      await sendEmail({
+        to: user.email,
+        subject: "Veteranos: reset your password",
+        text: [
+          `Hi ${matches[0].firstName},`,
+          "",
+          "You (or someone) requested a password reset for your Veteranos account.",
+          "Open the link below to choose a new password. It expires in one hour.",
+          "",
+          url,
+          "",
+          "If you didn't request this, you can safely ignore this email.",
+        ].join("\n"),
+      });
+    } catch {
+      // Swallow — never reveal success/failure or existence to the requester.
+    }
   }
 
-  const user = matches[0].user!;
-
-  const token = generateToken();
-  await db.passwordResetToken.create({
-    data: {
-      token,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
-      source: "self",
-    },
-  });
-
-  // Return the relative URL so the form can redirect the user straight
-  // to the reset-password page on this device.
-  return {
-    status: "ok",
-    url: `/reset-password?token=${encodeURIComponent(token)}`,
-  };
+  // Always generic — no token, no existence leak.
+  return { status: "sent" };
 }
 
 /** Admin-triggered: generate a reset token for a specific user and email it. */
@@ -109,18 +135,9 @@ export async function adminGenerateResetLinkAction(userId: string): Promise<{
   });
   if (!user) throw new Error("User not found");
 
-  const token = generateToken();
-  await db.passwordResetToken.create({
-    data: {
-      token,
-      userId: user.id,
-      expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
-      source: session.userId,
-    },
-  });
-
+  const raw = await issueResetToken(user.id, session.userId);
   const baseUrl = await getBaseUrl();
-  const url = buildPasswordResetUrl(baseUrl, token);
+  const url = buildPasswordResetUrl(baseUrl, raw);
 
   const text = [
     `Hi ${user.player?.firstName ?? "there"},`,
@@ -143,7 +160,7 @@ export async function adminGenerateResetLinkAction(userId: string): Promise<{
   return { url, emailDelivered: send.delivered };
 }
 
-/** Public: actually set the new password using the token. */
+/** Public: actually set the new password using the (raw) token from the link. */
 export async function resetPasswordAction(
   _: ResetState,
   formData: FormData,
@@ -155,7 +172,7 @@ export async function resetPasswordAction(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const tokenRow = await db.passwordResetToken.findUnique({
-    where: { token: parsed.data.token },
+    where: { token: hashToken(parsed.data.token) },
   });
 
   if (!tokenRow || tokenRow.usedAt) {
@@ -190,10 +207,10 @@ export async function resetPasswordAction(
   return { status: "ok" };
 }
 
-/** Helper used by the public reset page. */
+/** Helper used by the public reset page — validates the raw token from the URL. */
 export async function findUsableResetToken(token: string) {
   if (!token) return null;
-  const row = await db.passwordResetToken.findUnique({ where: { token } });
+  const row = await db.passwordResetToken.findUnique({ where: { token: hashToken(token) } });
   if (!row) return null;
   if (row.usedAt) return null;
   if (row.expiresAt.getTime() < Date.now()) return null;

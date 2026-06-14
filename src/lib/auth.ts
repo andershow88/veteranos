@@ -76,12 +76,17 @@ export async function getCurrentUser() {
   return user;
 }
 
-export async function requireAdmin() {
+export async function requireAdmin(): Promise<SessionPayload> {
   const session = await getSession();
-  if (!session || session.role !== "ADMIN") {
-    throw new Error("ADMIN_REQUIRED");
-  }
-  return session;
+  if (!session) throw new Error("ADMIN_REQUIRED");
+  // Trust the DB, not the (30-day) JWT role claim: a demoted or deleted admin
+  // must lose access immediately, not only when the cookie expires.
+  const user = await db.user.findUnique({
+    where: { id: session.userId },
+    select: { id: true, role: true, email: true },
+  });
+  if (!user || user.role !== "ADMIN") throw new Error("ADMIN_REQUIRED");
+  return { userId: user.id, role: user.role, email: user.email };
 }
 
 export async function requireUser() {
