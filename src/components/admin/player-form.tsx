@@ -1,10 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { FormSection } from "@/components/ui/form-section";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
+import { useUnsavedWarning } from "@/components/use-unsaved-warning";
 import {
   createPlayerAction,
   updatePlayerAction,
@@ -21,14 +24,27 @@ export function PlayerForm({ player }: { player?: Defaults }) {
     action,
     undefined,
   );
+  const router = useRouter();
+  const [dirty, setDirty] = useState(false);
+  useUnsavedWarning(dirty && !pending);
+  useEffect(() => {
+    // Reset the unsaved-changes flag after a successful save (intentional).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (state?.ok) setDirty(false);
+  }, [state]);
+
+  function cancel() {
+    if (dirty && !window.confirm("Discard unsaved changes?")) return;
+    router.back();
+  }
 
   const skill = (k: keyof Player, label: string) => (
     <SkillField name={k as string} label={label} defaultValue={(player?.[k] as number) ?? 50} />
   );
 
   return (
-    <form action={formAction} className="space-y-6">
-      <Section title="Personal details">
+    <form action={formAction} onInput={() => setDirty(true)} className="space-y-6">
+      <FormSection title="Personal details">
         <div className="grid sm:grid-cols-2 gap-4">
           <Field name="firstName" label="First name" required defaultValue={player?.firstName ?? ""} />
           <Field name="lastName" label="Last name" required defaultValue={player?.lastName ?? ""} />
@@ -37,9 +53,9 @@ export function PlayerForm({ player }: { player?: Defaults }) {
           <Field name="nickname" label="Nickname" defaultValue={player?.nickname ?? ""} />
           <Field name="phone" label="Phone" defaultValue={player?.phone ?? ""} />
         </div>
-      </Section>
+      </FormSection>
 
-      <Section title="Player type">
+      <FormSection title="Player type">
         <div className="grid sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="kind">Type</Label>
@@ -72,16 +88,16 @@ export function PlayerForm({ player }: { player?: Defaults }) {
           />
           active (visible in match lists)
         </label>
-      </Section>
+      </FormSection>
 
-      <Section title="Payment">
+      <FormSection title="Payment">
         <div className="grid sm:grid-cols-2 gap-4">
           <Field name="paypalName" label="PayPal name" defaultValue={player?.paypalName ?? ""} />
           <Field name="paypalLink" label="PayPal link" type="url" placeholder="https://paypal.me/..." defaultValue={player?.paypalLink ?? ""} />
         </div>
-      </Section>
+      </FormSection>
 
-      <Section title="Skills (0–100)">
+      <FormSection title="Skills (0–100)">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {skill("overall", "Overall")}
           {skill("technique", "Technique")}
@@ -93,13 +109,13 @@ export function PlayerForm({ player }: { player?: Defaults }) {
           {skill("shooting", "Shooting")}
           {skill("goalkeeping", "Goalkeeping")}
         </div>
-      </Section>
+      </FormSection>
 
-      <Section title="Notes">
+      <FormSection title="Notes">
         <Textarea name="notes" defaultValue={player?.notes ?? ""} placeholder="Other traits, play style, ..." />
-      </Section>
+      </FormSection>
 
-      <Section title="Account (optional)">
+      <FormSection title="Account (optional)">
         <p className="text-xs text-muted mb-3">
           Set email and password if this player should be able to log in.
         </p>
@@ -117,7 +133,7 @@ export function PlayerForm({ player }: { player?: Defaults }) {
             type="password"
           />
         </div>
-      </Section>
+      </FormSection>
 
       {state?.error && <Alert tone="danger">{state.error}</Alert>}
       {state?.ok && <Alert tone="success">Saved.</Alert>}
@@ -127,17 +143,11 @@ export function PlayerForm({ player }: { player?: Defaults }) {
           {pending && <Loader2 className="h-4 w-4 animate-spin" />}
           {isEdit ? "Save" : "Create player"}
         </Button>
+        <Button type="button" variant="ghost" onClick={cancel} disabled={pending}>
+          Cancel
+        </Button>
       </div>
     </form>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <fieldset className="space-y-3 rounded-2xl border border-border/60 bg-surface/40 p-4 sm:p-5">
-      <legend className="px-2 text-xs font-bold uppercase tracking-[0.2em] text-pitch-300">{title}</legend>
-      {children}
-    </fieldset>
   );
 }
 
@@ -158,7 +168,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name}>{label}{required ? " *" : ""}</Label>
       <Input
         id={name}
         name={name}
