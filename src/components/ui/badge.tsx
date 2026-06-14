@@ -1,11 +1,13 @@
 import { cn } from "@/lib/utils";
 
+// Token-backed tones — readable (WCAG AA) and theme-aware in light & dark
+// via the semantic --color-*-surface/-line/-ink tokens in globals.css.
 const tones = {
-  default: "bg-surface-2 text-pitch-100 border-border-strong",
-  success: "bg-pitch-700/30 text-pitch-200 border-pitch-600/60",
-  danger: "bg-red-900/40 text-red-200 border-red-700/60",
-  warn: "bg-amber-900/30 text-amber-200 border-amber-700/60",
-  info: "bg-sky-900/30 text-sky-200 border-sky-700/60",
+  default: "bg-neutral-surface text-neutral-ink border-neutral-line",
+  success: "bg-success-surface text-success-ink border-success-line",
+  danger: "bg-danger-surface text-danger-ink border-danger-line",
+  warn: "bg-warning-surface text-warning-ink border-warning-line",
+  info: "bg-info-surface text-info-ink border-info-line",
   outline: "bg-transparent text-foreground border-border-strong",
 } as const;
 

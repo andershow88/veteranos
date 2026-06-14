@@ -43,6 +43,25 @@
   --p900: #f0fdfa;
   --accent: #0d9488;
   --accent-2: #0f766e;
+
+  /* Semantic status surfaces (badges, pills, cards): translucent bg + border + readable ink.
+     Light mode = dark ink on pale tint (WCAG AA). */
+  --success-surface: rgba(16, 185, 129, 0.14);
+  --success-line: rgba(5, 150, 105, 0.45);
+  --success-ink: #066e52;
+  --warning-surface: rgba(245, 158, 11, 0.16);
+  --warning-line: rgba(217, 119, 6, 0.5);
+  --warning-ink: #8a5206;
+  --danger-surface: rgba(239, 68, 68, 0.12);
+  --danger-line: rgba(220, 38, 38, 0.5);
+  --danger-ink: #b42318;
+  --info-surface: rgba(14, 165, 233, 0.14);
+  --info-line: rgba(2, 132, 199, 0.5);
+  --info-ink: #0b6aa2;
+  --neutral-surface: var(--surface-2);
+  --neutral-line: var(--border);
+  --neutral-ink: var(--muted);
+  --focus-ring: rgba(13, 148, 136, 0.6);
 }
 
 .dark {
@@ -82,6 +101,24 @@
   --p900: #134e4a;
   --accent: #5eead4;
   --accent-2: #2dd4bf;
+
+  /* Dark mode = light ink on subtle dark tint (WCAG AA). */
+  --success-surface: rgba(16, 185, 129, 0.18);
+  --success-line: rgba(52, 211, 153, 0.45);
+  --success-ink: #6ee7b7;
+  --warning-surface: rgba(245, 158, 11, 0.16);
+  --warning-line: rgba(251, 191, 36, 0.45);
+  --warning-ink: #fcd34d;
+  --danger-surface: rgba(239, 68, 68, 0.2);
+  --danger-line: rgba(248, 113, 113, 0.45);
+  --danger-ink: #fca5a5;
+  --info-surface: rgba(56, 189, 248, 0.16);
+  --info-line: rgba(56, 189, 248, 0.45);
+  --info-ink: #7dd3fc;
+  --neutral-surface: var(--surface-2);
+  --neutral-line: var(--border);
+  --neutral-ink: var(--muted);
+  --focus-ring: rgba(94, 234, 212, 0.6);
 }
 
 @theme {
@@ -126,6 +163,27 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   --font-display: "Bebas Neue", "Oswald", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Solid success accent (was missing) + semantic status surface tokens.
+     Generate utilities like bg-success-surface / border-success-line / text-success-ink,
+     all theme-aware (values flip via :root / .dark above). */
+  --color-success: #10b981;
+  --color-success-surface: var(--success-surface);
+  --color-success-line: var(--success-line);
+  --color-success-ink: var(--success-ink);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-line: var(--warning-line);
+  --color-warning-ink: var(--warning-ink);
+  --color-danger-surface: var(--danger-surface);
+  --color-danger-line: var(--danger-line);
+  --color-danger-ink: var(--danger-ink);
+  --color-info-surface: var(--info-surface);
+  --color-info-line: var(--info-line);
+  --color-info-ink: var(--info-ink);
+  --color-neutral-surface: var(--neutral-surface);
+  --color-neutral-line: var(--neutral-line);
+  --color-neutral-ink: var(--neutral-ink);
+  --color-focus: var(--focus-ring);
 }
 
 @layer base {
@@ -152,6 +210,14 @@
 
   h1, h2, h3, h4 {
     letter-spacing: -0.01em;
+  }
+
+  /* Consistent, visible keyboard focus everywhere (a11y). Mouse clicks are
+     unaffected (:focus-visible only triggers for keyboard/programmatic focus). */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 3px;
   }
 }
 
@@ -213,6 +279,22 @@
 .animate-shine {
   background-size: 200% 100%;
   animation: shine 6s linear infinite;
+}
+
+/* Respect users who prefer reduced motion: drop decorative animation and
+   collapse transitions to near-instant (keeps state changes, removes motion). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-shine {
+    animation: none !important;
+  }
 }
 
 /* ── Club theme ── activated when .club-theme is on <html> ────── */

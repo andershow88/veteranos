@@ -109,7 +109,7 @@ export function MatchCard({
                 href={waShareUrl(buildReminderText(view.pendingAbos))}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-emerald-600/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-500/20 dark:text-emerald-300"
+                className="inline-flex items-center gap-1 rounded-md border border-success-line bg-success-surface px-2 py-0.5 text-[11px] font-semibold text-success-ink transition hover:opacity-80"
                 title="Send a WhatsApp reminder to all pending subscribers"
               >
                 <Share2 className="h-3 w-3" /> Send reminder
@@ -120,7 +120,7 @@ export function MatchCard({
               {view.pendingAbos.map((p) => (
                 <span
                   key={p.id}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-400/15 px-2 py-1 text-sm text-amber-900 dark:text-amber-100"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-warning-line bg-warning-surface px-2 py-1 text-sm text-warning-ink"
                 >
                   <Avatar firstName={p.firstName} lastName={p.lastName} size="sm" src={p.avatarUrl} />
                   <span className="truncate max-w-[140px]">
@@ -196,12 +196,12 @@ export function MatchCard({
               {view.declined.map((s, idx) => (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between rounded-lg border border-red-900/40 bg-red-900/10 px-3 py-2"
+                  className="flex items-center justify-between rounded-lg border border-danger-line bg-danger-surface px-3 py-2"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-red-300">#{idx + 1}</span>
+                    <span className="number-pill text-xs font-bold text-danger-ink">#{idx + 1}</span>
                     <Avatar firstName={s.player.firstName} lastName={s.player.lastName} size="sm" src={s.player.avatarUrl} />
-                    <span className="text-sm text-foreground/90 line-through decoration-red-400/60">
+                    <span className="text-sm text-foreground/90 line-through decoration-danger-line">
                       {s.player.firstName} {s.player.lastName}
                     </span>
                   </div>
@@ -362,11 +362,11 @@ function StatusSummary({ view }: { view: MatchView }) {
   // "confirmed" uses the theme-inverted pitch scale; the others use a dark
   // text color for light mode + a light one (dark:) for dark mode.
   const stats = [
-    { key: "confirmed", label: "Confirmed", value: confirmed, tone: "border-pitch-600/40 bg-pitch-700/30 text-pitch-100", icon: <Check className="h-3.5 w-3.5" />, always: true },
-    { key: "pending", label: "Pending", value: pending, tone: "border-amber-500/40 bg-amber-400/15 text-amber-800 dark:text-amber-200", icon: <Clock className="h-3.5 w-3.5" />, always: true },
-    { key: "waitlist", label: "Waitlist", value: waitlist, tone: "border-sky-500/40 bg-sky-400/15 text-sky-800 dark:text-sky-200", icon: <ListOrdered className="h-3.5 w-3.5" />, always: false },
-    { key: "replacements", label: "Replacements", value: replacements, tone: "border-indigo-500/40 bg-indigo-400/15 text-indigo-800 dark:text-indigo-200", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, always: false },
-    { key: "declined", label: "Declined", value: declined, tone: "border-red-500/40 bg-red-400/15 text-red-800 dark:text-red-200", icon: <X className="h-3.5 w-3.5" />, always: false },
+    { key: "confirmed", label: "Confirmed", value: confirmed, tone: "border-success-line bg-success-surface text-success-ink", icon: <Check className="h-3.5 w-3.5" />, always: true },
+    { key: "pending", label: "Pending", value: pending, tone: "border-warning-line bg-warning-surface text-warning-ink", icon: <Clock className="h-3.5 w-3.5" />, always: true },
+    { key: "waitlist", label: "Waitlist", value: waitlist, tone: "border-info-line bg-info-surface text-info-ink", icon: <ListOrdered className="h-3.5 w-3.5" />, always: false },
+    { key: "replacements", label: "Replacements", value: replacements, tone: "border-neutral-line bg-neutral-surface text-neutral-ink", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, always: false },
+    { key: "declined", label: "Declined", value: declined, tone: "border-danger-line bg-danger-surface text-danger-ink", icon: <X className="h-3.5 w-3.5" />, always: false },
   ].filter((s) => s.always || s.value > 0);
 
   return (
@@ -389,12 +389,12 @@ function StatusSummary({ view }: { view: MatchView }) {
       {total > 0 && (
         <div>
           <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface-2" aria-hidden>
-            <div className="bg-pitch-500 transition-all" style={{ width: `${confPct}%` }} />
-            <div className="bg-red-500/80 transition-all" style={{ width: `${decPct}%` }} />
+            <div className="bg-success transition-all" style={{ width: `${confPct}%` }} />
+            <div className="bg-danger transition-all" style={{ width: `${decPct}%` }} />
           </div>
           <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-muted">
             <span>{responded}/{total} subscribers responded</span>
-            <span className={pending > 0 ? "font-semibold text-amber-700 dark:text-amber-300" : "font-semibold text-pitch-200"}>
+            <span className={pending > 0 ? "font-semibold text-warning-ink" : "font-semibold text-success-ink"}>
               {pending > 0 ? `${pending} pending` : "All responded ✓"}
             </span>
           </div>

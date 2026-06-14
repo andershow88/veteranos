@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { Loader2, Check, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, Search, X } from "lucide-react";
 import { updatePlayerSkillsAction } from "@/server/admin-actions";
 import type { Position } from "@prisma/client";
@@ -41,6 +41,37 @@ const POS_SHORT: Record<string, string> = {
 type SortKey = "name" | "kind" | "position" | typeof SKILL_KEYS[number];
 type SortDir = "asc" | "desc";
 type RowState = "idle" | "saving" | "saved" | "error";
+
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (sortKey !== col) return <ArrowUpDown className="h-2.5 w-2.5 opacity-30" />;
+  return sortDir === "asc"
+    ? <ArrowUp className="h-2.5 w-2.5 text-pitch-400" />
+    : <ArrowDown className="h-2.5 w-2.5 text-pitch-400" />;
+}
+
+function Th({
+  col, children, className = "", sortKey, sortDir, onSort,
+}: {
+  col: SortKey; children: React.ReactNode; className?: string;
+  sortKey: SortKey; sortDir: SortDir; onSort: (col: SortKey) => void;
+}) {
+  const active = sortKey === col;
+  return (
+    <th
+      aria-sort={active ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+      className={`px-1.5 py-2.5 font-bold text-muted whitespace-nowrap select-none ${className}`}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(col)}
+        className="inline-flex items-center gap-1 transition hover:text-foreground"
+      >
+        {children}
+        <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
+      </button>
+    </th>
+  );
+}
 
 export function SkillsTable({ players }: { players: PlayerRow[] }) {
   const [rows, setRows] = useState(() =>
@@ -137,27 +168,6 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
     });
   }
 
-  function SortIcon({ col }: { col: SortKey }) {
-    if (sortKey !== col) return <ArrowUpDown className="h-2.5 w-2.5 opacity-30" />;
-    return sortDir === "asc"
-      ? <ArrowUp className="h-2.5 w-2.5 text-pitch-400" />
-      : <ArrowDown className="h-2.5 w-2.5 text-pitch-400" />;
-  }
-
-  function Th({ col, children, className = "" }: { col: SortKey; children: React.ReactNode; className?: string }) {
-    return (
-      <th
-        onClick={() => toggleSort(col)}
-        className={`px-1.5 py-2.5 font-bold text-muted whitespace-nowrap cursor-pointer hover:text-foreground select-none transition ${className}`}
-      >
-        <span className="inline-flex items-center gap-1">
-          {children}
-          <SortIcon col={col} />
-        </span>
-      </th>
-    );
-  }
-
   return (
     <div>
       {/* Filter bar */}
@@ -219,11 +229,11 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
         <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="border-b border-border text-left">
-              <Th col="name" className="sticky left-0 z-10 bg-bg-elevated px-3">Player</Th>
-              <Th col="kind" className="px-2">Type</Th>
-              <Th col="position" className="px-2">POS</Th>
+              <Th col="name" className="sticky left-0 z-10 bg-bg-elevated px-3" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort}>Player</Th>
+              <Th col="kind" className="px-2" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort}>Type</Th>
+              <Th col="position" className="px-2" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort}>POS</Th>
               {SKILL_KEYS.map((k) => (
-                <Th key={k} col={k} className="text-center">{SKILL_SHORT[k]}</Th>
+                <Th key={k} col={k} className="text-center" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort}>{SKILL_SHORT[k]}</Th>
               ))}
               <th className="px-2 py-2.5 w-16"></th>
             </tr>
@@ -271,9 +281,9 @@ function SkillRow({
       </td>
       <td className="px-2 py-1.5 whitespace-nowrap">
         <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
-          row.kind === "ABO" ? "bg-pitch-700/30 text-pitch-300" : "bg-info/20 text-info"
+          row.kind === "ABO" ? "bg-neutral-surface text-neutral-ink" : "bg-info-surface text-info-ink"
         }`}>
-          {row.kind}
+          {row.kind === "ABO" ? "Sub" : "WL"}
         </span>
       </td>
       <td className="px-2 py-1.5">
