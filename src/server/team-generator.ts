@@ -275,11 +275,12 @@ export async function generateTeamsForMatch(
   const initial = snakeDraft(playing, teamCount);
   const optimized = refineSwaps(initial);
 
-  // Persist: drop old teams, create fresh ones
-  await db.team.deleteMany({ where: { matchId } });
   const verdict = balanceVerdict(optimized);
 
+  // Persist atomically: drop old teams AND create fresh ones in one
+  // transaction, so a failure can't leave the match without any teams.
   await db.$transaction(async (tx) => {
+    await tx.team.deleteMany({ where: { matchId } });
     for (const t of optimized) {
       const meta = describeTeam(t, optimized);
       await tx.team.create({

@@ -15,6 +15,24 @@ async function nextWaitlistRank(matchId: string) {
   return (top?.rank ?? 0) + 1;
 }
 
+/**
+ * Decline order rank for an abo. Preserves the existing rank if the player is
+ * already OUT (re-declining must NOT shuffle the order), otherwise assigns
+ * max(existing OUT rank) + 1 — collision-free, unlike a plain count.
+ */
+async function resolveOutRank(matchId: string, playerId: string): Promise<number> {
+  const existing = await db.signup.findUnique({
+    where: { matchId_playerId: { matchId, playerId } },
+    select: { status: true, rank: true },
+  });
+  if (existing?.status === "OUT") return existing.rank;
+  const maxOut = await db.signup.aggregate({
+    where: { matchId, status: "OUT", player: { kind: "ABO" } },
+    _max: { rank: true },
+  });
+  return (maxOut._max.rank ?? -1) + 1;
+}
+
 /** Abo confirms participation or is freshly signed up. */
 export async function setAttendingAction(matchId: string) {
   await requireUser();
@@ -58,10 +76,7 @@ export async function setDeclinedAction(matchId: string) {
     throw new Error("Only abos can decline.");
   }
 
-  // Decline order: count existing OUTs to assign rank
-  const outRank = await db.signup.count({
-    where: { matchId, status: "OUT", player: { kind: "ABO" } },
-  });
+  const outRank = await resolveOutRank(matchId, user.player.id);
 
   await db.signup.upsert({
     where: { matchId_playerId: { matchId, playerId: user.player.id } },
@@ -106,9 +121,7 @@ export async function declineWithReplacementAction(input: {
   if (match.locked) throw new Error("Match is locked");
   if (user.player.kind !== "ABO") throw new Error("Only abos can decline.");
 
-  const outRank = await db.signup.count({
-    where: { matchId: input.matchId, status: "OUT", player: { kind: "ABO" } },
-  });
+  const outRank = await resolveOutRank(input.matchId, user.player.id);
 
   await db.signup.upsert({
     where: { matchId_playerId: { matchId: input.matchId, playerId: user.player.id } },

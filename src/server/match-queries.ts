@@ -131,9 +131,12 @@ function composeMatchView(
     .filter((s) => s.status === "IN" && s.player.kind === "ABO")
     .sort((a, b) => a.player.rank - b.player.rank || a.rank - b.rank);
 
+  // Decline order = signup.rank (the order players declined), matching the
+  // payment/replacement logic in match-actions. Must NOT use player.rank here,
+  // or the displayed replacement would diverge from the payment attribution.
   const declined = match.signups
     .filter((s) => s.status === "OUT" && s.player.kind === "ABO")
-    .sort((a, b) => a.player.rank - b.player.rank || a.rank - b.rank);
+    .sort((a, b) => a.rank - b.rank || a.player.rank - b.player.rank);
 
   const waitlist = match.signups
     .filter((s) => s.status === "WAITLIST")
