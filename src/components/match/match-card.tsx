@@ -3,10 +3,11 @@ import { Calendar, MapPin, Users, ListOrdered, Lock, Trophy, ArrowRight, ArrowRi
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { cn, formatMatchDate, formatRelativeMatchDate, waShareUrl } from "@/lib/utils";
+import { formatMatchDate, formatRelativeMatchDate, waShareUrl } from "@/lib/utils";
 import type { MatchView, Player } from "@/server/match-queries";
 import { SignupControls } from "./signup-controls";
 import { ReplacementRow } from "./replacement-row";
+import { StatusStatCard, type StatTone } from "./status-stat-card";
 
 type CurrentPlayerCtx = {
   playerId: string | null;
@@ -341,12 +342,11 @@ function findMine(view: MatchView, playerId: string) {
 }
 
 /**
- * Compact, smart status overview per match.
+ * Compact, calm, fully uniform status overview per match.
  * Order: Confirmed → Pending → Waitlist → Replacements → Declined.
  * "Pending" = active subscribers who have neither confirmed nor declined for
- * THIS match. Pills for Waitlist/Replacements/Declined only show when relevant
- * (>0); Confirmed and Pending are always shown. Below: a slim progress bar
- * (green = confirmed, red = declined, remainder = pending) of subscriber replies.
+ * THIS match. All five tiles always render (uniform grid). Below: a single
+ * slim bar showing how many subscribers have responded ("Responses N / M").
  */
 function StatusSummary({ view }: { view: MatchView }) {
   const confirmed = view.attendees.length;
@@ -357,48 +357,56 @@ function StatusSummary({ view }: { view: MatchView }) {
 
   const responded = confirmed + declined;
   const total = view.aboTotal || responded + pending;
-  const confPct = total > 0 ? (confirmed / total) * 100 : 0;
-  const decPct = total > 0 ? (declined / total) * 100 : 0;
+  const respPct = total > 0 ? Math.round((responded / total) * 100) : 0;
 
-  // Colors per tone with enough contrast in LIGHT and DARK:
-  // "confirmed" uses the theme-inverted pitch scale; the others use a dark
-  // text color for light mode + a light one (dark:) for dark mode.
-  const stats = [
-    { key: "confirmed", label: "Confirmed", value: confirmed, tone: "border-success-line bg-success-surface text-success-ink", icon: <Check className="h-3.5 w-3.5" />, always: true },
-    { key: "pending", label: "Pending", value: pending, tone: "border-warning-line bg-warning-surface text-warning-ink", icon: <Clock className="h-3.5 w-3.5" />, always: true },
-    { key: "waitlist", label: "Waitlist", value: waitlist, tone: "border-info-line bg-info-surface text-info-ink", icon: <ListOrdered className="h-3.5 w-3.5" />, always: false },
-    { key: "replacements", label: "Replacements", value: replacements, tone: "border-neutral-line bg-neutral-surface text-neutral-ink", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, always: false },
-    { key: "declined", label: "Declined", value: declined, tone: "border-danger-line bg-danger-surface text-danger-ink", icon: <X className="h-3.5 w-3.5" />, always: false },
-  ].filter((s) => s.always || s.value > 0);
+  // All five tiles always render so the row stays uniform; calm colour comes
+  // only from the icon + number + thin border (see StatusStatCard).
+  const stats: Array<{
+    key: string;
+    label: string;
+    value: number;
+    tone: StatTone;
+    icon: React.ReactNode;
+  }> = [
+    { key: "confirmed", label: "Confirmed", value: confirmed, tone: "success", icon: <Check className="h-5 w-5" /> },
+    { key: "pending", label: "Pending", value: pending, tone: "warning", icon: <Clock className="h-5 w-5" /> },
+    { key: "waitlist", label: "Waitlist", value: waitlist, tone: "info", icon: <ListOrdered className="h-5 w-5" /> },
+    { key: "replacements", label: "Replacements", value: replacements, tone: "neutral", icon: <ArrowRightLeft className="h-5 w-5" /> },
+    { key: "declined", label: "Declined", value: declined, tone: "danger", icon: <X className="h-5 w-5" /> },
+  ];
 
   return (
-    <div className="space-y-3 rounded-xl border border-border/60 bg-surface/40 p-3">
+    <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {stats.map((s) => (
-          <div
+        {stats.map((s, i) => (
+          <StatusStatCard
             key={s.key}
-            className={cn("flex flex-col items-center justify-center gap-1 rounded-lg border px-1.5 py-2 text-center", s.tone)}
-          >
-            <span className="flex items-center gap-1.5">
-              <span className="shrink-0 opacity-80">{s.icon}</span>
-              <span className="text-lg font-bold leading-none tabular-nums">{s.value}</span>
-            </span>
-            <span className="text-[10px] font-semibold uppercase leading-tight tracking-wide opacity-90">{s.label}</span>
-          </div>
+            icon={s.icon}
+            value={s.value}
+            label={s.label}
+            tone={s.tone}
+            // The lone leftover tile spans both columns (2-col) and the full
+            // middle column (3-col) so it never sits half-width on the left.
+            className={
+              i === stats.length - 1 ? "col-span-2 sm:col-span-3 lg:col-span-1" : undefined
+            }
+          />
         ))}
       </div>
 
       {total > 0 && (
-        <div>
-          <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface-2" aria-hidden>
-            <div className="bg-success transition-all" style={{ width: `${confPct}%` }} />
-            <div className="bg-danger transition-all" style={{ width: `${decPct}%` }} />
-          </div>
-          <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-muted">
-            <span>{responded}/{total} subscribers responded</span>
-            <span className={pending > 0 ? "font-semibold text-warning-ink" : "font-semibold text-success-ink"}>
-              {pending > 0 ? `${pending} pending` : "All responded ✓"}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs text-muted">
+            <span className="font-medium">Responses</span>
+            <span className="font-semibold tabular-nums text-foreground">
+              {responded} / {total}
             </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2" aria-hidden>
+            <div
+              className="h-full rounded-full bg-pitch-500 transition-all"
+              style={{ width: `${respPct}%` }}
+            />
           </div>
         </div>
       )}
