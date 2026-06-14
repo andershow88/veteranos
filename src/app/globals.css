@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Dark-Mode-Variante an die .dark-Klasse binden (klassenbasiertes Theme via
+   ThemeToggle/FOUC-Script) statt an prefers-color-scheme. Damit folgen alle
+   `dark:`-Utilities der tatsächlich gewählten Einstellung (Hell/Dunkel/System). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Light / Dark Mode via CSS custom properties ────────────── */
 :root {
   --bg: #f0f5f4;

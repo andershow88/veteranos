@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Baut einen WhatsApp-Share-Link mit vorausgefüllter Nachricht.
+ * Öffnet WhatsApp ohne festen Empfänger — der Nutzer wählt selbst die
+ * Gruppe/den Chat. Wird von allen WhatsApp-Aktionen geteilt.
+ */
+export function waShareUrl(text: string) {
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}
+
 export function initials(firstName: string, lastName?: string | null) {
   const first = firstName.charAt(0);
   const second = (lastName ?? "").charAt(0) || firstName.charAt(1) || "";

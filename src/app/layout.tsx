@@ -65,7 +65,7 @@ export default async function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: [
           "(function(){try{",
-          "var r=document.documentElement,t=localStorage.getItem('theme'),d=t?t==='dark':false;",
+          "var r=document.documentElement,t=localStorage.getItem('theme')||'light',d=t==='dark'||(t==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);",
           "r.classList.toggle('dark',d);",
           "var c=localStorage.getItem('club-theme');",
           "if(!c)return;",

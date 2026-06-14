@@ -3,8 +3,8 @@ import { Calendar, MapPin, Users, ListOrdered, Lock, Trophy, ArrowRight, ArrowRi
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { cn, formatMatchDate, formatRelativeMatchDate } from "@/lib/utils";
-import type { MatchView } from "@/server/match-queries";
+import { cn, formatMatchDate, formatRelativeMatchDate, waShareUrl } from "@/lib/utils";
+import type { MatchView, Player } from "@/server/match-queries";
 import { SignupControls } from "./signup-controls";
 import { ReplacementRow } from "./replacement-row";
 
@@ -104,12 +104,23 @@ export function MatchCard({
             title="Offen"
             icon={<Clock className="h-3.5 w-3.5" />}
             count={view.pendingAbos.length}
+            action={
+              <a
+                href={waShareUrl(buildReminderText(view.pendingAbos))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-md border border-emerald-600/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-500/20 dark:text-emerald-300"
+                title="WhatsApp-Reminder an alle offenen Abos senden"
+              >
+                <Share2 className="h-3 w-3" /> Reminder senden
+              </a>
+            }
           >
             <div className="flex flex-wrap gap-1.5">
               {view.pendingAbos.map((p) => (
                 <span
                   key={p.id}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-700/40 bg-amber-900/10 px-2 py-1 text-sm text-amber-100/90"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-400/15 px-2 py-1 text-sm text-amber-900 dark:text-amber-100"
                 >
                   <Avatar firstName={p.firstName} lastName={p.lastName} size="sm" src={p.avatarUrl} />
                   <span className="truncate max-w-[140px]">
@@ -216,7 +227,7 @@ export function MatchCard({
             {currentPlayer.role === "ADMIN" && (
               <div className="flex items-center gap-3">
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent("Hey guys, just a reminder to sign up for the next game!\n\nhttps://veteranos.club")}`}
+                  href={waShareUrl("Hey guys, just a reminder to sign up for the next game!\n\nhttps://veteranos.club")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-muted hover:text-emerald-400 transition"
@@ -243,11 +254,13 @@ function Section({
   title,
   icon,
   count,
+  action,
   children,
 }: {
   title: string;
   icon?: React.ReactNode;
   count?: number;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -258,6 +271,7 @@ function Section({
         {typeof count === "number" && (
           <span className="number-pill text-muted font-medium">· {count}</span>
         )}
+        {action && <span className="ml-auto normal-case tracking-normal">{action}</span>}
       </h3>
       {children}
     </section>
@@ -344,27 +358,30 @@ function StatusSummary({ view }: { view: MatchView }) {
   const confPct = total > 0 ? (confirmed / total) * 100 : 0;
   const decPct = total > 0 ? (declined / total) * 100 : 0;
 
+  // Farben pro Tonart mit ausreichend Kontrast in HELL und DUNKEL.
+  // "confirmed" nutzt die theme-invertierte pitch-Skala; die uebrigen je eine
+  // dunkle Textfarbe fuer Hell + eine helle (dark:) fuer Dunkel.
   const stats = [
-    { key: "confirmed", label: "Confirmed", value: confirmed, tone: "bg-pitch-700/25 text-pitch-100 border-pitch-600/50", icon: <Check className="h-4 w-4" />, always: true },
-    { key: "pending", label: "Offen", value: pending, tone: "bg-amber-900/25 text-amber-100 border-amber-700/50", icon: <Clock className="h-4 w-4" />, always: true },
-    { key: "waitlist", label: "Waitlist", value: waitlist, tone: "bg-sky-900/25 text-sky-100 border-sky-700/50", icon: <ListOrdered className="h-4 w-4" /> },
-    { key: "replacements", label: "Replacements", value: replacements, tone: "bg-indigo-900/25 text-indigo-100 border-indigo-700/50", icon: <ArrowRightLeft className="h-4 w-4" /> },
-    { key: "declined", label: "Declined", value: declined, tone: "bg-red-900/25 text-red-100 border-red-700/50", icon: <X className="h-4 w-4" /> },
+    { key: "confirmed", label: "Confirmed", value: confirmed, tone: "border-pitch-600/40 bg-pitch-700/30 text-pitch-100", icon: <Check className="h-3.5 w-3.5" />, always: true },
+    { key: "pending", label: "Offen", value: pending, tone: "border-amber-500/40 bg-amber-400/15 text-amber-800 dark:text-amber-200", icon: <Clock className="h-3.5 w-3.5" />, always: true },
+    { key: "waitlist", label: "Waitlist", value: waitlist, tone: "border-sky-500/40 bg-sky-400/15 text-sky-800 dark:text-sky-200", icon: <ListOrdered className="h-3.5 w-3.5" />, always: false },
+    { key: "replacements", label: "Replacements", value: replacements, tone: "border-indigo-500/40 bg-indigo-400/15 text-indigo-800 dark:text-indigo-200", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, always: false },
+    { key: "declined", label: "Declined", value: declined, tone: "border-red-500/40 bg-red-400/15 text-red-800 dark:text-red-200", icon: <X className="h-3.5 w-3.5" />, always: false },
   ].filter((s) => s.always || s.value > 0);
 
   return (
-    <div className="rounded-xl border border-border/60 bg-surface/40 p-3 space-y-3">
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-3 rounded-xl border border-border/60 bg-surface/40 p-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
         {stats.map((s) => (
           <div
             key={s.key}
-            className={cn("flex flex-1 min-w-[84px] items-center gap-2 rounded-lg border px-2.5 py-2", s.tone)}
+            className={cn("flex flex-col items-center justify-center gap-1 rounded-lg border px-1.5 py-2 text-center", s.tone)}
           >
-            <span className="shrink-0 opacity-80">{s.icon}</span>
-            <div className="leading-none">
-              <div className="text-xl font-bold tabular-nums">{s.value}</div>
-              <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider opacity-80">{s.label}</div>
-            </div>
+            <span className="flex items-center gap-1.5">
+              <span className="shrink-0 opacity-80">{s.icon}</span>
+              <span className="text-lg font-bold leading-none tabular-nums">{s.value}</span>
+            </span>
+            <span className="text-[10px] font-semibold uppercase leading-tight tracking-wide opacity-90">{s.label}</span>
           </div>
         ))}
       </div>
@@ -373,13 +390,11 @@ function StatusSummary({ view }: { view: MatchView }) {
         <div>
           <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface-2" aria-hidden>
             <div className="bg-pitch-500 transition-all" style={{ width: `${confPct}%` }} />
-            <div className="bg-red-500/70 transition-all" style={{ width: `${decPct}%` }} />
+            <div className="bg-red-500/80 transition-all" style={{ width: `${decPct}%` }} />
           </div>
-          <div className="mt-1.5 flex items-center justify-between text-[11px] text-muted">
-            <span>
-              {responded}/{total} Abos haben geantwortet
-            </span>
-            <span className={pending > 0 ? "font-semibold text-amber-300" : "font-semibold text-pitch-300"}>
+          <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-muted">
+            <span>{responded}/{total} Abos haben geantwortet</span>
+            <span className={pending > 0 ? "font-semibold text-amber-700 dark:text-amber-300" : "font-semibold text-pitch-200"}>
               {pending > 0 ? `${pending} offen` : "Alle geantwortet ✓"}
             </span>
           </div>
@@ -387,4 +402,27 @@ function StatusSummary({ view }: { view: MatchView }) {
       )}
     </div>
   );
+}
+
+/**
+ * Baut die WhatsApp-Reminder-Nachricht fuer die offenen Abos:
+ * jeder Name in eigener Zeile, danach ein kurzer Reminder-Text.
+ * Vornamen werden nur bei Mehrdeutigkeit um den Nachnamen ergaenzt;
+ * doppelte Namen werden entfernt.
+ */
+function buildReminderText(pending: Player[]): string {
+  const firstCounts: Record<string, number> = {};
+  for (const p of pending) firstCounts[p.firstName] = (firstCounts[p.firstName] ?? 0) + 1;
+
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const p of pending) {
+    let name = firstCounts[p.firstName] > 1 && p.lastName ? `${p.firstName} ${p.lastName}` : p.firstName;
+    name = name.trim();
+    const key = name.toLowerCase();
+    if (!name || seen.has(key)) continue;
+    seen.add(key);
+    names.push(name);
+  }
+  return `${names.join("\n")}\n\nDon't forget to sign up or cancel for the next game.`;
 }
