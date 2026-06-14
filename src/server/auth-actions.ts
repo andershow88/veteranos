@@ -9,6 +9,7 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { consumeInvite, findUsableInvite } from "./invite-actions";
 
 const loginSchema = z.object({
@@ -42,6 +43,10 @@ const registerSchema = z.object({
 export type AuthState = { error?: string } | undefined;
 
 export async function loginAction(_: AuthState, formData: FormData): Promise<AuthState> {
+  if (!rateLimit(`login:${await clientIp()}`, 10, 10 * 60 * 1000)) {
+    return { error: "Too many attempts. Please wait a few minutes and try again." };
+  }
+
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -59,6 +64,10 @@ export async function loginAction(_: AuthState, formData: FormData): Promise<Aut
 }
 
 export async function registerAction(_: AuthState, formData: FormData): Promise<AuthState> {
+  if (!rateLimit(`register:${await clientIp()}`, 8, 60 * 60 * 1000)) {
+    return { error: "Too many attempts. Please wait a while and try again." };
+  }
+
   const parsed = registerSchema.safeParse({
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),

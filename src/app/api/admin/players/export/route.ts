@@ -4,6 +4,15 @@ import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+/** Quote/escape a CSV cell and neutralise spreadsheet formula injection. */
+function csvCell(value: string | number | null): string {
+    let s = String(value ?? "");
+    // A leading =, +, -, @, tab or CR can be interpreted as a formula in Excel/Sheets.
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    if (/[";\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+}
+
 export async function GET() {
     await requireAdmin();
 
@@ -12,21 +21,9 @@ export async function GET() {
     });
 
     const header = [
-        "Name",
-        "Type",
-        "Rank",
-        "Position",
-        "Overall",
-        "Technique",
-        "Speed",
-        "Stamina",
-        "Defense",
-        "Offense",
-        "Passing",
-        "Shooting",
-        "Goalkeeping",
-        "Active",
-    ].join(";");
+        "Name", "Type", "Rank", "Position", "Overall", "Technique", "Speed",
+        "Stamina", "Defense", "Offense", "Passing", "Shooting", "Goalkeeping", "Active",
+    ].map(csvCell).join(";");
 
     const rows = players.map((p) =>
         [
@@ -44,7 +41,7 @@ export async function GET() {
             p.shooting,
             p.goalkeeping,
             p.active ? "Yes" : "No",
-        ].join(";"),
+        ].map(csvCell).join(";"),
     );
 
     const bom = "﻿";

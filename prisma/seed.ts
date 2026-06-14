@@ -14,6 +14,17 @@ import bcrypt from "bcryptjs";
 const db = new PrismaClient();
 
 async function main() {
+  // Never create a predictable default admin in production. Require explicit
+  // credentials there; the dev fallback stays for local convenience only.
+  if (process.env.NODE_ENV === "production" && (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)) {
+    throw new Error(
+      "ADMIN_EMAIL and ADMIN_PASSWORD must be set in production — refusing to seed a default admin.",
+    );
+  }
+  if (process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length < 8) {
+    throw new Error("ADMIN_PASSWORD must be at least 8 characters.");
+  }
+
   const adminEmail = (process.env.ADMIN_EMAIL ?? "admin@veteranos.local").toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD ?? "admin123";
 

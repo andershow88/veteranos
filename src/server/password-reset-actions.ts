@@ -7,6 +7,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { hashPassword, requireAdmin } from "@/lib/auth";
 import { buildPasswordResetUrl, sendEmail } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const TOKEN_TTL_MS = 1000 * 60 * 60; // 1 hour
 
@@ -74,6 +75,11 @@ export async function requestPasswordResetAction(
   _: ForgotState,
   formData: FormData,
 ): Promise<ForgotState> {
+  // Generic response on rate-limit too, so it can't be used for enumeration.
+  if (!rateLimit(`reset:${await clientIp()}`, 5, 60 * 60 * 1000)) {
+    return { status: "sent" };
+  }
+
   const parsed = forgotSchema.safeParse({
     firstName: formData.get("firstName"),
     lastName: formData.get("lastName"),
