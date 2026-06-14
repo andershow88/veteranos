@@ -105,15 +105,17 @@ export function MatchCard({
             icon={<Clock className="h-3.5 w-3.5" />}
             count={view.pendingAbos.length}
             action={
-              <a
-                href={waShareUrl(buildReminderText(view.pendingAbos))}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-success-line bg-success-surface px-2 py-0.5 text-[11px] font-semibold text-success-ink transition hover:opacity-80"
-                title="Send a WhatsApp reminder to all pending subscribers"
-              >
-                <Share2 className="h-3 w-3" /> Send reminder
-              </a>
+              currentPlayer.role === "ADMIN" ? (
+                <a
+                  href={waShareUrl(buildReminderText(view.pendingAbos))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md border border-success-line bg-success-surface px-2 py-0.5 text-[11px] font-semibold text-success-ink transition hover:opacity-80"
+                  title="Send a WhatsApp reminder to all pending subscribers"
+                >
+                  <Share2 className="h-3 w-3" /> Send reminder
+                </a>
+              ) : undefined
             }
           >
             <div className="flex flex-wrap gap-1.5">
