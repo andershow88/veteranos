@@ -3,6 +3,7 @@ import { CalendarPlus, Sparkles } from "lucide-react";
 import { WeatherWidget } from "@/components/weather-widget";
 import { RainRadar } from "@/components/rain-radar";
 import { TricolorStripe } from "@/components/tricolor-stripe";
+import { SoccerBall } from "@/components/soccer-ball";
 import { listUpcomingMatches, getLockedMatchWithTeams } from "@/server/match-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
@@ -86,7 +87,8 @@ function Hero() {
       <div className="relative flex-1 overflow-hidden rounded-3xl border border-border-strong/60 glass pitch-stripes p-6 sm:p-10">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pitch-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-pitch-400/15 blur-3xl" />
-        <div className="relative flex flex-col gap-4">
+        <SoccerBall className="pointer-events-none absolute right-4 top-4 h-20 w-20 rotate-12 drop-shadow-[0_6px_16px_rgba(0,0,0,0.3)] sm:right-6 sm:top-6 sm:h-28 sm:w-28" />
+        <div className="relative flex flex-col gap-4 pr-16 sm:pr-28">
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-pitch-500/40 bg-pitch-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pitch-200">
             <Sparkles className="h-3 w-3" /> Upcoming matches
           </div>
