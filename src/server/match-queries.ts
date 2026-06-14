@@ -39,6 +39,11 @@ export type MatchView = {
   /** Waitlist players that do NOT replace anyone (overflow) */
   waitlistOverflow: Array<Signup & { player: Player }>;
 
+  /** Active ABO players who have NOT yet responded (neither IN nor OUT) for this match */
+  pendingAbos: Player[];
+  /** Total active ABO players expected to respond (confirmed + declined + pending) */
+  aboTotal: number;
+
   hasTeams: boolean;
 };
 
@@ -59,51 +64,69 @@ export async function buildMatchView(matchId: string): Promise<MatchView | null>
   });
   if (!match) return null;
 
-  return composeMatchView(match);
+  const activeAbos = await getActiveAbos();
+  return composeMatchView(match, activeAbos);
+}
+
+/** All active ABO players — the set expected to confirm/decline each match. */
+async function getActiveAbos(): Promise<Player[]> {
+  return db.player.findMany({
+    where: { active: true, kind: "ABO" },
+    orderBy: [{ rank: "asc" }, { lastName: "asc" }, { firstName: "asc" }],
+  });
 }
 
 export async function listUpcomingMatches(): Promise<MatchView[]> {
-  const matches = await db.match.findMany({
-    where: { date: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) } }, // up to 6h after kick-off still counts as upcoming
-    orderBy: { date: "asc" },
-    include: {
-      signups: {
-        include: { player: true },
-        orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+  const [matches, activeAbos] = await Promise.all([
+    db.match.findMany({
+      where: { date: { gte: new Date(Date.now() - 1000 * 60 * 60 * 6) } }, // up to 6h after kick-off still counts as upcoming
+      orderBy: { date: "asc" },
+      include: {
+        signups: {
+          include: { player: true },
+          orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+        },
+        teams: { select: { id: true } },
       },
-      teams: { select: { id: true } },
-    },
-  });
-  return matches.map(composeMatchView);
+    }),
+    getActiveAbos(),
+  ]);
+  return matches.map((m) => composeMatchView(m, activeAbos));
 }
 
 export async function listPastMatches(limit = 20): Promise<MatchView[]> {
-  const matches = await db.match.findMany({
-    where: { date: { lt: new Date(Date.now() - 1000 * 60 * 60 * 6) } },
-    orderBy: { date: "desc" },
-    take: limit,
-    include: {
-      signups: {
-        include: { player: true },
-        orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+  const [matches, activeAbos] = await Promise.all([
+    db.match.findMany({
+      where: { date: { lt: new Date(Date.now() - 1000 * 60 * 60 * 6) } },
+      orderBy: { date: "desc" },
+      take: limit,
+      include: {
+        signups: {
+          include: { player: true },
+          orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+        },
+        teams: { select: { id: true } },
       },
-      teams: { select: { id: true } },
-    },
-  });
-  return matches.map(composeMatchView);
+    }),
+    getActiveAbos(),
+  ]);
+  return matches.map((m) => composeMatchView(m, activeAbos));
 }
 
-function composeMatchView(match: {
-  id: string;
-  date: Date;
-  durationMin: number;
-  location: string | null;
-  notes: string | null;
-  locked: boolean;
-  teamCount: number;
-  signups: Array<Signup & { player: Player }>;
-  teams: Array<{ id: string }>;
-}): MatchView {
+function composeMatchView(
+  match: {
+    id: string;
+    date: Date;
+    durationMin: number;
+    location: string | null;
+    notes: string | null;
+    locked: boolean;
+    teamCount: number;
+    signups: Array<Signup & { player: Player }>;
+    teams: Array<{ id: string }>;
+  },
+  activeAbos: Player[] = [],
+): MatchView {
   const attendees = match.signups
     .filter((s) => s.status === "IN" && s.player.kind === "ABO")
     .sort((a, b) => a.player.rank - b.player.rank || a.rank - b.rank);
@@ -115,6 +138,13 @@ function composeMatchView(match: {
   const waitlist = match.signups
     .filter((s) => s.status === "WAITLIST")
     .sort((a, b) => a.rank - b.rank || a.player.rank - b.player.rank);
+
+  // "Pending" = active ABO players who have neither confirmed (IN) nor declined (OUT).
+  const respondedAboIds = new Set<string>([
+    ...attendees.map((s) => s.playerId),
+    ...declined.map((s) => s.playerId),
+  ]);
+  const pendingAbos = activeAbos.filter((p) => !respondedAboIds.has(p.id));
 
   // Waitlist order: the first listed waitlist player replaces the first declined abo.
   const replacements: ReplacementInfo[] = declined.map((out, idx) => {
@@ -143,6 +173,8 @@ function composeMatchView(match: {
     waitlist,
     replacements,
     waitlistOverflow,
+    pendingAbos,
+    aboTotal: activeAbos.length,
     hasTeams: match.teams.length > 0,
   };
 }
