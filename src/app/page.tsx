@@ -83,25 +83,24 @@ function Hero() {
   return (
     <section className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
       {/* Restored info box around the headline (placement kept; weather beside). */}
-      <div className="relative flex-1 overflow-hidden rounded-3xl border border-border-strong/60 glass pitch-stripes p-6 sm:p-10">
+      <div className="relative flex-1 overflow-hidden rounded-3xl border border-border-strong/60 glass pitch-stripes p-5 sm:p-7">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pitch-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-pitch-400/15 blur-3xl" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/bild_ball.png"
           alt=""
-          className="pointer-events-none absolute right-4 top-4 h-20 w-20 select-none object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.35)] sm:right-6 sm:top-6 sm:h-28 sm:w-28"
+          className="pointer-events-none absolute right-3 top-3 h-16 w-16 select-none object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.35)] sm:right-5 sm:top-5 sm:h-24 sm:w-24"
         />
-        <div className="relative flex flex-col gap-4 pr-16 sm:pr-28">
+        <div className="relative flex flex-col gap-2.5 pr-14 sm:pr-24">
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-pitch-500/40 bg-pitch-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pitch-200">
             <Sparkles className="h-3 w-3" /> Upcoming matches
           </div>
-          <h1 className="font-display text-4xl tracking-wide text-foreground sm:text-6xl">
+          <h1 className="font-display text-4xl tracking-wide text-foreground sm:text-5xl">
             Veteranos. <span className="text-pitch-300">Play.</span> Win.
           </h1>
-          <p className="max-w-2xl text-base text-muted sm:text-lg">
-            Your football matches in one place. Confirm, decline or queue up &mdash; Edu handle
-            balanced teams, waitlists and payments.
+          <p className="text-base font-medium text-muted sm:text-lg">
+            Older, wiser, still winning.
           </p>
         </div>
         <TricolorStripe className="hero-tricolor" />
