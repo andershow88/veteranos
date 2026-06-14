@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { NotificationPrompt } from "@/components/pwa/notification-prompt";
+import { BottomNav } from "@/components/bottom-nav";
 import { getCurrentUser } from "@/lib/auth";
 
 const inter = Inter({
@@ -135,10 +136,11 @@ export default async function RootLayout({
               : null
           }
         />
-        <main className="flex-1 w-full">{children}</main>
+        <main className="flex-1 w-full pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
         <footer className="mt-16 border-t border-border/60 py-8 text-center text-xs text-subtle">
           <span className="font-display tracking-widest text-pitch-400">VETERANOS</span> · Built with Next.js, Prisma & love for the game
         </footer>
+        {user && <BottomNav isAdmin={user.role === "ADMIN"} />}
         <ServiceWorkerRegister />
         <InstallPrompt />
         <NotificationPrompt />

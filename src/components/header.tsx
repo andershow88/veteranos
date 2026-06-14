@@ -5,6 +5,7 @@ import { Trophy, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { AdminDetailsToggle } from "./match/admin-details-toggle";
 import { ClubBadgeHeader } from "./club-badge-header";
+import { NavLink } from "./nav-link";
 
 type Props = {
   user: { email: string; role: "ADMIN" | "PLAYER"; playerName: string | null; clubSlug?: string | null } | null;
@@ -68,25 +69,7 @@ export function Header({ user }: Props) {
           )}
         </div>
       </div>
-
-      {/* Mobile nav row. Scrolls horizontally if needed instead of wrapping. */}
-      <nav className="md:hidden flex items-center gap-1 px-3 pb-2 pt-1 border-t border-border/40 overflow-x-auto scrollbar-thin">
-        <NavLink href="/">Matches</NavLink>
-        {user && <NavLink href="/profile">Profile</NavLink>}
-        <NavLink href="/handout">Handout</NavLink>
-        {user?.role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
-      </nav>
+      {/* Mobile navigation is the bottom nav (see BottomNav in layout). */}
     </header>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="rounded-lg px-3 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-surface-2 transition whitespace-nowrap"
-    >
-      {children}
-    </Link>
   );
 }
