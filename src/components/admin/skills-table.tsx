@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useRef, useCallback } from "react";
-import { Loader2, Check, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, Search, X } from "lucide-react";
+import { Loader2, Check, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown, Search, X, ChevronDown } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { updatePlayerSkillsAction } from "@/server/admin-actions";
 import type { Position } from "@prisma/client";
 
@@ -224,8 +225,8 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
         </span>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop: wide editable table */}
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="border-b border-border text-left">
@@ -257,6 +258,83 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
           </tbody>
         </table>
       </div>
+
+      {/* Mobile: card list, tap to expand and edit (large inputs) */}
+      <div className="space-y-2 p-3 md:hidden">
+        {filtered.length === 0 ? (
+          <p className="py-6 text-center text-sm text-subtle">No players match your filters.</p>
+        ) : (
+          filtered.map((r) => (
+            <SkillCard key={r.id} row={r} onChange={(key, val) => updateCell(r.id, key, val)} />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StateIcon({ state, error }: { state: RowState; error: string }) {
+  if (state === "saving") return <Loader2 className="h-4 w-4 animate-spin text-pitch-400" />;
+  if (state === "saved") return <Check className="h-4 w-4 text-success" />;
+  if (state === "error") return <span title={error}><AlertCircle className="h-4 w-4 text-danger" /></span>;
+  return null;
+}
+
+function SkillCard({
+  row,
+  onChange,
+}: {
+  row: PlayerRow & { _state: RowState; _error: string };
+  onChange: (key: string, value: string | number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`rounded-xl border border-border/60 bg-surface/50 ${!row.active ? "opacity-60" : ""}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3 px-3 py-3 text-left"
+      >
+        <Avatar firstName={row.firstName} lastName={row.lastName} size="sm" />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold">{row.firstName} {row.lastName}</div>
+          <div className="text-[11px] text-muted">
+            {row.kind === "ABO" ? "Subscriber" : "Waitlist"} · {POS_SHORT[row.position]} · OVR {row.overall}
+          </div>
+        </div>
+        <StateIcon state={row._state} error={row._error} />
+        <ChevronDown className={`h-4 w-4 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="space-y-3 border-t border-border/60 px-3 py-3">
+          <div className="space-y-1">
+            <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted">Position</label>
+            <select
+              value={row.position}
+              onChange={(e) => onChange("position", e.target.value)}
+              className="h-10 w-full rounded-lg border border-border/60 bg-transparent px-2 text-sm text-foreground focus:border-pitch-500 focus:outline-none"
+            >
+              {POSITIONS.map((p) => <option key={p} value={p}>{POS_SHORT[p]}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {SKILL_KEYS.map((k) => (
+              <div key={k} className="space-y-1">
+                <label className="block text-[10px] font-semibold uppercase tracking-wide text-muted">{SKILL_SHORT[k]}</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={row[k]}
+                  onChange={(e) => onChange(k, Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+                  className="number-pill h-10 w-full rounded-lg border border-border/60 bg-transparent px-2 text-center text-sm text-foreground focus:border-pitch-500 focus:outline-none"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
