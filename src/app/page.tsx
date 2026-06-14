@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarPlus, Sparkles } from "lucide-react";
 import { WeatherWidget } from "@/components/weather-widget";
 import { RainRadar } from "@/components/rain-radar";
+import { TricolorStripe } from "@/components/tricolor-stripe";
 import { listUpcomingMatches, getLockedMatchWithTeams } from "@/server/match-queries";
 import { getCurrentUser } from "@/lib/auth";
 import { MatchCard } from "@/components/match/match-card";
@@ -26,13 +27,12 @@ export default async function HomePage() {
     role: user?.role ?? null,
   };
 
-  const firstName = user?.player?.firstName ?? null;
   const [nextMatch, ...moreMatches] = matches;
   const showTeams = !!lockedMatch && lockedMatch.teams.length > 0;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-10">
-      <Hero firstName={firstName} />
+      <Hero />
 
       {matches.length === 0 ? (
         <>
@@ -79,27 +79,30 @@ export default async function HomePage() {
   );
 }
 
-function Hero({ firstName }: { firstName: string | null }) {
+function Hero() {
   return (
-    <section className="flex flex-wrap items-end justify-between gap-4">
-      <div className="min-w-0">
-        <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-pitch-300">
-          <Sparkles className="h-3.5 w-3.5" /> Veteranos
+    <section className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
+      {/* Restored info box around the headline (placement kept; weather beside). */}
+      <div className="relative flex-1 overflow-hidden rounded-3xl border border-border-strong/60 glass pitch-stripes p-6 sm:p-10">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pitch-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-pitch-400/15 blur-3xl" />
+        <div className="relative flex flex-col gap-4">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-pitch-500/40 bg-pitch-700/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-pitch-200">
+            <Sparkles className="h-3 w-3" /> Upcoming matches
+          </div>
+          <h1 className="font-display text-4xl tracking-wide text-foreground sm:text-6xl">
+            Veteranos. <span className="text-pitch-300">Play.</span> Win.
+          </h1>
+          <p className="max-w-2xl text-base text-muted sm:text-lg">
+            Your football matches in one place. Confirm, decline or queue up &mdash; Edu handle
+            balanced teams, waitlists and payments.
+          </p>
         </div>
-        <h1 className="mt-1 font-display text-3xl tracking-wide text-foreground sm:text-4xl">
-          {firstName ? (
-            <>
-              Hi, <span className="text-pitch-300">{firstName}</span>
-            </>
-          ) : (
-            "Upcoming matches"
-          )}
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Confirm or decline, manage the waitlist, and see balanced teams.
-        </p>
+        <TricolorStripe className="hero-tricolor" />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+
+      {/* Weather stays beside the box — centered row on mobile, stacked on desktop. */}
+      <div className="flex flex-row flex-wrap items-center justify-center gap-4 lg:flex-col lg:items-end lg:justify-center">
         <WeatherWidget />
         <RainRadar />
       </div>
