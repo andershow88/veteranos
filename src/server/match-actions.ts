@@ -133,7 +133,16 @@ export async function declineWithReplacementAction(input: {
     replacementPlayerId = guest.id;
   } else {
     if (!input.existingPlayerId) throw new Error("Player selection required");
-    replacementPlayerId = input.existingPlayerId;
+    // Validate server-side: the chosen replacement must be an active waitlist
+    // player (the client only offers these, but never trust the client).
+    const chosen = await db.player.findUnique({
+      where: { id: input.existingPlayerId },
+      select: { id: true, kind: true, active: true },
+    });
+    if (!chosen || !chosen.active || chosen.kind !== "WAITLIST") {
+      throw new Error("Selected player is not an eligible waitlist player.");
+    }
+    replacementPlayerId = chosen.id;
   }
 
   const waitlist = await db.signup.findMany({
@@ -222,6 +231,7 @@ export async function addExistingPlayerToMatchAction(input: {
 
 /** Returns waitlist players available for manual assignment on a match. */
 export async function getWaitlistPlayersForMatch(matchId: string) {
+  await requireUser();
   const [signedUpOnWaitlist, allWaitlistPlayers] = await Promise.all([
     db.signup.findMany({
       where: { matchId, status: "WAITLIST" },

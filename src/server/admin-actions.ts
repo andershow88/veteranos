@@ -344,6 +344,9 @@ export async function swapTeamPlayersAction(slotIdA: string, slotIdB: string) {
     if (!slotA || !slotB) throw new Error("Slot not found");
     if (slotA.teamId === slotB.teamId)
       throw new Error("Both slots belong to the same team");
+    // Never swap across matches — would corrupt unrelated teams.
+    if (slotA.team.matchId !== slotB.team.matchId)
+      throw new Error("Slots belong to different matches");
 
     // 2. Determine new positions based on the swapped player
     const pickPos = (p: typeof slotA.player) => {
