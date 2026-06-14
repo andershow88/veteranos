@@ -101,7 +101,7 @@ export function MatchCard({
 
         {view.pendingAbos.length > 0 && (
           <Section
-            title="Offen"
+            title="Pending"
             icon={<Clock className="h-3.5 w-3.5" />}
             count={view.pendingAbos.length}
             action={
@@ -110,9 +110,9 @@ export function MatchCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 rounded-md border border-emerald-600/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-500/20 dark:text-emerald-300"
-                title="WhatsApp-Reminder an alle offenen Abos senden"
+                title="Send a WhatsApp reminder to all pending subscribers"
               >
-                <Share2 className="h-3 w-3" /> Reminder senden
+                <Share2 className="h-3 w-3" /> Send reminder
               </a>
             }
           >
@@ -339,12 +339,12 @@ function findMine(view: MatchView, playerId: string) {
 }
 
 /**
- * Smarte, kompakte Status-Übersicht pro Spiel.
- * Reihenfolge: Confirmed → Offen → Waitlist → Replacements → Declined.
- * "Offen" = aktive Abo-Spieler, die für DIESES Spiel weder zu- noch abgesagt haben.
- * Pills für Waitlist/Replacements/Declined erscheinen nur, wenn relevant (>0);
- * Confirmed und Offen werden immer gezeigt. Darunter eine feine Fortschrittsleiste
- * (grün = zugesagt, rot = abgesagt, Rest = offen) der Abo-Rückmeldungen.
+ * Compact, smart status overview per match.
+ * Order: Confirmed → Pending → Waitlist → Replacements → Declined.
+ * "Pending" = active subscribers who have neither confirmed nor declined for
+ * THIS match. Pills for Waitlist/Replacements/Declined only show when relevant
+ * (>0); Confirmed and Pending are always shown. Below: a slim progress bar
+ * (green = confirmed, red = declined, remainder = pending) of subscriber replies.
  */
 function StatusSummary({ view }: { view: MatchView }) {
   const confirmed = view.attendees.length;
@@ -358,12 +358,12 @@ function StatusSummary({ view }: { view: MatchView }) {
   const confPct = total > 0 ? (confirmed / total) * 100 : 0;
   const decPct = total > 0 ? (declined / total) * 100 : 0;
 
-  // Farben pro Tonart mit ausreichend Kontrast in HELL und DUNKEL.
-  // "confirmed" nutzt die theme-invertierte pitch-Skala; die uebrigen je eine
-  // dunkle Textfarbe fuer Hell + eine helle (dark:) fuer Dunkel.
+  // Colors per tone with enough contrast in LIGHT and DARK:
+  // "confirmed" uses the theme-inverted pitch scale; the others use a dark
+  // text color for light mode + a light one (dark:) for dark mode.
   const stats = [
     { key: "confirmed", label: "Confirmed", value: confirmed, tone: "border-pitch-600/40 bg-pitch-700/30 text-pitch-100", icon: <Check className="h-3.5 w-3.5" />, always: true },
-    { key: "pending", label: "Offen", value: pending, tone: "border-amber-500/40 bg-amber-400/15 text-amber-800 dark:text-amber-200", icon: <Clock className="h-3.5 w-3.5" />, always: true },
+    { key: "pending", label: "Pending", value: pending, tone: "border-amber-500/40 bg-amber-400/15 text-amber-800 dark:text-amber-200", icon: <Clock className="h-3.5 w-3.5" />, always: true },
     { key: "waitlist", label: "Waitlist", value: waitlist, tone: "border-sky-500/40 bg-sky-400/15 text-sky-800 dark:text-sky-200", icon: <ListOrdered className="h-3.5 w-3.5" />, always: false },
     { key: "replacements", label: "Replacements", value: replacements, tone: "border-indigo-500/40 bg-indigo-400/15 text-indigo-800 dark:text-indigo-200", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, always: false },
     { key: "declined", label: "Declined", value: declined, tone: "border-red-500/40 bg-red-400/15 text-red-800 dark:text-red-200", icon: <X className="h-3.5 w-3.5" />, always: false },
@@ -393,9 +393,9 @@ function StatusSummary({ view }: { view: MatchView }) {
             <div className="bg-red-500/80 transition-all" style={{ width: `${decPct}%` }} />
           </div>
           <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px] text-muted">
-            <span>{responded}/{total} Abos haben geantwortet</span>
+            <span>{responded}/{total} subscribers responded</span>
             <span className={pending > 0 ? "font-semibold text-amber-700 dark:text-amber-300" : "font-semibold text-pitch-200"}>
-              {pending > 0 ? `${pending} offen` : "Alle geantwortet ✓"}
+              {pending > 0 ? `${pending} pending` : "All responded ✓"}
             </span>
           </div>
         </div>
@@ -405,10 +405,9 @@ function StatusSummary({ view }: { view: MatchView }) {
 }
 
 /**
- * Baut die WhatsApp-Reminder-Nachricht fuer die offenen Abos:
- * jeder Name in eigener Zeile, danach ein kurzer Reminder-Text.
- * Vornamen werden nur bei Mehrdeutigkeit um den Nachnamen ergaenzt;
- * doppelte Namen werden entfernt.
+ * Builds the WhatsApp reminder message for the pending subscribers:
+ * one name per line, followed by a short reminder text. First names are
+ * only extended with the last name when ambiguous; duplicates are removed.
  */
 function buildReminderText(pending: Player[]): string {
   const firstCounts: Record<string, number> = {};

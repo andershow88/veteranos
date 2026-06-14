@@ -46,7 +46,7 @@ export default async function ProfilePage() {
             <Badge tone="info">{user.role === "ADMIN" ? "Admin" : "Player"}</Badge>
             {player && (
               <Badge tone={player.kind === "ABO" ? "success" : "default"}>
-                {player.kind === "ABO" ? "Abo" : "Waitlist"}
+                {player.kind === "ABO" ? "Subscriber" : "Waitlist"}
               </Badge>
             )}
           </div>

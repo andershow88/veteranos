@@ -6,9 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Baut einen WhatsApp-Share-Link mit vorausgefüllter Nachricht.
- * Öffnet WhatsApp ohne festen Empfänger — der Nutzer wählt selbst die
- * Gruppe/den Chat. Wird von allen WhatsApp-Aktionen geteilt.
+ * Builds a WhatsApp share link with a prefilled message.
+ * Opens WhatsApp without a fixed recipient — the user picks the group/chat.
+ * Shared by all WhatsApp actions.
  */
 export function waShareUrl(text: string) {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;

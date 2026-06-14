@@ -43,7 +43,7 @@ export function PlayerForm({ player }: { player?: Defaults }) {
           <div className="space-y-1.5">
             <Label htmlFor="kind">Type</Label>
             <Select id="kind" name="kind" defaultValue={player?.kind ?? "ABO"}>
-              <option value="ABO">Abo</option>
+              <option value="ABO">Subscriber</option>
               <option value="WAITLIST">Waitlist</option>
             </Select>
           </div>

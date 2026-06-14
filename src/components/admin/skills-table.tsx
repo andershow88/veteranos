@@ -178,7 +178,7 @@ export function SkillsTable({ players }: { players: PlayerRow[] }) {
           className="bg-transparent border border-border/60 rounded-lg px-2 py-1.5 text-xs text-foreground focus:border-pitch-500 focus:outline-none"
         >
           <option value="ALL">All types</option>
-          <option value="ABO">Abo</option>
+          <option value="ABO">Subscriber</option>
           <option value="WAITLIST">Waitlist</option>
         </select>
         <select

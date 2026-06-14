@@ -62,7 +62,7 @@ export function SignupManager({ view, allPlayers, readOnly }: Props) {
               <Select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)}>
                 <option value="">Choose player…</option>
                 {availableSubs.length > 0 && (
-                  <optgroup label="Abos">
+                  <optgroup label="Subscribers">
                     {availableSubs.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.firstName} {p.lastName}
@@ -184,7 +184,7 @@ function DeclinedSection({
                       {s.player.firstName} {s.player.lastName}
                     </div>
                     <div className="text-[10px] uppercase tracking-widest text-muted">
-                      Abo · OVR {s.player.overall}
+                      Subscriber · OVR {s.player.overall}
                       {rep?.replacement && (
                         <span className="text-pitch-400 ml-2">
                           → {rep.replacement.player.firstName} {rep.replacement.player.lastName}
@@ -395,7 +395,7 @@ function SignupSection({
                   {s.player.firstName} {s.player.lastName}
                 </div>
                 <div className="text-[10px] uppercase tracking-widest text-muted">
-                  {s.player.kind === "ABO" ? "Abo" : "Waitlist"} · OVR {s.player.overall}
+                  {s.player.kind === "ABO" ? "Subscriber" : "Waitlist"} · OVR {s.player.overall}
                 </div>
                 <SignupTimestamp signup={s} />
               </div>

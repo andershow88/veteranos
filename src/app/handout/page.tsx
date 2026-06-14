@@ -100,7 +100,7 @@ export default function HandoutPage() {
               </Step>
               <Step n={2}>
                 <strong>Register.</strong> Fill in first name, last name, email, password, and
-                pick whether you join as <em>Abo</em> or <em>Waitlist</em>. The other fields
+                pick whether you join as <em>Subscriber</em> or <em>Waitlist</em>. The other fields
                 are optional.
               </Step>
               <Step n={3}>
@@ -122,7 +122,7 @@ export default function HandoutPage() {
           >
             <div className="grid sm:grid-cols-2 gap-3">
               <FeatureCard
-                title="Abo"
+                title="Subscriber"
                 badge={<Badge tone="success">Fixed slot</Badge>}
                 points={[
                   "Has a guaranteed seat in every match by default.",
@@ -143,7 +143,7 @@ export default function HandoutPage() {
               />
             </div>
             <p>
-              Admins can flip you from Abo to Waitlist (or back) any time on the player edit
+              Admins can flip you from Subscriber to Waitlist (or back) any time on the player edit
               screen. The role you picked at registration is just the starting point.
             </p>
           </Section>
@@ -160,9 +160,9 @@ export default function HandoutPage() {
             </p>
             <Table
               rows={[
-                ["Confirmed", "Abos who said In and are playing.", <Badge tone="success" key="c">In</Badge>],
-                ["Declined", "Abos who said they can't make it.", <Badge tone="danger" key="d">Out</Badge>],
-                ["Replacements", "Pairs of (abo who declined) → (waitlist player stepping in).", <Badge tone="info" key="r">→</Badge>],
+                ["Confirmed", "Subscribers who said In and are playing.", <Badge tone="success" key="c">In</Badge>],
+                ["Declined", "Subscribers who said they can't make it.", <Badge tone="danger" key="d">Out</Badge>],
+                ["Replacements", "Pairs of (subscriber who declined) → (waitlist player stepping in).", <Badge tone="info" key="r">→</Badge>],
                 ["Waitlist", "Everyone who signed up via the waitlist, in order.", <Badge tone="default" key="w">Queue</Badge>],
               ]}
             />
@@ -185,7 +185,7 @@ export default function HandoutPage() {
           >
             <div className="grid sm:grid-cols-2 gap-3">
               <FeatureCard
-                title="As an Abo"
+                title="As a Subscriber"
                 points={[
                   <span key="in"><Check className="inline h-3.5 w-3.5 text-pitch-300" /> <strong>I&apos;m in</strong> &mdash; confirms your slot.</span>,
                   <span key="out"><X className="inline h-3.5 w-3.5 text-red-300" /> <strong>Can&apos;t make it</strong> &mdash; frees your slot for the waitlist.</span>,
@@ -203,7 +203,7 @@ export default function HandoutPage() {
               />
             </div>
             <Callout tone="warn" icon={<Lock className="h-4 w-4" />}>
-              When the admin <strong>locks</strong> a match, sign-ups freeze. Abos can no longer change
+              When the admin <strong>locks</strong> a match, sign-ups freeze. Subscribers can no longer change
               their mind, and waitlisters can&apos;t join or leave.
             </Callout>
           </Section>
@@ -224,7 +224,7 @@ export default function HandoutPage() {
                 [<Badge tone="default" key="n">No payment</Badge>, "No money is owed (e.g. nobody declined)."],
                 [<Badge tone="warn" key="p">Payment pending</Badge>, "Waitlist player still has to pay."],
                 [<Badge tone="info" key="c">Awaiting confirmation</Badge>, "Waitlist player marked it as paid; abo hasn't confirmed yet."],
-                [<Badge tone="success" key="ok">Paid</Badge>, "Abo confirmed receipt. Done."],
+                [<Badge tone="success" key="ok">Paid</Badge>, "Subscriber confirmed receipt. Done."],
               ]}
             />
             <Steps>
@@ -237,7 +237,7 @@ export default function HandoutPage() {
                 <em>Awaiting confirmation</em>.
               </Step>
               <Step n={3}>
-                <strong>Abo</strong> sees the same row with <strong>Confirm received</strong> /{" "}
+                <strong>Subscriber</strong> sees the same row with <strong>Confirm received</strong> /{" "}
                 <strong>Not received</strong> buttons. Tapping confirm flips it to <em>Paid</em>.
               </Step>
             </Steps>
@@ -272,7 +272,7 @@ export default function HandoutPage() {
               <FeatureCard
                 title="Admin only"
                 points={[
-                  "Player type (Abo / Waitlist).",
+                  "Player type (Subscriber / Waitlist).",
                   "Order / rank inside the list.",
                   "Position (goalkeeper, defender, midfielder, striker).",
                   "Skills (overall, technique, speed, stamina, defense, offense, passing, shooting, goalkeeping).",
@@ -350,7 +350,7 @@ export default function HandoutPage() {
               <ul className="list-disc pl-5 space-y-1 text-sm">
                 <li>Create / edit / delete players (with or without a login account).</li>
                 <li>Edit skills (overall, technique, speed, stamina, defense, offense, passing, shooting, goalkeeping) and preferred position.</li>
-                <li>Switch a player between Abo and Waitlist, or set them inactive.</li>
+                <li>Switch a player between Subscriber and Waitlist, or set them inactive.</li>
                 <li>Promote a player to admin or demote them back. Self-demotion and demoting the last admin are blocked.</li>
                 <li>Generate a one-hour password reset link for any player.</li>
               </ul>

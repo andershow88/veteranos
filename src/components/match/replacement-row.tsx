@@ -57,7 +57,7 @@ export function ReplacementRow({
               {info.abo.firstName} {info.abo.lastName}
             </div>
             <div className="text-[10px] uppercase tracking-widest text-red-300/80">
-              Abo · declined
+              Subscriber · declined
             </div>
           </div>
         </div>

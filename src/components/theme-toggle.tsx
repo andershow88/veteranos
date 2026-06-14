@@ -8,13 +8,13 @@ import { getClub } from "@/lib/clubs";
 type Mode = "light" | "dark" | "system";
 
 const MODES: { mode: Mode; label: string; Icon: typeof Sun }[] = [
-  { mode: "light", label: "Hell", Icon: Sun },
-  { mode: "dark", label: "Dunkel", Icon: Moon },
+  { mode: "light", label: "Light", Icon: Sun },
+  { mode: "dark", label: "Dark", Icon: Moon },
   { mode: "system", label: "System", Icon: Monitor },
 ];
 
-// Externer "Store" = localStorage. So lesen wir die Auswahl ohne
-// setState-im-Effect (hydration-sicher via useSyncExternalStore).
+// External "store" = localStorage. Lets us read the choice without
+// setState-in-effect (hydration-safe via useSyncExternalStore).
 const listeners = new Set<() => void>();
 function notify() {
   listeners.forEach((l) => l());
@@ -38,7 +38,7 @@ function prefersDark() {
 
 function applyMode(m: Mode) {
   document.documentElement.classList.toggle("dark", m === "dark" || (m === "system" && prefersDark()));
-  // Club-Palette fuer den nun aktiven Hell-/Dunkel-Modus neu ableiten.
+  // Re-derive the club palette for the now-active light/dark mode.
   try {
     const stored = localStorage.getItem("club-theme");
     if (stored) {
@@ -51,12 +51,12 @@ function applyMode(m: Mode) {
 export function ThemeToggle() {
   const mode = useSyncExternalStore(subscribe, readMode, () => "light" as Mode);
 
-  // DOM mit der aktuellen Auswahl synchron halten (External-System-Update).
+  // Keep the DOM in sync with the current choice (external-system update).
   useEffect(() => {
     applyMode(mode);
   }, [mode]);
 
-  // Solange "System" gewaehlt ist, OS-Wechsel live uebernehmen.
+  // While "system" is selected, follow OS changes live.
   useEffect(() => {
     if (mode !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -68,14 +68,14 @@ export function ThemeToggle() {
   function choose(m: Mode) {
     localStorage.setItem("theme", m);
     applyMode(m);
-    notify(); // useSyncExternalStore neu lesen lassen -> Re-Render
+    notify(); // make useSyncExternalStore re-read -> re-render
   }
 
   return (
     <div
       className="inline-flex items-center gap-0.5 rounded-xl border border-border/60 bg-surface-2/40 p-0.5"
       role="group"
-      aria-label="Farbschema"
+      aria-label="Theme"
     >
       {MODES.map(({ mode: m, label, Icon }) => {
         const active = mode === m;

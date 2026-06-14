@@ -174,7 +174,7 @@ export function TeamControls({ matchId, hasTeams, locked, isPast, teamCount, poo
                       {p.firstName} {p.lastName}
                     </span>
                     <Badge tone={p.kind === "ABO" ? "success" : "info"} className="shrink-0">
-                      {p.kind === "ABO" ? "Abo" : "Waitlist"}
+                      {p.kind === "ABO" ? "Subscriber" : "Waitlist"}
                     </Badge>
                     <span className="number-pill text-xs text-muted shrink-0">OVR {p.overall}</span>
                   </label>

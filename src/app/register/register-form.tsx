@@ -46,7 +46,7 @@ export function RegisterForm({ token }: { token: string }) {
         <div className="space-y-1.5">
           <Label>Player type *</Label>
           <div className="grid sm:grid-cols-2 gap-2">
-            <KindRadio value="ABO" label="Abo" description="Fixed slot. Confirm or decline per match." />
+            <KindRadio value="ABO" label="Subscriber" description="Fixed slot. Confirm or decline per match." />
             <KindRadio value="WAITLIST" label="Waitlist" description="Sign up per match when there is an open spot." />
           </div>
         </div>

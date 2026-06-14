@@ -34,7 +34,7 @@ export default async function AdminPlayersPage() {
         </div>
       </div>
 
-      <PlayerListSection title="Abos" players={subs} tone="success" />
+      <PlayerListSection title="Subscribers" players={subs} tone="success" />
       <PlayerListSection title="Waitlist" players={waitlist} tone="info" />
     </div>
   );

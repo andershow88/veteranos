@@ -23,7 +23,7 @@ const registerSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "At least 6 characters"),
   kind: z.enum(["ABO", "WAITLIST"], {
-    errorMap: () => ({ message: "Please choose Abo or Waitlist" }),
+    errorMap: () => ({ message: "Please choose Subscriber or Waitlist" }),
   }),
   // Optional profile data
   nickname: z.string().optional().nullable(),
