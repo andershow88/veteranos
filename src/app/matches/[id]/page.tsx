@@ -40,7 +40,7 @@ export default async function MatchDetailPage({
 
   const mySignup = currentPlayer.playerId ? findMySignup(view, currentPlayer.playerId) : null;
   const showSignupBar =
-    !!currentPlayer.playerId && !view.locked &&
+    !!currentPlayer.playerId && !view.locked && !view.isPast &&
     (currentPlayer.kind === "ABO" || currentPlayer.kind === "WAITLIST");
 
   return (

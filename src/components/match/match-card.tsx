@@ -67,6 +67,7 @@ export function MatchCard({
         <SignupControls
           matchId={view.id}
           locked={view.locked}
+          isPast={view.isPast}
           currentPlayer={currentPlayer}
           mySignup={
             currentPlayer.playerId

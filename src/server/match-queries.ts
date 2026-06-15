@@ -45,6 +45,9 @@ export type MatchView = {
   aboTotal: number;
 
   hasTeams: boolean;
+
+  /** True once the match is over (kickoff + 6h) — no more sign-up changes. */
+  isPast: boolean;
 };
 
 /**
@@ -179,6 +182,8 @@ function composeMatchView(
     pendingAbos,
     aboTotal: activeAbos.length,
     hasTeams: match.teams.length > 0,
+    // A match counts as over 6h after kickoff (same window used elsewhere).
+    isPast: match.date.getTime() < Date.now() - 1000 * 60 * 60 * 6,
   };
 }
 

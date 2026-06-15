@@ -15,6 +15,8 @@ import type { Signup, Player } from "@prisma/client";
 type Props = {
   matchId: string;
   locked: boolean;
+  /** Match is over (past kickoff) — no manual in/out changes anymore. */
+  isPast?: boolean;
   currentPlayer: {
     playerId: string | null;
     kind: "ABO" | "WAITLIST" | null;
@@ -25,7 +27,7 @@ type Props = {
 
 type WaitlistOption = { id: string; firstName: string; lastName: string | null; overall: number; _onMatchWaitlist: boolean };
 
-export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Props) {
+export function SignupControls({ matchId, locked, isPast, currentPlayer, mySignup }: Props) {
   const sx = useSignup(matchId);
   const [showDeclineOptions, setShowDeclineOptions] = useState(false);
 
@@ -33,6 +35,16 @@ export function SignupControls({ matchId, locked, currentPlayer, mySignup }: Pro
     return (
       <div className="rounded-xl border border-dashed border-border/60 bg-surface/50 px-4 py-3 text-sm text-muted">
         Log in to confirm or decline.
+      </div>
+    );
+  }
+
+  // Past match: the game is over — no more manual in/out changes. Payment
+  // confirmation stays available elsewhere in the card.
+  if (isPast) {
+    return (
+      <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-surface/50 px-4 py-3 text-sm text-muted">
+        <Clock className="h-4 w-4 shrink-0" /> This match is over — sign-ups can no longer be changed.
       </div>
     );
   }
