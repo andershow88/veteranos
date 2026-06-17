@@ -30,7 +30,7 @@ import {
 } from "@/server/match-actions";
 import type { ReplacementInfo } from "@/server/match-queries";
 import { buildPaymentReminderText, waShareUrl } from "@/lib/utils";
-import { reminderStatusLabel } from "@/lib/payment-rules";
+import { paymentAnchorId, reminderStatusLabel } from "@/lib/payment-rules";
 
 type CurrentPlayerCtx = {
   playerId: string | null;
@@ -56,7 +56,10 @@ export function ReplacementRow({
   const signupId = info.replacement?.id ?? "";
 
   return (
-    <div className="rounded-xl border border-border/60 bg-surface/50 p-3 space-y-2">
+    <div
+      id={signupId ? paymentAnchorId(signupId) : undefined}
+      className="scroll-mt-24 rounded-xl border border-border/60 bg-surface/50 p-3 space-y-2 sm:scroll-mt-20"
+    >
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-xs font-bold text-pitch-300 number-pill">#{index + 1}</span>
 

@@ -84,3 +84,17 @@ export function reminderStatusLabel(count: number): string | null {
   if (!count || count < 1) return null;
   return `Reminder ${count} opened`;
 }
+
+/**
+ * DOM id of a replacement row, used as a #hash anchor so a payment entry in the
+ * profile can deep-link straight to the row where the actions live. Single
+ * source of truth shared by the profile link and the match row id.
+ */
+export function paymentAnchorId(signupId: string): string {
+  return `payment-${signupId}`;
+}
+
+/** Deep link from a profile payment entry to the exact match row + actions. */
+export function paymentDeepLink(matchId: string, signupId: string): string {
+  return `/matches/${matchId}#${paymentAnchorId(signupId)}`;
+}

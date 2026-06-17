@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { ClubPicker } from "@/components/club-picker";
 import { getPaymentsForPlayer, type PaymentEntry } from "@/server/match-queries";
 import { formatMatchDate } from "@/lib/utils";
+import { paymentDeepLink } from "@/lib/payment-rules";
 
 export const dynamic = "force-dynamic";
 
@@ -163,7 +164,7 @@ function PaymentList({
             return (
               <Link
                 key={e.signupId}
-                href={`/matches/${e.matchId}`}
+                href={paymentDeepLink(e.matchId, e.signupId)}
                 className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-surface/50 px-3 py-2 hover:border-pitch-500 transition"
               >
                 <Avatar firstName={other.firstName} lastName={other.lastName} size="sm" src={other.avatarUrl} />

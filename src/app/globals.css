@@ -281,6 +281,26 @@
   animation: shine 6s linear infinite;
 }
 
+/* Brief flash on a replacement row when it is reached via a "#payment-<id>"
+   deep link from the profile, so the user sees exactly where the payment
+   actions are. Adapts to light/dark via the themed pitch + ring-glow tokens. */
+@keyframes payment-flash {
+  0% {
+    box-shadow:
+      0 0 0 2px color-mix(in oklab, var(--color-pitch-500) 60%, transparent),
+      0 8px 30px -8px var(--ring-glow);
+    background-color: color-mix(in oklab, var(--color-pitch-500) 16%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    background-color: transparent;
+  }
+}
+
+.payment-flash {
+  animation: payment-flash 2.4s ease-out;
+}
+
 /* Respect users who prefer reduced motion: drop decorative animation and
    collapse transitions to near-instant (keeps state changes, removes motion). */
 @media (prefers-reduced-motion: reduce) {

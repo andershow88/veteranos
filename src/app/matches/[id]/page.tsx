@@ -7,6 +7,7 @@ import { buildMatchView, findMySignup } from "@/server/match-queries";
 import { MatchCard } from "@/components/match/match-card";
 import { MatchSignupBar } from "@/components/match/match-signup-bar";
 import { TeamShowcase } from "@/components/team/team-showcase";
+import { HashScrollHighlight } from "@/components/match/hash-scroll-highlight";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,7 @@ export default async function MatchDetailPage({
           <ArrowLeft className="h-4 w-4" /> Back to overview
         </Link>
 
+        <HashScrollHighlight />
         <MatchCard view={view} currentPlayer={currentPlayer} showDetailsLink={false} />
 
         {teams.length > 0 && <TeamShowcase teams={teams} />}

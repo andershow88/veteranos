@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   isOutstanding,
+  paymentAnchorId,
+  paymentDeepLink,
   reminderStatusLabel,
   subscriberConfirmError,
   subscriberReminderError,
@@ -66,6 +68,21 @@ describe("subscriberReminderError (reminder authorization)", () => {
   });
   it("rejects reminding when there is no outstanding payment (NONE)", () => {
     expect(subscriberReminderError(ABO, ctx("NONE"))).toMatch(/no outstanding payment/i);
+  });
+});
+
+describe("payment deep link (profile -> exact match row)", () => {
+  it("derives the row anchor id from the signup id", () => {
+    expect(paymentAnchorId("sg_123")).toBe("payment-sg_123");
+  });
+  it("builds a match URL whose hash matches the row anchor id (no drift)", () => {
+    const matchId = "m_42";
+    const signupId = "sg_123";
+    const link = paymentDeepLink(matchId, signupId);
+    expect(link).toBe("/matches/m_42#payment-sg_123");
+    // the fragment must equal the id we render on the row
+    expect(link.split("#")[1]).toBe(paymentAnchorId(signupId));
+    expect(link.startsWith(`/matches/${matchId}`)).toBe(true);
   });
 });
 
