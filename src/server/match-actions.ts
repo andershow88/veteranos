@@ -5,6 +5,12 @@ import { db } from "@/lib/db";
 import { getCurrentUser, requireAdmin, requireUser } from "@/lib/auth";
 import type { PaymentStatus, SignupStatus } from "@prisma/client";
 import { sendPushToAll } from "@/lib/push";
+import {
+  OUTSTANDING_PAYMENT_STATUSES,
+  REMINDER_DEBOUNCE_SECONDS,
+  subscriberConfirmError,
+  subscriberReminderError,
+} from "@/lib/payment-rules";
 
 async function nextWaitlistRank(matchId: string) {
   const top = await db.signup.findFirst({
@@ -678,6 +684,77 @@ export async function disputePaymentAction(signupId: string) {
     where: { id: signupId },
     data: { paymentStatus: "PENDING" },
   });
+
+  pathBust(ctx.waitlist.matchId);
+}
+
+/**
+ * Subscription (abo) player confirms they have already received the payment and
+ * settles it directly — without waiting for the replacement to mark it paid.
+ * Reaches the same final state (PAID) as the two-step claim/confirm flow.
+ *
+ * The write is an atomic conditional update: it only flips a still-outstanding
+ * (PENDING or CLAIMED) payment to PAID, so it can neither double-complete nor
+ * clobber a concurrent transition (e.g. the replacement claiming at the same
+ * moment). Affected-rows === 0 means it was already settled by someone else.
+ */
+export async function confirmPaymentReceivedAction(signupId: string) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const ctx = await findReplacementContext(signupId);
+  if (!ctx) throw new Error("Not a replacement signup");
+
+  const error = subscriberConfirmError(user.player.id, {
+    aboPlayerId: ctx.abo.id,
+    waitlistPlayerId: ctx.waitlist.playerId,
+    paymentStatus: ctx.waitlist.paymentStatus,
+  });
+  if (error) throw new Error(error);
+
+  const res = await db.signup.updateMany({
+    where: { id: signupId, paymentStatus: { in: [...OUTSTANDING_PAYMENT_STATUSES] } },
+    data: { paymentStatus: "PAID" },
+  });
+  if (res.count === 0) throw new Error("This payment is already completed.");
+
+  pathBust(ctx.waitlist.matchId);
+}
+
+/**
+ * Records that the subscription (abo) player opened a WhatsApp payment reminder
+ * for the replacement. Tracks a count + the latest timestamp. We say "opened",
+ * never "sent": only the deep link being triggered is observable, not delivery.
+ *
+ * The increment is a single atomic statement whose WHERE clause re-checks the
+ * outstanding state and a short cool-down window at the DB level, so double
+ * clicks, fast re-taps and concurrent requests can't inflate the count.
+ */
+export async function remindPaymentAction(signupId: string) {
+  await requireUser();
+  const user = await getCurrentUser();
+  if (!user?.player) throw new Error("No player profile");
+
+  const ctx = await findReplacementContext(signupId);
+  if (!ctx) throw new Error("Not a replacement signup");
+
+  const error = subscriberReminderError(user.player.id, {
+    aboPlayerId: ctx.abo.id,
+    waitlistPlayerId: ctx.waitlist.playerId,
+    paymentStatus: ctx.waitlist.paymentStatus,
+  });
+  if (error) throw new Error(error);
+
+  await db.$executeRaw`
+    UPDATE "Signup"
+    SET "paymentReminderCount" = "paymentReminderCount" + 1,
+        "paymentReminderLastAt" = NOW()
+    WHERE "id" = ${signupId}
+      AND "paymentStatus" IN ('PENDING', 'CLAIMED')
+      AND ("paymentReminderLastAt" IS NULL
+           OR "paymentReminderLastAt" < NOW() - (${REMINDER_DEBOUNCE_SECONDS} * INTERVAL '1 second'))
+  `;
 
   pathBust(ctx.waitlist.matchId);
 }

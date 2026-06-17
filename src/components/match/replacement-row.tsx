@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -11,17 +11,26 @@ import {
   Send,
   AlertCircle,
   Loader2,
+  ChevronDown,
+  MessageCircle,
+  Bell,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import {
   claimPaymentAction,
   unclaimPaymentAction,
   confirmPaymentAction,
   disputePaymentAction,
+  confirmPaymentReceivedAction,
+  remindPaymentAction,
 } from "@/server/match-actions";
 import type { ReplacementInfo } from "@/server/match-queries";
+import { buildPaymentReminderText, waShareUrl } from "@/lib/utils";
+import { reminderStatusLabel } from "@/lib/payment-rules";
 
 type CurrentPlayerCtx = {
   playerId: string | null;
@@ -32,10 +41,12 @@ type CurrentPlayerCtx = {
 export function ReplacementRow({
   info,
   index,
+  matchDate,
   currentPlayer,
 }: {
   info: ReplacementInfo;
   index: number;
+  matchDate: Date | string;
   currentPlayer?: CurrentPlayerCtx;
 }) {
   const [pending, start] = useTransition();
@@ -160,11 +171,14 @@ export function ReplacementRow({
             </div>
           )}
 
-          {/* Abo player's view */}
+          {/* Abo player's view: still waiting, but can settle directly or nudge. */}
           {isAboMe && info.paymentStatus === "PENDING" && (
-            <div className="text-xs text-muted">
-              Waiting for <span className="font-semibold text-foreground">{info.replacement.player.firstName}</span> to pay you and mark it.
-            </div>
+            <SubscriberPendingActions
+              signupId={signupId}
+              replacementFirstName={info.replacement.player.firstName}
+              matchDate={matchDate}
+              reminderCount={info.replacement.paymentReminderCount}
+            />
           )}
 
           {isAboMe && info.paymentStatus === "CLAIMED" && (
@@ -201,6 +215,145 @@ export function ReplacementRow({
       {info.paymentNote && (isWaitlistMe || isAboMe) && (
         <div className="text-xs text-muted italic">&ldquo;{info.paymentNote}&rdquo;</div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Subscription (abo) player's options while a replacement payment is still
+ * pending: confirm receipt directly, or open a WhatsApp reminder. Grouped in a
+ * small popover opened from the row. The replacement player's flow is untouched.
+ */
+function SubscriberPendingActions({
+  signupId,
+  replacementFirstName,
+  matchDate,
+  reminderCount,
+}: {
+  signupId: string;
+  replacementFirstName: string;
+  matchDate: Date | string;
+  reminderCount: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close the popover on outside click or Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const reminderLabel = reminderStatusLabel(reminderCount);
+
+  const onConfirmReceived = async () => {
+    setOpen(false);
+    const ok = await confirm({
+      title: `Have you already received the payment from ${replacementFirstName}?`,
+      description:
+        "This settles the payment as received, even though they haven't marked it as paid in the app yet.",
+      confirmText: "Confirm payment received",
+      cancelText: "Cancel",
+      variant: "primary",
+    });
+    if (!ok) return;
+    setError(null);
+    start(async () => {
+      try {
+        await confirmPaymentReceivedAction(signupId);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Could not confirm the payment.");
+      }
+    });
+  };
+
+  const onSendReminder = () => {
+    setOpen(false);
+    // Open WhatsApp inside the click gesture so it isn't pop-up blocked; the
+    // recipient is picked there. We then record that a reminder was opened.
+    window.open(waShareUrl(buildPaymentReminderText(replacementFirstName, matchDate)), "_blank");
+    setError(null);
+    start(async () => {
+      try {
+        await remindPaymentAction(signupId);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Could not record the reminder.");
+      }
+    });
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex-1 min-w-0 text-xs text-muted">
+        Waiting for <span className="font-semibold text-foreground">{replacementFirstName}</span> to pay
+        you and mark it.
+        {reminderLabel && (
+          <span className="mt-1 flex items-center gap-1 text-[11px] text-muted">
+            <Bell className="h-3 w-3" /> {reminderLabel}
+          </span>
+        )}
+        {error && (
+          <Alert tone="danger" className="mt-2">
+            {error}
+          </Alert>
+        )}
+      </div>
+
+      <div className="relative" ref={menuRef}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={pending}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wallet className="h-3.5 w-3.5" />}
+          Payment options
+          <ChevronDown className="h-3.5 w-3.5" />
+        </Button>
+
+        {open && (
+          <div
+            role="menu"
+            className="absolute right-0 z-50 mt-1 w-60 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-2xl"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onConfirmReceived}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-foreground hover:bg-surface-2"
+            >
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-pitch-300" />
+              Confirm payment received
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={onSendReminder}
+              className="flex w-full items-center gap-2 border-t border-border/60 px-3 py-2.5 text-left text-sm text-foreground hover:bg-surface-2"
+            >
+              <MessageCircle className="h-4 w-4 shrink-0 text-pitch-300" />
+              Send WhatsApp reminder
+            </button>
+          </div>
+        )}
+      </div>
+      {dialog}
     </div>
   );
 }

@@ -14,6 +14,14 @@ export function waShareUrl(text: string) {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
+/**
+ * Prefilled English WhatsApp reminder a subscription player sends to the
+ * replacement about an outstanding payment. Recipient is picked in WhatsApp.
+ */
+export function buildPaymentReminderText(firstName: string, matchDate: Date | string) {
+  return `Hi ${firstName}, just a quick reminder about the outstanding payment for your replacement spot on ${formatMatchDate(matchDate)}. Thank you!`;
+}
+
 export function initials(firstName: string, lastName?: string | null) {
   const first = firstName.charAt(0);
   const second = (lastName ?? "").charAt(0) || firstName.charAt(1) || "";

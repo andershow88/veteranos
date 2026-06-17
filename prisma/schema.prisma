@@ -184,6 +184,12 @@ model Signup {
   paymentStatus PaymentStatus @default(NONE)
   paymentNote   String?
 
+  // How many times the subscription (abo) player has opened a WhatsApp payment
+  // reminder for this replacement, and when the latest one was opened. "Opened"
+  // (not "sent"): we can only know the deep link was triggered, not delivered.
+  paymentReminderCount  Int       @default(0)
+  paymentReminderLastAt DateTime?
+
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

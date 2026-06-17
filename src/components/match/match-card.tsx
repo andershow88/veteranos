@@ -184,7 +184,7 @@ export function MatchCard({
           >
             <div className="space-y-2">
               {view.replacements.map((r, idx) => (
-                <ReplacementRow key={idx} info={r} index={idx} currentPlayer={currentPlayer} />
+                <ReplacementRow key={idx} info={r} index={idx} matchDate={view.date} currentPlayer={currentPlayer} />
               ))}
             </div>
           </Section>
