@@ -9,7 +9,7 @@ import { hashPassword, requireAdmin } from "@/lib/auth";
 import { buildPasswordResetUrl, sendEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
-const TOKEN_TTL_MS = 1000 * 60 * 60; // 1 hour
+const TOKEN_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 
 const forgotSchema = z.object({
   firstName: z.string().min(1, "First name missing"),
@@ -112,7 +112,7 @@ export async function requestPasswordResetAction(
           `Hi ${matches[0].firstName},`,
           "",
           "You (or someone) requested a password reset for your Veteranos account.",
-          "Open the link below to choose a new password. It expires in one hour.",
+          "Open the link below to choose a new password. It expires in 12 hours.",
           "",
           url,
           "",
@@ -149,7 +149,7 @@ export async function adminGenerateResetLinkAction(userId: string): Promise<{
     `Hi ${user.player?.firstName ?? "there"},`,
     "",
     "An admin generated a password reset link for your Veteranos account.",
-    "Open the link below to choose a new password. It expires in one hour.",
+    "Open the link below to choose a new password. It expires in 12 hours.",
     "",
     url,
     "",

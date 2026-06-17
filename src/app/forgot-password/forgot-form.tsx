@@ -21,7 +21,7 @@ export function ForgotPasswordForm() {
       <Alert tone="success">
         <span>
           If a matching account exists, a password reset link has been emailed to its
-          registered address. The link expires in one hour. If you don&apos;t receive it,
+          registered address. The link expires in 12 hours. If you don&apos;t receive it,
           contact an admin.
         </span>
       </Alert>

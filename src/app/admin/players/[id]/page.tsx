@@ -109,7 +109,7 @@ export default async function EditPlayerPage({
             <CardHeader>
               <h3 className="font-display text-xl tracking-wide">Password reset</h3>
               <p className="text-xs text-muted">
-                Generate a one-hour reset link for this user. The link is emailed to them
+                Generate a 12-hour reset link for this user. The link is emailed to them
                 (if email is configured) and shown here as a fallback you can copy and forward.
               </p>
             </CardHeader>

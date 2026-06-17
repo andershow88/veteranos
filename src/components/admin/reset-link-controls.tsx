@@ -66,7 +66,7 @@ export function ResetLinkControls({ userId }: { userId: string }) {
             </Button>
           </div>
           <p className="text-[11px] text-subtle">
-            Link expires in 1 hour. The previous reset links for this user are invalidated as soon as one is used.
+            Link expires in 12 hours. The previous reset links for this user are invalidated as soon as one is used.
           </p>
         </div>
       )}

@@ -304,7 +304,7 @@ export default function HandoutPage() {
             </Steps>
             <Callout tone="warn" icon={<AlertTriangle className="h-4 w-4" />}>
               If your name doesn&apos;t match (or matches more than one player), the form asks you
-              to contact an admin. Admins can <strong>generate a one-hour reset link</strong> for any
+              to contact an admin. Admins can <strong>generate a 12-hour reset link</strong> for any
               user in <em>Admin → Players → [name]</em>.
             </Callout>
           </Section>
@@ -352,7 +352,7 @@ export default function HandoutPage() {
                 <li>Edit skills (overall, technique, speed, stamina, defense, offense, passing, shooting, goalkeeping) and preferred position.</li>
                 <li>Switch a player between Subscriber and Waitlist, or set them inactive.</li>
                 <li>Promote a player to admin or demote them back. Self-demotion and demoting the last admin are blocked.</li>
-                <li>Generate a one-hour password reset link for any player.</li>
+                <li>Generate a 12-hour password reset link for any player.</li>
               </ul>
             </SubSection>
 
