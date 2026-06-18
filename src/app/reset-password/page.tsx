@@ -15,6 +15,10 @@ export default async function ResetPasswordPage({
   if (await getSession()) redirect("/");
 
   const { token } = await searchParams;
+  // `token` is the RAW token from the link; the DB stores only its hash. The
+  // form must submit the RAW token (resetPasswordAction hashes it once to look
+  // it up) — never row.token, which is the stored hash and would be hashed
+  // twice, making every valid link fail as "invalid or already used".
   const row = token ? await findUsableResetToken(token) : null;
 
   return (
@@ -25,7 +29,7 @@ export default async function ResetPasswordPage({
         </div>
         <div className="glass rounded-2xl p-6 sm:p-8">
           {row ? (
-            <ResetPasswordForm token={row.token} />
+            <ResetPasswordForm token={token!} />
           ) : (
             <Alert tone="warning">
               <span>This reset link is invalid, used, or expired. Request a new one from the forgot-password page or your admin.</span>
