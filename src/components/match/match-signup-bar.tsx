@@ -26,7 +26,7 @@ export function MatchSignupBar({ matchId, kind, status }: Props) {
   return (
     <div
       className="fixed inset-x-0 z-30 border-t border-border/60 bg-bg/95 backdrop-blur-md md:hidden"
-      style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+      style={{ bottom: "calc(var(--bottom-nav-h) + env(safe-area-inset-bottom))" }}
     >
       <div className="mx-auto flex max-w-md items-center gap-2 px-3 py-2">
         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-widest text-muted">Your reply</span>

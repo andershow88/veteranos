@@ -9,13 +9,13 @@ import { BottomNav } from "@/components/bottom-nav";
 import { getCurrentUser } from "@/lib/auth";
 
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
 const bebas = Bebas_Neue({
-  variable: "--font-display",
+  variable: "--font-bebas",
   subsets: ["latin"],
   weight: ["400"],
   display: "swap",
@@ -144,7 +144,7 @@ export default async function RootLayout({
         <main
           id="main"
           tabIndex={-1}
-          className={`flex-1 w-full focus:outline-none ${user ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0" : ""}`}
+          className={`flex-1 w-full focus:outline-none ${user ? "pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom))] md:pb-0" : ""}`}
         >
           {children}
         </main>

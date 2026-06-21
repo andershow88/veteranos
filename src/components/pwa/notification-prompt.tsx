@@ -101,7 +101,7 @@ export function NotificationPrompt() {
 
     return (
         <div
-            className="fixed z-40 left-3 right-3 bottom-16 sm:left-auto sm:right-3 sm:bottom-3 max-w-sm"
+            className="fixed z-30 left-3 right-3 bottom-16 sm:left-auto sm:right-3 sm:bottom-[5.5rem] max-w-sm"
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         >
             <div className="relative rounded-2xl border border-border/60 bg-surface/95 backdrop-blur-md shadow-2xl px-4 py-3 pr-10">

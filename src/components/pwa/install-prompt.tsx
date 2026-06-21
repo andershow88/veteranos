@@ -92,7 +92,7 @@ export function InstallPrompt() {
   // detail card; X dismisses for this session.
   return (
     <div
-      className="fixed z-40 right-3 bottom-3 max-w-[min(22rem,calc(100vw-1.5rem))] sm:max-w-sm"
+      className="fixed z-30 right-3 bottom-3 max-w-[min(22rem,calc(100vw-1.5rem))] sm:max-w-sm"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="relative glass rounded-2xl border border-pitch-600/40 shadow-2xl px-3 py-2 pr-9 flex items-center gap-2.5">
