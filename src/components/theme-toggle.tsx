@@ -90,7 +90,7 @@ export function ThemeToggle() {
               "grid h-8 w-8 place-items-center rounded-lg transition " +
               (active
                 ? "bg-bg-elevated text-foreground shadow-sm"
-                : "text-foreground/55 hover:bg-surface-2/60 hover:text-foreground")
+                : "text-foreground/70 hover:bg-surface-2/60 hover:text-foreground")
             }
           >
             <Icon className="h-4 w-4" />

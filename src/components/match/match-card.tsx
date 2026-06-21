@@ -405,8 +405,8 @@ function StatusSummary({ view }: { view: MatchView }) {
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2" aria-hidden>
             <div
-              className="h-full rounded-full bg-pitch-500 transition-all"
-              style={{ width: `${respPct}%` }}
+              className="h-full w-full origin-left rounded-full bg-pitch-500 transition-transform duration-300 ease-out"
+              style={{ transform: `scaleX(${respPct / 100})` }}
             />
           </div>
         </div>

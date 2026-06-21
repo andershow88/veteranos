@@ -110,7 +110,7 @@ export function WeatherWidget() {
       <div className="flex items-center gap-3">
         {forecast.map((d) => (
           <div key={d.date} className="flex flex-col items-center gap-0.5 min-w-10">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-muted">{d.dayName}</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">{d.dayName}</span>
             <WmoIcon code={d.code} className="h-4 w-4 text-pitch-300" />
             <div className="text-[10px] number-pill text-foreground leading-tight">
               <span className="font-semibold">{d.tempMax}°</span>
@@ -120,7 +120,7 @@ export function WeatherWidget() {
         ))}
       </div>
 
-      <div className="text-[8px] uppercase tracking-widest text-muted/50">
+      <div className="text-[10px] uppercase tracking-widest text-muted">
         DWD · Open-Meteo
       </div>
     </div>

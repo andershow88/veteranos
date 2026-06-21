@@ -476,7 +476,7 @@ function SignupTimestamp({ signup }: { signup: { createdAt: Date | string; updat
     timeZone: "Europe/Berlin",
   });
   return (
-    <div className="text-[9px] text-muted/60 mt-0.5">
+    <div className="text-[10px] text-muted mt-0.5">
       {label} {fmt.format(date)}
     </div>
   );

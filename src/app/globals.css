@@ -299,7 +299,7 @@
 }
 
 .payment-flash {
-  animation: payment-flash 2.4s ease-out;
+  animation: payment-flash 0.9s ease-out;
 }
 
 /* Respect users who prefer reduced motion: drop decorative animation and

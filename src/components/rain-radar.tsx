@@ -132,7 +132,7 @@ export function RainRadar() {
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-1 text-[8px] uppercase tracking-widest text-muted/50">
+      <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted">
         <CloudRain className="h-2.5 w-2.5" /> Rain Radar · RainViewer
       </div>
     </div>

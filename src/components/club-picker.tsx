@@ -45,7 +45,7 @@ export function ClubPicker({ currentSlug }: { currentSlug: string | null }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search club..."
-          className="w-full bg-transparent border border-border/60 rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-subtle focus:border-pitch-500 focus:outline-none"
+          className="w-full bg-transparent border border-border/60 rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-subtle focus:border-pitch-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pitch-500/60"
         />
         {search && (
           <button

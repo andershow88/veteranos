@@ -24,7 +24,7 @@ export function HashScrollHighlight() {
       el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
       el.classList.add("payment-flash");
       window.clearTimeout(timer);
-      timer = window.setTimeout(() => el.classList.remove("payment-flash"), 2400);
+      timer = window.setTimeout(() => el.classList.remove("payment-flash"), 900);
     };
 
     // Defer one frame so the server-rendered row is laid out before scrolling.

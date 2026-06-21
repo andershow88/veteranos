@@ -458,7 +458,7 @@ function Section({
           {subtitle && <p className="text-xs sm:text-sm text-muted mt-1">{subtitle}</p>}
         </div>
       </div>
-      <div className="space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed wrap-break-word">
+      <div className="space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed wrap-break-word max-w-[72ch]">
         {children}
       </div>
     </section>
