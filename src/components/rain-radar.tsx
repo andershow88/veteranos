@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { CloudRain } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const LAT = 48.1351;
 const LON = 11.582;
@@ -72,7 +73,16 @@ export function RainRadar() {
     return () => clearInterval(intervalRef.current);
   }, [loaded, frames.length]);
 
-  if (!loaded || frames.length === 0) return null;
+  if (!loaded || frames.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-1.5">
+        <Skeleton className="rounded-xl" style={{ width: MAP_W, height: MAP_H }} />
+        <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-muted">
+          <CloudRain className="h-2.5 w-2.5" /> Rain Radar · RainViewer
+        </div>
+      </div>
+    );
+  }
 
   const frame = frames[frameIdx];
   const isPast = frameIdx < frames.length - 3;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, CloudDrizzle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CurrentWeather = { temperature: number; code: number };
 type DailyForecast = { date: string; dayName: string; code: number; tempMax: number; tempMin: number };
@@ -85,7 +86,24 @@ export function WeatherWidget() {
       .catch(() => {});
   }, []);
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center gap-3 shrink-0 lg:items-end">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-12 w-12 rounded-xl" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-7 w-20" />
+            <Skeleton className="h-2.5 w-24" />
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-12 w-10" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const forecast = data.daily.slice(1);
 
