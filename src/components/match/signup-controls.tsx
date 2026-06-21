@@ -125,12 +125,14 @@ export function SignupControls({ matchId, locked, isPast, currentPlayer, mySignu
       )}
 
       {showDeclineOptions && (
-        <DeclineOptions
-          matchId={matchId}
-          pending={sx.pending}
-          run={sx.run}
-          onDone={() => setShowDeclineOptions(false)}
-        />
+        <div className="animate-enter">
+          <DeclineOptions
+            matchId={matchId}
+            pending={sx.pending}
+            run={sx.run}
+            onDone={() => setShowDeclineOptions(false)}
+          />
+        </div>
       )}
     </div>
   );
