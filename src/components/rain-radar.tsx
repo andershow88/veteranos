@@ -5,21 +5,20 @@ import { CloudRain } from "lucide-react";
 
 const LAT = 48.1351;
 const LON = 11.582;
-const ZOOM = 9;
-const SIZE = 180;
+const ZOOM = 7; // ~300 km view — the broad cloud picture, like before
+const TILE = 256;
+const MAP_W = 248; // wider (landscape) map box
+const MAP_H = 168;
 
 type RadarFrame = { path: string; time: number };
 
-function latLonToTile(lat: number, lon: number, zoom: number) {
-  const n = 2 ** zoom;
-  const xf = ((lon + 180) / 360) * n;
-  const latRad = (lat * Math.PI) / 180;
-  const yf = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n;
-  const x = Math.floor(xf);
-  const y = Math.floor(yf);
-  // fx/fy: fractional position of the point inside its tile (0..1) — used to
-  // place the marker exactly on Munich instead of at the tile centre.
-  return { x, y, fx: xf - x, fy: yf - y };
+// Web-mercator tile coordinates (float) for a lat/lon at a given zoom.
+function lonToTileX(lon: number, z: number) {
+  return ((lon + 180) / 360) * 2 ** z;
+}
+function latToTileY(lat: number, z: number) {
+  const r = (lat * Math.PI) / 180;
+  return ((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * 2 ** z;
 }
 
 export function RainRadar() {
@@ -28,7 +27,21 @@ export function RainRadar() {
   const [loaded, setLoaded] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
-  const tile = latLonToTile(LAT, LON, ZOOM);
+  // Centre the map box on Munich: compute the viewport's top-left in world
+  // pixels, then list the tiles that cover it with their screen offsets. This
+  // keeps Munich (the marker) dead-centre instead of at a tile edge.
+  const cx = lonToTileX(LON, ZOOM) * TILE;
+  const cy = latToTileY(LAT, ZOOM) * TILE;
+  const originX = cx - MAP_W / 2;
+  const originY = cy - MAP_H / 2;
+  const tiles: { tx: number; ty: number; left: number; top: number }[] = [];
+  for (let tx = Math.floor(originX / TILE); tx <= Math.floor((originX + MAP_W) / TILE); tx++) {
+    for (let ty = Math.floor(originY / TILE); ty <= Math.floor((originY + MAP_H) / TILE); ty++) {
+      tiles.push({ tx, ty, left: tx * TILE - originX, top: ty * TILE - originY });
+    }
+  }
+  const centerTx = Math.floor(cx / TILE);
+  const centerTy = Math.floor(cy / TILE);
 
   useEffect(() => {
     fetch("https://api.rainviewer.com/public/weather-maps.json")
@@ -39,16 +52,14 @@ export function RainRadar() {
         const all = [...past, ...nowcast];
         if (all.length === 0) return;
         setFrames(all);
-
-        const imgs = all.map((f) => {
-          const img = new Image();
-          img.src = `https://tilecache.rainviewer.com${f.path}/256/${ZOOM}/${tile.x}/${tile.y}/4/1_1.png`;
-          return img;
-        });
-        imgs[imgs.length - 1].onload = () => setLoaded(true);
+        // Wait for the centre radar tile of the latest frame before animating.
+        const img = new Image();
+        img.src = `https://tilecache.rainviewer.com${all[all.length - 1].path}/256/${ZOOM}/${centerTx}/${centerTy}/4/1_1.png`;
+        img.onload = () => setLoaded(true);
+        img.onerror = () => setLoaded(true);
       })
       .catch(() => {});
-  }, [tile.x, tile.y]);
+  }, [centerTx, centerTy]);
 
   useEffect(() => {
     if (!loaded || frames.length === 0) return;
@@ -72,35 +83,36 @@ export function RainRadar() {
     timeZone: "Europe/Berlin",
   });
 
-  const baseTileUrl = `https://tile.openstreetmap.org/${ZOOM}/${tile.x}/${tile.y}.png`;
-  const radarTileUrl = `https://tilecache.rainviewer.com${frame.path}/256/${ZOOM}/${tile.x}/${tile.y}/4/1_1.png`;
-
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
         className="relative overflow-hidden rounded-xl border border-border/60"
-        style={{ width: SIZE, height: SIZE }}
+        style={{ width: MAP_W, height: MAP_H }}
       >
-        {/* Base map tile */}
-        <img
-          src={baseTileUrl}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-60 dark:opacity-40 dark:invert dark:hue-rotate-180"
-          style={{ imageRendering: "auto" }}
-        />
-        {/* Radar overlay */}
-        <img
-          key={frame.path}
-          src={radarTileUrl}
-          alt="Rain radar"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ imageRendering: "auto" }}
-        />
-        {/* Marker at Munich's actual position within the tile */}
-        <div
-          className="absolute pointer-events-none"
-          style={{ left: `${tile.fx * 100}%`, top: `${tile.fy * 100}%`, transform: "translate(-50%, -50%)" }}
-        >
+        {/* Base map tiles */}
+        {tiles.map((t) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={`b-${t.tx}-${t.ty}`}
+            src={`https://tile.openstreetmap.org/${ZOOM}/${t.tx}/${t.ty}.png`}
+            alt=""
+            className="absolute max-w-none opacity-60 dark:opacity-40 dark:invert dark:hue-rotate-180"
+            style={{ left: t.left, top: t.top, width: TILE, height: TILE }}
+          />
+        ))}
+        {/* Radar overlay tiles */}
+        {tiles.map((t) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={`r-${frame.path}-${t.tx}-${t.ty}`}
+            src={`https://tilecache.rainviewer.com${frame.path}/256/${ZOOM}/${t.tx}/${t.ty}/4/1_1.png`}
+            alt=""
+            className="absolute max-w-none"
+            style={{ left: t.left, top: t.top, width: TILE, height: TILE }}
+          />
+        ))}
+        {/* Marker — dead centre = Munich */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="h-2.5 w-2.5 rounded-full bg-pitch-400 border-2 border-white shadow" />
         </div>
         {/* Time label */}
