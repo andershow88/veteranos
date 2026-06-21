@@ -76,6 +76,15 @@ export default async function HomePage() {
               </div>
             </section>
           )}
+
+          <div className="pt-1 text-center">
+            <Link
+              href="/matches/past"
+              className="text-sm font-semibold text-pitch-300 transition hover:text-pitch-200"
+            >
+              Past matches →
+            </Link>
+          </div>
         </>
       )}
     </div>
