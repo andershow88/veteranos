@@ -1,6 +1,14 @@
 # 006 — Replace `include: { player: true }` with explicit `select`
 
-**Against** `d878a27`. **Category** Performance. **Effort** S–M. **Risk** LOW.
+**Against** `d878a27`. **Category** Performance. **Effort** M (reassessed). **Risk** MED. **Status** PLAN ONLY.
+
+> Reassessed during execution: `MatchView`/`composeMatchView` and the team-generator
+> are typed against the **full `Player`** and thread it through many consumers
+> (MatchCard, team-showcase, signup-manager, payments). Narrowing the query's
+> `player` select changes the inferred type and forces a typed refactor across the
+> whole view layer — M effort, MED risk — for a small per-row payload saving.
+> Not worth it at the current scale; revisit only if payload/memory becomes a
+> measured problem. Steps below kept for that future.
 
 ## Problem
 `buildMatchView`, `listUpcomingMatches`, `getPaymentsForPlayer` (`src/server/match-queries.ts`) and `generateTeamsForMatch` (`src/server/team-generator.ts`) load full `Player` rows (all skills, paypal, phone, notes, …) where only a few fields are consumed — bloating payloads/memory, esp. across N matches.

@@ -13,7 +13,7 @@ Vetting note: finding "rank used as array index" was **rejected** (OUT ranks are
 | [003](003-harden-reset-email-logging.md) | Don't log reset tokens/emails to console | Security | S | DONE |
 | [004](004-authorization-tests.md) | Tests for server-action authorization | Tests | L | PARTIAL (core suite added) |
 | [005](005-rate-limit-hardening.md) | Trusted-proxy IP + document limiter scope | Security | M | DONE |
-| [006](006-prisma-overfetch.md) | Replace `include: { player: true }` with `select` | Perf | S–M | DONE |
+| [006](006-prisma-overfetch.md) | Replace `include: { player: true }` with `select` | Perf | M | PLAN ONLY (reassessed: typed refactor across the view layer; low value) |
 | [007](007-vapid-email-fallback.md) | Remove personal email from VAPID fallback | Security/PII | S | DONE |
 | [008](008-effect-cleanup.md) | Weather fetch abort + avatar close race | Correctness | S | DONE |
 | [009](009-perf-scaling-investigate.md) | Scaling: payments query, list pagination, renumber, indexes | Perf | M | PLAN ONLY (investigate; low impact at current scale) |
@@ -29,3 +29,5 @@ Vetting note: finding "rank used as array index" was **rejected** (OUT ranks are
 - **Rank used as array index** (`match-actions.ts` replacement insert): rejected — OUT ranks are 0-based (`resolveOutRank` returns `(max ?? -1)+1`), so indexing the rank-sorted waitlist by `outRank` is correct.
 - **Invite-token timing side-channel**: rejected — 128-bit random tokens make enumeration infeasible; not worth constant-time rework.
 - **npm-audit "critical @babel"**: corrected — real audit is 2 moderate dev-chain advisories; tracked under 009 as low priority.
+- **Avatar `close()` race** (part of 008): rejected — `close()` runs after the `await`ed action inside `try`, so it only fires on success; no race. 008 implemented as the weather-fetch abort only.
+- **006 over-fetch `select`**: reassessed to PLAN ONLY — `MatchView`/`Player` typing threads the full `Player` through many consumers, so narrowing the query requires a typed refactor across the view layer (M effort, MED risk) for a small payload saving. Not worth it at current scale.

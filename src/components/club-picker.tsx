@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check, Loader2, Search, X } from "lucide-react";
 import { CLUBS, type Club } from "@/lib/clubs";
 import { setClubAction } from "@/server/profile-actions";
+import { computeClubVars, CLUB_VARS } from "@/lib/club-theme";
 
 export function ClubPicker({ currentSlug }: { currentSlug: string | null }) {
   const [selected, setSelected] = useState(currentSlug ?? "none");
@@ -122,142 +123,22 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
   );
 }
 
-function hexToRgb(hex: string) {
-  const h = hex.replace("#", "");
-  return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
-}
-
-function mixColor(c: { r: number; g: number; b: number }, white: number) {
-  return {
-    r: Math.round(c.r + (255 - c.r) * white),
-    g: Math.round(c.g + (255 - c.g) * white),
-    b: Math.round(c.b + (255 - c.b) * white),
-  };
-}
-
-function darkenColor(c: { r: number; g: number; b: number }, amount: number) {
-  return {
-    r: Math.round(c.r * (1 - amount)),
-    g: Math.round(c.g * (1 - amount)),
-    b: Math.round(c.b * (1 - amount)),
-  };
-}
-
-type RGB = { r: number; g: number; b: number };
-
-function rgbHex(c: RGB) {
-  return `#${c.r.toString(16).padStart(2, "0")}${c.g.toString(16).padStart(2, "0")}${c.b.toString(16).padStart(2, "0")}`;
-}
-
-function rgba(c: RGB, a: number) {
-  return `rgba(${c.r},${c.g},${c.b},${a})`;
-}
-
-function luminance(c: RGB) {
-  const [rs, gs, bs] = [c.r, c.g, c.b].map((ch) => {
-    const s = ch / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
-}
-
-function effectivePrimary(club: Club): { color: RGB; hex: string } {
-  const p = hexToRgb(club.primaryColor);
-  if (luminance(p) > 0.7) {
-    const s = hexToRgb(club.secondaryColor);
-    if (luminance(s) < 0.7) return { color: s, hex: club.secondaryColor };
-    return { color: { r: 55, g: 55, b: 55 }, hex: "#373737" };
-  }
-  return { color: p, hex: club.primaryColor };
-}
-
-const ALL_PROPS = [
-  "--club-primary", "--club-secondary", "--club-tertiary", "--club-primary-raw",
-  "--p50", "--p100", "--p200", "--p300", "--p400", "--p500", "--p600", "--p700", "--p800", "--p900",
-  "--accent", "--accent-2", "--selection-bg", "--ring-glow",
-  "--border-strong", "--glass-border", "--btn-primary-text",
-  "--body-gradient-a", "--body-gradient-b",
-  "--glass-from", "--glass-to",
-  "--surface", "--surface-2", "--border",
-  "--stripe-a", "--stripe-b",
-];
-
 export function applyClubTheme(club: Club) {
   const root = document.documentElement;
+  const s = root.style;
+
   if (club.slug === "none") {
     root.classList.remove("club-theme", "club-tricolor");
-    ALL_PROPS.forEach((p) => root.style.removeProperty(p));
+    CLUB_VARS.forEach((p) => s.removeProperty(p));
     localStorage.removeItem("club-theme");
     return;
   }
 
-  const { color: primary, hex: primaryHex } = effectivePrimary(club);
   const isDark = root.classList.contains("dark");
-  const lum = luminance(primary);
-  const s = root.style;
-
-  if (isDark) {
-    s.setProperty("--p50", rgbHex(mixColor(primary, 0.95)));
-    s.setProperty("--p100", rgbHex(mixColor(primary, 0.88)));
-    s.setProperty("--p200", rgbHex(mixColor(primary, 0.75)));
-    s.setProperty("--p300", rgbHex(mixColor(primary, 0.55)));
-    s.setProperty("--p400", rgbHex(mixColor(primary, 0.35)));
-    s.setProperty("--p500", primaryHex);
-    s.setProperty("--p600", rgbHex(darkenColor(primary, 0.2)));
-    s.setProperty("--p700", rgbHex(darkenColor(primary, 0.45)));
-    s.setProperty("--p800", rgbHex(darkenColor(primary, 0.6)));
-    s.setProperty("--p900", rgbHex(darkenColor(primary, 0.75)));
-    s.setProperty("--accent", rgbHex(mixColor(primary, 0.55)));
-    s.setProperty("--accent-2", rgbHex(mixColor(primary, 0.35)));
-    s.setProperty("--body-gradient-a", rgba(primary, 0.1));
-    s.setProperty("--body-gradient-b", rgba(primary, 0.12));
-    // Dark surfaces must stay DARK (white text sits on them) — darken the club
-    // colour instead of mixing it toward white. Mirrors the FOUC head script.
-    s.setProperty("--surface", rgbHex(darkenColor(primary, 0.82)));
-    s.setProperty("--surface-2", rgbHex(darkenColor(primary, 0.72)));
-    s.setProperty("--border", rgbHex(darkenColor(primary, 0.5)));
-    s.setProperty("--glass-from", rgba(darkenColor(primary, 0.7), 0.6));
-    s.setProperty("--glass-to", rgba(darkenColor(primary, 0.8), 0.7));
-    s.setProperty("--stripe-a", rgba(primary, 0.03));
-    s.setProperty("--stripe-b", rgba(primary, 0.06));
-  } else {
-    s.setProperty("--p50", rgbHex(darkenColor(primary, 0.65)));
-    s.setProperty("--p100", rgbHex(darkenColor(primary, 0.45)));
-    s.setProperty("--p200", rgbHex(darkenColor(primary, 0.25)));
-    s.setProperty("--p300", primaryHex);
-    s.setProperty("--p400", primaryHex);
-    s.setProperty("--p500", primaryHex);
-    s.setProperty("--p600", rgbHex(mixColor(primary, 0.25)));
-    s.setProperty("--p700", rgbHex(mixColor(primary, 0.82)));
-    s.setProperty("--p800", rgbHex(mixColor(primary, 0.88)));
-    s.setProperty("--p900", rgbHex(mixColor(primary, 0.93)));
-    s.setProperty("--accent", rgbHex(darkenColor(primary, 0.1)));
-    s.setProperty("--accent-2", rgbHex(darkenColor(primary, 0.25)));
-    s.setProperty("--body-gradient-a", rgba(primary, 0.1));
-    s.setProperty("--body-gradient-b", rgba(primary, 0.07));
-    s.setProperty("--surface", rgbHex(mixColor(primary, 0.85)));
-    s.setProperty("--surface-2", rgbHex(mixColor(primary, 0.78)));
-    s.setProperty("--border", rgbHex(mixColor(primary, 0.75)));
-    s.setProperty("--glass-from", rgba(mixColor(primary, 0.92), 0.82));
-    s.setProperty("--glass-to", rgba(mixColor(primary, 0.95), 0.9));
-    s.setProperty("--stripe-a", rgba(primary, 0.03));
-    s.setProperty("--stripe-b", rgba(primary, 0.05));
-  }
-
-  s.setProperty("--club-primary", primaryHex);
-  s.setProperty("--club-primary-raw", `${primary.r},${primary.g},${primary.b}`);
-  s.setProperty("--club-secondary", club.secondaryColor);
-  s.setProperty("--selection-bg", primaryHex);
-  s.setProperty("--ring-glow", rgba(primary, 0.4));
-  s.setProperty("--border-strong", rgbHex(isDark ? mixColor(primary, 0.35) : darkenColor(primary, 0.15)));
-  s.setProperty("--glass-border", rgba(primary, 0.35));
-  s.setProperty("--btn-primary-text", lum > 0.4 ? "#0a0a0a" : "#ffffff");
-
-  if (club.tertiaryColor) {
-    s.setProperty("--club-tertiary", club.tertiaryColor);
-  } else {
-    s.removeProperty("--club-tertiary");
-  }
+  const vars = computeClubVars(club.primaryColor, club.secondaryColor, club.tertiaryColor ?? null, isDark);
+  // Clear a stale tricolor var when switching to a club without one.
+  if (!club.tertiaryColor) s.removeProperty("--club-tertiary");
+  for (const [k, val] of Object.entries(vars)) s.setProperty(k, val);
 
   root.classList.add("club-theme");
   if (club.tertiaryColor) root.classList.add("club-tricolor");
