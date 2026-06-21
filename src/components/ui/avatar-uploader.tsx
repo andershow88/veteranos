@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition, useCallback } from "react";
+import { useRef, useState, useTransition, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { Camera, Trash2, X, Loader2, ZoomIn, ZoomOut } from "lucide-react";
@@ -37,14 +37,24 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
     setAreaPixels(area);
   }, []);
 
-  const close = () => {
+  const close = useCallback(() => {
     setImageSrc(null);
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setAreaPixels(null);
     setError(null);
     if (fileInput.current) fileInput.current.value = "";
-  };
+  }, []);
+
+  // Dismiss the crop modal with Escape (matches the ConfirmDialog pattern).
+  useEffect(() => {
+    if (!imageSrc) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [imageSrc, close]);
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -135,9 +145,14 @@ export function AvatarUploader({ playerId, firstName, lastName, currentUrl }: Pr
 
       {imageSrc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl glass shadow-2xl overflow-hidden">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="crop-title"
+            className="w-full max-w-md rounded-2xl glass shadow-2xl overflow-hidden"
+          >
             <header className="flex items-center justify-between px-5 py-3 border-b border-border/60">
-              <h3 className="font-display text-xl tracking-wide">Adjust photo</h3>
+              <h3 id="crop-title" className="font-display text-xl tracking-wide">Adjust photo</h3>
               <button
                 type="button"
                 onClick={close}

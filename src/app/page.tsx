@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { CalendarPlus, Sparkles } from "lucide-react";
 import { WeatherWidget } from "@/components/weather-widget";
 import { RainRadar } from "@/components/rain-radar";
@@ -88,10 +89,12 @@ function Hero() {
       <div className="relative flex-1 overflow-hidden rounded-3xl border border-border-strong/60 glass pitch-stripes p-5 sm:p-7">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-pitch-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -left-12 -bottom-12 h-56 w-56 rounded-full bg-pitch-400/15 blur-3xl" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/bild_ball.png"
           alt=""
+          aria-hidden
+          width={96}
+          height={96}
           className="pointer-events-none absolute right-3 top-3 h-16 w-16 select-none object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.35)] sm:right-5 sm:top-5 sm:h-24 sm:w-24"
         />
         <div className="relative flex flex-col gap-2.5 pr-14 sm:pr-24">

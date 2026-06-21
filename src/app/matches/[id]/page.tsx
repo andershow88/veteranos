@@ -8,6 +8,7 @@ import { MatchCard } from "@/components/match/match-card";
 import { MatchSignupBar } from "@/components/match/match-signup-bar";
 import { TeamShowcase } from "@/components/team/team-showcase";
 import { HashScrollHighlight } from "@/components/match/hash-scroll-highlight";
+import { formatMatchDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,8 @@ export default async function MatchDetailPage({
         >
           <ArrowLeft className="h-4 w-4" /> Back to overview
         </Link>
+
+        <h1 className="sr-only">Match on {formatMatchDate(view.date)}</h1>
 
         <HashScrollHighlight />
         <MatchCard view={view} currentPlayer={currentPlayer} showDetailsLink={false} />

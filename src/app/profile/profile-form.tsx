@@ -24,16 +24,16 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="firstName">First name</Label>
-          <Input id="firstName" name="firstName" defaultValue={defaults.firstName} required />
+          <Input id="firstName" name="firstName" autoComplete="given-name" defaultValue={defaults.firstName} required />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="lastName">Last name (optional)</Label>
-          <Input id="lastName" name="lastName" defaultValue={defaults.lastName ?? ""} />
+          <Input id="lastName" name="lastName" autoComplete="family-name" defaultValue={defaults.lastName ?? ""} />
         </div>
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="nickname">Nickname (optional)</Label>
-        <Input id="nickname" name="nickname" defaultValue={defaults.nickname ?? ""} />
+        <Input id="nickname" name="nickname" autoComplete="nickname" defaultValue={defaults.nickname ?? ""} />
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
@@ -58,7 +58,7 @@ export function ProfileForm({ defaults }: { defaults: Defaults }) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="phone">Phone (optional)</Label>
-        <Input id="phone" name="phone" defaultValue={defaults.phone ?? ""} />
+        <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" defaultValue={defaults.phone ?? ""} />
       </div>
 
       {state?.error && <Alert tone="danger">{state.error}</Alert>}

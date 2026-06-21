@@ -33,11 +33,11 @@ export function ForgotPasswordForm() {
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="firstName">First name *</Label>
-          <Input id="firstName" name="firstName" required />
+          <Input id="firstName" name="firstName" autoComplete="given-name" required />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="lastName">Last name *</Label>
-          <Input id="lastName" name="lastName" required />
+          <Input id="lastName" name="lastName" autoComplete="family-name" required />
         </div>
       </div>
 

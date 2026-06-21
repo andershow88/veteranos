@@ -259,11 +259,12 @@ function ModeButton({
 function PlayerRadio({ player, selected, onSelect }: { player: WaitlistOption; selected: boolean; onSelect: (id: string) => void }) {
   return (
     <label
-      className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition ${
+      className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition focus-within:ring-2 focus-within:ring-pitch-500 focus-within:ring-offset-2 focus-within:ring-offset-bg ${
         selected ? "border-pitch-500 bg-pitch-700/20" : "border-border/60 bg-surface/30 hover:border-pitch-500/40"
       }`}
     >
       <input type="radio" name="replacement" value={player.id} checked={selected} onChange={() => onSelect(player.id)} className="sr-only" />
+      <Check className={`h-4 w-4 shrink-0 ${selected ? "text-pitch-300" : "invisible"}`} aria-hidden />
       <span className="flex-1 truncate text-sm">{player.firstName} {player.lastName}</span>
       <span className="number-pill text-xs text-muted">OVR {player.overall}</span>
     </label>

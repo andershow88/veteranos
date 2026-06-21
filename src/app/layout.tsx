@@ -125,6 +125,12 @@ export default async function RootLayout({
         // the app runs in standalone / PWA mode with viewport-fit: cover.
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[1100] focus:rounded-lg focus:bg-bg-elevated focus:px-4 focus:py-2 focus:text-foreground focus:ring-2 focus:ring-pitch-500"
+        >
+          Skip to content
+        </a>
         <Header
           user={
             user
@@ -136,7 +142,13 @@ export default async function RootLayout({
               : null
           }
         />
-        <main className="flex-1 w-full pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
+        <main
+          id="main"
+          tabIndex={-1}
+          className={`flex-1 w-full focus:outline-none ${user ? "pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0" : ""}`}
+        >
+          {children}
+        </main>
         <footer className="mt-16 border-t border-border/60 py-8 text-center text-xs text-subtle">
           <span className="font-display tracking-widest text-pitch-400">VETERANOS</span> · Built with Next.js, Prisma & love for the game
         </footer>

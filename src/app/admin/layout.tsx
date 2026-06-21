@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { Users, CalendarDays, LayoutDashboard, ShieldCheck, Link as LinkIcon, SlidersHorizontal } from "lucide-react";
+import { AdminNavItem } from "@/components/admin/admin-nav-item";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -20,34 +20,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </div>
 
       <nav className="mb-8 flex flex-wrap gap-2">
-        <NavItem href="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>Dashboard</NavItem>
-        <NavItem href="/admin/players" icon={<Users className="h-4 w-4" />}>Players</NavItem>
-        <NavItem href="/admin/skills" icon={<SlidersHorizontal className="h-4 w-4" />}>Skills</NavItem>
-        <NavItem href="/admin/matches" icon={<CalendarDays className="h-4 w-4" />}>Matches</NavItem>
-        <NavItem href="/admin/invites" icon={<LinkIcon className="h-4 w-4" />}>Invites</NavItem>
+        <AdminNavItem href="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>Dashboard</AdminNavItem>
+        <AdminNavItem href="/admin/players" icon={<Users className="h-4 w-4" />}>Players</AdminNavItem>
+        <AdminNavItem href="/admin/skills" icon={<SlidersHorizontal className="h-4 w-4" />}>Skills</AdminNavItem>
+        <AdminNavItem href="/admin/matches" icon={<CalendarDays className="h-4 w-4" />}>Matches</AdminNavItem>
+        <AdminNavItem href="/admin/invites" icon={<LinkIcon className="h-4 w-4" />}>Invites</AdminNavItem>
       </nav>
 
       <div>{children}</div>
     </div>
-  );
-}
-
-function NavItem({
-  href,
-  icon,
-  children,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface px-3.5 py-2 text-sm font-semibold text-foreground/85 hover:border-pitch-500 hover:bg-surface-2 transition"
-    >
-      {icon}
-      {children}
-    </Link>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { Check, Loader2, Search, X } from "lucide-react";
 import { CLUBS, type Club } from "@/lib/clubs";
 import { setClubAction } from "@/server/profile-actions";
@@ -47,7 +48,12 @@ export function ClubPicker({ currentSlug }: { currentSlug: string | null }) {
           className="w-full bg-transparent border border-border/60 rounded-xl pl-10 pr-10 py-2.5 text-sm text-foreground placeholder:text-subtle focus:border-pitch-500 focus:outline-none"
         />
         {search && (
-          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            aria-label="Clear search"
+            className="absolute right-1 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-lg text-muted hover:text-foreground"
+          >
             <X className="h-4 w-4" />
           </button>
         )}
@@ -98,7 +104,7 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
           >
             {c.badge ? (
               <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-white shadow-sm">
-                <img src={c.badge} alt={c.name} className="absolute inset-0 h-full w-full object-contain p-1" />
+                <Image src={c.badge} alt={c.name} fill sizes="56px" className="object-contain p-1" />
               </span>
             ) : (
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-surface/60 text-muted text-lg">—</span>

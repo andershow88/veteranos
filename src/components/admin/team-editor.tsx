@@ -186,7 +186,7 @@ export function TeamEditor({
 
       {/* Hint bar when a player is selected */}
       {selectedPlayer && (
-        <Alert tone="warning" className="animate-in fade-in slide-in-from-top-2 duration-200">
+        <Alert tone="warning">
           <ArrowLeftRight className="mr-2 inline h-4 w-4 shrink-0 text-warning-ink" />
           <span>
             <strong>

@@ -420,7 +420,7 @@ function IconBtn({
   title?: string;
 }) {
   return (
-    <Button onClick={onClick} variant={variant} size="sm" title={title}>
+    <Button onClick={onClick} variant={variant} size="sm" title={title} aria-label={title} className="h-11 w-11 p-0">
       {children}
     </Button>
   );

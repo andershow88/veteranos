@@ -197,7 +197,7 @@ export function TeamControls({ matchId, hasTeams, locked, isPast, teamCount, poo
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={generate} disabled={pending}>
+        <Button onClick={generate} disabled={pending} variant={hasTeams ? "secondary" : "primary"}>
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
           {hasTeams ? "Regenerate teams" : "Generate teams"}
         </Button>

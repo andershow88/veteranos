@@ -9,7 +9,7 @@ type Item = { href: string; label: string; Icon: typeof CalendarDays; match: (p:
 const BASE_ITEMS: Item[] = [
   { href: "/", label: "Matches", Icon: CalendarDays, match: (p) => p === "/" || p.startsWith("/matches") },
   { href: "/profile", label: "Profile", Icon: User, match: (p) => p.startsWith("/profile") },
-  { href: "/handout", label: "Guide", Icon: BookOpen, match: (p) => p.startsWith("/handout") },
+  { href: "/handout", label: "Handout", Icon: BookOpen, match: (p) => p.startsWith("/handout") },
 ];
 const ADMIN_ITEM: Item = { href: "/admin", label: "Admin", Icon: ShieldCheck, match: (p) => p.startsWith("/admin") };
 

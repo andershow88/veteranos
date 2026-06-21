@@ -51,7 +51,7 @@ export function PlayerForm({ player }: { player?: Defaults }) {
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field name="nickname" label="Nickname" defaultValue={player?.nickname ?? ""} />
-          <Field name="phone" label="Phone" defaultValue={player?.phone ?? ""} />
+          <Field name="phone" label="Phone" type="tel" defaultValue={player?.phone ?? ""} />
         </div>
       </FormSection>
 
