@@ -60,13 +60,14 @@ export function WeatherWidget() {
       } catch {}
     }
 
+    const controller = new AbortController();
     const url =
       `https://api.open-meteo.com/v1/dwd-icon?latitude=${LAT}&longitude=${LON}` +
       `&current=temperature_2m,weather_code` +
       `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
       `&timezone=Europe/Berlin&forecast_days=5`;
 
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((r) => r.json())
       .then((json) => {
         const result: WeatherData = {
@@ -84,6 +85,7 @@ export function WeatherWidget() {
         sessionStorage.setItem("vet-weather", JSON.stringify({ ...result, _ts: Date.now() }));
       })
       .catch(() => {});
+    return () => controller.abort();
   }, []);
 
   if (!data) {

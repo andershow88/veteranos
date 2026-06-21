@@ -19,10 +19,14 @@ export async function sendEmail({ to, subject, text, html }: SendArgs): Promise<
   const from = process.env.MAIL_FROM ?? "Veteranos <onboarding@resend.dev>";
 
   if (!apiKey) {
-    console.log("[email] no RESEND_API_KEY set, logging instead:");
-    console.log(`[email] to=${to}`);
-    console.log(`[email] subject=${subject}`);
-    console.log(`[email] body:\n${text}`);
+    // Never log the email body (it carries reset tokens) to stdout in
+    // production — Railway archives logs. Admin reset flows surface the link in
+    // the UI instead. In dev, full output is convenient and low-risk.
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[email] (dev, RESEND_API_KEY unset) to=${to} subject=${subject}\n${text}`);
+    } else {
+      console.warn("[email] delivery skipped: RESEND_API_KEY not configured");
+    }
     return { delivered: false, reason: "RESEND_API_KEY not configured" };
   }
 

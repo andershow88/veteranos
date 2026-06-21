@@ -28,10 +28,22 @@ export function rateLimit(key: string, limit: number, windowMs: number): boolean
   return true;
 }
 
-/** Best-effort client IP from proxy headers. */
+/**
+ * Best-effort client IP from proxy headers. Assumes a single trusted proxy
+ * (Railway). `x-real-ip` is set by the proxy (not client-controlled) so prefer
+ * it; for `x-forwarded-for` take the LAST hop — the address the trusted proxy
+ * observed — because a client can prepend spoofed entries to the front.
+ * NOTE: rate-limit state is in-memory per instance (see rateLimit above); a
+ * horizontally-scaled deployment needs a shared store (Redis) — see plans/009.
+ */
 export async function clientIp(): Promise<string> {
   const h = await headers();
+  const real = h.get("x-real-ip");
+  if (real) return real.trim();
   const fwd = h.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return h.get("x-real-ip") ?? "unknown";
+  if (fwd) {
+    const parts = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  return "unknown";
 }

@@ -3,7 +3,7 @@ import { db } from "./db";
 
 const VAPID_PUBLIC = "BFawXGGBS-53e2M-WlrshU7TINMor70na0LEnu5M-yU77jghXwHzAN6MZI4JP_KGTccMiVuGlMm-hqe2n-Kz2nk";
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY ?? "";
-const VAPID_EMAIL = process.env.VAPID_EMAIL ?? "mailto:ander.butten@gmail.com";
+const VAPID_EMAIL = process.env.VAPID_EMAIL ?? "mailto:admin@veteranos.app";
 
 if (VAPID_PRIVATE) {
     webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);

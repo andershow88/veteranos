@@ -461,11 +461,9 @@ export async function adminSetSignupAction(input: {
 
   let rank = player.rank;
   if (input.status === "WAITLIST") rank = await nextWaitlistRank(input.matchId);
-  if (input.status === "OUT") {
-    rank = await db.signup.count({
-      where: { matchId: input.matchId, status: "OUT", player: { kind: "ABO" } },
-    });
-  }
+  // Use the same collision-free scheme as the rest of the code (max+1, not a
+  // plain count which collides when OUT ranks have gaps).
+  if (input.status === "OUT") rank = await resolveOutRank(input.matchId, input.playerId);
 
   await db.signup.upsert({
     where: { matchId_playerId: { matchId: input.matchId, playerId: input.playerId } },
