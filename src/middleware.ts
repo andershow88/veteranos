@@ -31,6 +31,9 @@ export const config = {
   // Guard everything except the auth pages, API routes (own auth), Next
   // internals and static assets.
   matcher: [
-    "/((?!api|_next/static|_next/image|login|register|forgot-password|reset-password|favicon.ico|favicon.png|manifest.webmanifest|sw.js|icon-192.png|icon-512.png|apple-touch-icon.png).*)",
+    // Also exclude the public decorative assets (hero ball + club badges) so the
+    // next/image server-side optimizer can fetch them without being redirected
+    // to /login. Avatars stay behind the guard.
+    "/((?!api|_next/static|_next/image|login|register|forgot-password|reset-password|favicon.ico|favicon.png|manifest.webmanifest|sw.js|icon-192.png|icon-512.png|apple-touch-icon.png|clubs|bild_ball.png).*)",
   ],
 };

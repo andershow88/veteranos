@@ -5,6 +5,7 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { registerAction } from "@/server/auth-actions";
 
 export function RegisterForm({ token }: { token: string }) {
@@ -35,10 +36,9 @@ export function RegisterForm({ token }: { token: string }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Password *</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             autoComplete="new-password"
             minLength={6}
             required

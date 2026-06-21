@@ -5,17 +5,21 @@ import { CloudRain } from "lucide-react";
 
 const LAT = 48.1351;
 const LON = 11.582;
-const ZOOM = 7;
+const ZOOM = 9;
 const SIZE = 180;
 
 type RadarFrame = { path: string; time: number };
 
 function latLonToTile(lat: number, lon: number, zoom: number) {
   const n = 2 ** zoom;
-  const x = Math.floor(((lon + 180) / 360) * n);
+  const xf = ((lon + 180) / 360) * n;
   const latRad = (lat * Math.PI) / 180;
-  const y = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n);
-  return { x, y };
+  const yf = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n;
+  const x = Math.floor(xf);
+  const y = Math.floor(yf);
+  // fx/fy: fractional position of the point inside its tile (0..1) — used to
+  // place the marker exactly on Munich instead of at the tile centre.
+  return { x, y, fx: xf - x, fy: yf - y };
 }
 
 export function RainRadar() {
@@ -92,9 +96,12 @@ export function RainRadar() {
           className="absolute inset-0 w-full h-full object-cover"
           style={{ imageRendering: "auto" }}
         />
-        {/* Crosshair for Munich */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="h-2 w-2 rounded-full bg-pitch-400 border border-white/80 shadow-sm" />
+        {/* Marker at Munich's actual position within the tile */}
+        <div
+          className="absolute pointer-events-none"
+          style={{ left: `${tile.fx * 100}%`, top: `${tile.fy * 100}%`, transform: "translate(-50%, -50%)" }}
+        >
+          <div className="h-2.5 w-2.5 rounded-full bg-pitch-400 border-2 border-white shadow" />
         </div>
         {/* Time label */}
         <div className="absolute bottom-1 left-1 rounded bg-bg/80 px-1.5 py-0.5 text-[9px] font-bold number-pill text-foreground backdrop-blur-sm">

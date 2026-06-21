@@ -104,7 +104,7 @@ function ClubGrid({ title, clubs, selected, onPick }: { title: string; clubs: Cl
           >
             {c.badge ? (
               <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-white shadow-sm">
-                <Image src={c.badge} alt={c.name} fill sizes="56px" className="object-contain p-1" />
+                <Image src={c.badge} alt={c.name} width={56} height={56} className="h-full w-full object-contain p-1" />
               </span>
             ) : (
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-surface/60 text-muted text-lg">—</span>

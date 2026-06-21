@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { Loader2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
-import { Input, Label } from "@/components/ui/input";
+import { Label } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
 import { changePasswordAction } from "@/server/profile-actions";
 
@@ -15,11 +16,11 @@ export function PasswordForm() {
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="currentPassword">Current password</Label>
-          <Input id="currentPassword" name="currentPassword" type="password" required />
+          <PasswordInput id="currentPassword" name="currentPassword" autoComplete="current-password" required />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="newPassword">New password</Label>
-          <Input id="newPassword" name="newPassword" type="password" minLength={6} required />
+          <PasswordInput id="newPassword" name="newPassword" autoComplete="new-password" minLength={6} required />
         </div>
       </div>
 
