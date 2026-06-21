@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/input";
-import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordField } from "@/components/ui/password-field";
 import {
   resetPasswordAction,
   type ResetState,
@@ -34,16 +33,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="token" value={token} />
-      <div className="space-y-1.5">
-        <Label htmlFor="password">New password *</Label>
-        <PasswordInput
-          id="password"
-          name="password"
-          autoComplete="new-password"
-          minLength={6}
-          required
-        />
-      </div>
+      <PasswordField id="password" name="password" label="New password" autoComplete="new-password" minLength={6} required />
 
       {state?.error && <Alert tone="danger">{state.error}</Alert>}
 
