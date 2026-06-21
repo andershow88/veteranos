@@ -1,10 +1,13 @@
 FROM node:22-bookworm-slim AS base
 
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && apt-get install -y --no-install-recommends openssl ca-certificates tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NEXT_TELEMETRY_DISABLED=1
+# Run the whole app in German time (Railway containers default to UTC). This is
+# the global safety net; the code also handles Europe/Berlin explicitly.
+ENV TZ=Europe/Berlin
 WORKDIR /app
 
 # ---- deps stage: install once, cache aggressively ---------------------------

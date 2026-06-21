@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { hashPassword, requireAdmin } from "@/lib/auth";
 import { generateTeamsForMatch } from "./team-generator";
 import { sendPushToAll } from "@/lib/push";
+import { berlinDateTimeToUtc, APP_TIME_ZONE } from "@/lib/utils";
 
 const skillsSchema = {
   overall: z.coerce.number().int().min(0).max(100).default(50),
@@ -206,7 +207,9 @@ export async function createMatchAction(
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  const dt = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
+  // Interpret the entered date/time as German wall-clock, not the server's
+  // (UTC) local time, so the stored instant matches what the admin meant.
+  const dt = berlinDateTimeToUtc(parsed.data.date, parsed.data.time);
   if (Number.isNaN(dt.getTime())) return { error: "Invalid date" };
 
   // New matches start with an empty sign-up list. Every player must
@@ -221,7 +224,7 @@ export async function createMatchAction(
     },
   });
 
-  const dateStr = dt.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" });
+  const dateStr = dt.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", timeZone: APP_TIME_ZONE });
   sendPushToAll("⚽ New match!", `${dateStr} — Sign up now!`, `/matches/${match.id}`).catch(() => {});
 
   revalidatePath("/");
@@ -245,7 +248,7 @@ export async function updateMatchAction(
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  const dt = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
+  const dt = berlinDateTimeToUtc(parsed.data.date, parsed.data.time);
   if (Number.isNaN(dt.getTime())) return { error: "Invalid date" };
 
   await db.match.update({
@@ -259,7 +262,7 @@ export async function updateMatchAction(
     },
   });
 
-  const dateStr = dt.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" });
+  const dateStr = dt.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", timeZone: APP_TIME_ZONE });
   sendPushToAll("📋 Match updated", `${dateStr} — details changed`, `/matches/${matchId}`).catch(() => {});
 
   revalidatePath("/");

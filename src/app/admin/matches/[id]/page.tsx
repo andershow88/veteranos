@@ -9,7 +9,7 @@ import { SignupManager } from "@/components/admin/signup-manager";
 import { TeamSection } from "@/components/admin/team-section";
 import { DeleteMatchButton } from "@/components/admin/delete-match-button";
 import { buildMatchView, getActivePlayersGrouped } from "@/server/match-queries";
-import { formatMatchDate } from "@/lib/utils";
+import { formatMatchDate, utcToBerlinParts } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -33,8 +33,8 @@ export default async function AdminMatchPage({
   ]);
   if (!view) notFound();
 
-  const dateStr = match.date.toISOString().slice(0, 10);
-  const timeStr = match.date.toTimeString().slice(0, 5);
+  // Prefill the form with the German wall-clock date/time, not the server's.
+  const { date: dateStr, time: timeStr } = utcToBerlinParts(match.date);
   // Server component: request-time comparison is intentional.
   // eslint-disable-next-line react-hooks/purity
   const isPast = match.date.getTime() < Date.now();
