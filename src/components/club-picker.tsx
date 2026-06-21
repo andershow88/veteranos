@@ -211,10 +211,11 @@ export function applyClubTheme(club: Club) {
     s.setProperty("--accent-2", rgbHex(mixColor(primary, 0.35)));
     s.setProperty("--body-gradient-a", rgba(primary, 0.1));
     s.setProperty("--body-gradient-b", rgba(primary, 0.12));
-    const surfBase = darkenColor(primary, 0.75);
-    s.setProperty("--surface", rgbHex(mixColor(surfBase, 0.7)));
-    s.setProperty("--surface-2", rgbHex(mixColor(surfBase, 0.6)));
-    s.setProperty("--border", rgbHex(mixColor(primary, 0.78)));
+    // Dark surfaces must stay DARK (white text sits on them) — darken the club
+    // colour instead of mixing it toward white. Mirrors the FOUC head script.
+    s.setProperty("--surface", rgbHex(darkenColor(primary, 0.82)));
+    s.setProperty("--surface-2", rgbHex(darkenColor(primary, 0.72)));
+    s.setProperty("--border", rgbHex(darkenColor(primary, 0.5)));
     s.setProperty("--glass-from", rgba(darkenColor(primary, 0.7), 0.6));
     s.setProperty("--glass-to", rgba(darkenColor(primary, 0.8), 0.7));
     s.setProperty("--stripe-a", rgba(primary, 0.03));
