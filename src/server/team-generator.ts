@@ -52,7 +52,7 @@ function spread(values: number[]) {
   return max - min;
 }
 
-function balanceCost(teams: TeamDraft[]) {
+export function balanceCost(teams: TeamDraft[]) {
   const stats = teams.map(teamStats);
   const overallSpread = spread(stats.map((s) => s.overall));
   const defSpread = spread(stats.map((s) => s.defense));
@@ -62,82 +62,161 @@ function balanceCost(teams: TeamDraft[]) {
   return overallSpread * 3 + defSpread + offSpread + speedSpread * 0.5;
 }
 
+/** Single source of truth for "counts as a keeper" — used by the draft, the
+ * refiner and the showcase so they can never disagree about who is a goalie. */
+const isKeeper = (p: Player) =>
+  p.position === "GOALKEEPER" || p.goalkeeping >= 70;
+
+/** Tiny seeded PRNG (mulberry32). A fixed seed makes a draft reproducible
+ * (used by the tests); a fresh seed per regenerate gives variety. */
+function mulberry32(seed: number) {
+  let s = seed >>> 0;
+  return function () {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffleInPlace<T>(arr: T[], rnd: () => number) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/** Hard size contract: every team gets `floor(total / teamCount)` players, and
+ * the first `total % teamCount` teams get one extra. 15/3 -> [5,5,5],
+ * 16/3 -> [6,5,5] — sizes can never differ by more than one (no more 6/5/4). */
+export function targetSizes(total: number, teamCount: number): number[] {
+  const base = Math.floor(total / teamCount);
+  const rem = total % teamCount;
+  return Array.from({ length: teamCount }, (_, i) => base + (i < rem ? 1 : 0));
+}
+
+/** Sort strong -> weak, but shuffle players whose `overall` is within
+ * `tierWidth` of each other. Keeps the strength spread fair across teams while
+ * randomising who-goes-where, so each regenerate yields different fair teams. */
+function tieredOrder(players: Player[], rnd: () => number, tierWidth = 5): Player[] {
+  const sorted = [...players].sort((a, b) => b.overall - a.overall);
+  const out: Player[] = [];
+  let i = 0;
+  while (i < sorted.length) {
+    const top = sorted[i].overall;
+    let j = i;
+    while (j < sorted.length && top - sorted[j].overall < tierWidth) j++;
+    const tier = sorted.slice(i, j);
+    shuffleInPlace(tier, rnd);
+    out.push(...tier);
+    i = j;
+  }
+  return out;
+}
+
 /**
- * Snake draft: sort players by overall, deal them out in order,
- * reverse direction every round. Produces roughly balanced teams.
+ * Size-locked draft. Goalkeepers and field players are dealt through ONE shared
+ * seat counter with hard per-team caps (`targetSizes`), so team sizes always
+ * differ by at most one — 5/5/5, 6/5/5, never 6/5/4 — for ANY goalkeeper count.
+ * Within those caps a tiered shuffle keeps teams balanced by skill while making
+ * each regenerate produce different (but equally fair) teams.
  */
-function snakeDraft(players: Player[], teamCount: number): TeamDraft[] {
+export function draftTeams(
+  players: Player[],
+  teamCount: number,
+  seed?: number,
+): TeamDraft[] {
+  const rnd = mulberry32(seed ?? Date.now());
+
   const teams: TeamDraft[] = TEAM_COLORS.slice(0, teamCount).map((c) => ({
     color: c,
     name: TEAM_NAMES[c],
     players: [],
   }));
+  const caps = targetSizes(players.length, teamCount);
+  const allTeams = teams.map((_, i) => i);
 
-  // Distribute goalkeepers evenly first
-  const goalkeepers = players
-    .filter((p) => p.position === "GOALKEEPER" || p.goalkeeping >= 70)
-    .sort((a, b) => b.goalkeeping - a.goalkeeping);
-  const fieldPlayers = players
-    .filter((p) => !goalkeepers.includes(p))
-    .sort((a, b) => b.overall - a.overall);
-
-  goalkeepers.forEach((gk, idx) => {
-    teams[idx % teamCount].players.push(gk);
-  });
-
-  // Snake draft
-  let dir = 1;
-  let teamIdx = 0;
-  for (const p of fieldPlayers) {
-    teams[teamIdx].players.push(p);
-    if (dir === 1) {
-      if (teamIdx === teamCount - 1) {
-        dir = -1;
-      } else {
-        teamIdx++;
-      }
-    } else {
-      if (teamIdx === 0) {
-        dir = 1;
-      } else {
-        teamIdx--;
+  // Pick the team furthest below its cap; random tie-break for variety.
+  // Returns -1 if every eligible team is already at its cap.
+  function nextSeat(eligible: number[]): number {
+    const order = [...eligible];
+    shuffleInPlace(order, rnd);
+    let best = -1;
+    let bestDeficit = 0;
+    for (const t of order) {
+      const deficit = caps[t] - teams[t].players.length;
+      if (deficit > bestDeficit) {
+        bestDeficit = deficit;
+        best = t;
       }
     }
+    return best;
+  }
+
+  // Goalkeepers first, but THROUGH the shared seat counter so their seats are
+  // counted (this is the actual fix for 6/5/4). Prefer a team that has no
+  // keeper yet so keepers spread out before any team gets a second one.
+  const keepers = players.filter(isKeeper).sort((a, b) => b.goalkeeping - a.goalkeeping);
+  const hasKeeper = new Set<number>();
+  for (const gk of keepers) {
+    const open = allTeams.filter((t) => teams[t].players.length < caps[t]);
+    if (open.length === 0) break; // no seats left (only if keepers > players)
+    const preferred = open.filter((t) => !hasKeeper.has(t));
+    const target = nextSeat(preferred.length ? preferred : open);
+    teams[target].players.push(gk);
+    hasKeeper.add(target);
+  }
+
+  // Remaining field players, tiered-shuffled, into the remaining seats. The caps
+  // guarantee the final sizes equal targetSizes() exactly.
+  const drafted = new Set(keepers);
+  const field = tieredOrder(players.filter((p) => !drafted.has(p)), rnd);
+  for (const p of field) {
+    teams[nextSeat(allTeams)].players.push(p);
   }
 
   return teams;
 }
 
 /**
- * Local optimization: random player swaps between two teams,
- * only accepted if balance cost decreases. Fast and robust.
+ * Local optimization: random 1-for-1 player swaps between two teams. A swap is
+ * accepted as long as it does not WORSEN balance (`newCost <= cost`); accepting
+ * equal-cost swaps lets evenly-matched players keep moving around on regenerate
+ * instead of freezing in place, while balance can still never get worse.
+ * Swaps are 1-for-1, so team sizes are never changed here.
  */
-function refineSwaps(teams: TeamDraft[], iterations = 800): TeamDraft[] {
+export function refineSwaps(
+  teams: TeamDraft[],
+  iterations = 800,
+  seed?: number,
+): TeamDraft[] {
+  const rnd = mulberry32(seed ?? Date.now());
   const current = teams.map((t) => ({ ...t, players: [...t.players] }));
   let cost = balanceCost(current);
 
   for (let i = 0; i < iterations; i++) {
-    const a = Math.floor(Math.random() * current.length);
-    let b = Math.floor(Math.random() * current.length);
-    if (current.length > 1) while (b === a) b = Math.floor(Math.random() * current.length);
+    const a = Math.floor(rnd() * current.length);
+    let b = Math.floor(rnd() * current.length);
+    if (current.length > 1) while (b === a) b = Math.floor(rnd() * current.length);
     if (current[a].players.length === 0 || current[b].players.length === 0) continue;
 
-    const ia = Math.floor(Math.random() * current[a].players.length);
-    const ib = Math.floor(Math.random() * current[b].players.length);
+    const ia = Math.floor(rnd() * current[a].players.length);
+    const ib = Math.floor(rnd() * current[b].players.length);
 
     const pa = current[a].players[ia];
     const pb = current[b].players[ib];
 
     // Don't swap goalies if it leaves a team without one
-    const isPaKeeper = pa.position === "GOALKEEPER" || pa.goalkeeping >= 70;
-    const isPbKeeper = pb.position === "GOALKEEPER" || pb.goalkeeping >= 70;
+    const isPaKeeper = isKeeper(pa);
+    const isPbKeeper = isKeeper(pb);
     if (isPaKeeper !== isPbKeeper) {
       const teamAHasOtherKeeper = current[a].players.some(
-        (p, idx) => idx !== ia && (p.position === "GOALKEEPER" || p.goalkeeping >= 70),
+        (p, idx) => idx !== ia && isKeeper(p),
       );
       const teamBHasOtherKeeper = current[b].players.some(
-        (p, idx) => idx !== ib && (p.position === "GOALKEEPER" || p.goalkeeping >= 70),
+        (p, idx) => idx !== ib && isKeeper(p),
       );
+      // A lone keeper stays put on purpose — never strand a team without one.
       if (isPaKeeper && !teamAHasOtherKeeper) continue;
       if (isPbKeeper && !teamBHasOtherKeeper) continue;
     }
@@ -146,7 +225,7 @@ function refineSwaps(teams: TeamDraft[], iterations = 800): TeamDraft[] {
     current[b].players[ib] = pa;
 
     const newCost = balanceCost(current);
-    if (newCost < cost) {
+    if (newCost <= cost) {
       cost = newCost;
     } else {
       current[a].players[ia] = pa;
@@ -170,7 +249,7 @@ function describeTeam(team: TeamDraft, all: TeamDraft[]) {
   const isBestSpeed = s.speed >= Math.max(...speeds);
   const isBestTech = s.technique >= Math.max(...techs);
 
-  const gks = team.players.filter((p) => p.position === "GOALKEEPER" || p.goalkeeping >= 70);
+  const gks = team.players.filter(isKeeper);
 
   const traits: string[] = [];
   if (isBestDef && isBestOff) traits.push("complete package");
@@ -272,8 +351,10 @@ export async function generateTeamsForMatch(
     );
   }
 
-  const initial = snakeDraft(playing, teamCount);
-  const optimized = refineSwaps(initial);
+  // Fresh seed each regenerate -> different (but equally fair) teams every time.
+  const seed = (Date.now() ^ ((Math.random() * 2 ** 31) | 0)) | 0;
+  const initial = draftTeams(playing, teamCount, seed);
+  const optimized = refineSwaps(initial, 800, seed ^ 0x9e3779b9);
 
   const verdict = balanceVerdict(optimized);
 
