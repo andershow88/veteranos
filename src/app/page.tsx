@@ -55,13 +55,15 @@ export default async function HomePage() {
         </>
       ) : (
         <>
+          {/* Once teams are published (generated + match locked), they take the
+              top spot, above the match details. */}
+          {showTeams && <TeamsSection lockedMatch={lockedMatch} />}
+
           {/* Focus: the next match */}
           <section className="space-y-3">
             <SectionHeading>Next match</SectionHeading>
             <MatchCard view={nextMatch} currentPlayer={currentPlayer} />
           </section>
-
-          {showTeams && <TeamsSection lockedMatch={lockedMatch} />}
 
           {moreMatches.length > 0 && (
             <section className="space-y-3">
