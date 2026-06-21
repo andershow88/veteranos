@@ -34,8 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
-# claude
-.claude/
+# claude (ignore local settings, but track committed skills)
+.claude/*
+!.claude/skills/
 
 # vercel
 .vercel
