@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { CLUBS } from "@/lib/clubs";
 
 export function ClubBadgeHeader({ fallback }: { fallback: ReactNode }) {
@@ -38,7 +39,7 @@ export function ClubBadgeHeader({ fallback }: { fallback: ReactNode }) {
 
   return (
     <span className="relative h-9 w-9 shrink-0 rounded-xl bg-white shadow-[0_4px_20px_-4px] shadow-pitch-500/40 group-hover:scale-105 transition-transform overflow-hidden">
-      <img src={badge} alt="" className="absolute inset-0 h-full w-full object-contain p-0.5" />
+      <Image src={badge} alt="" width={36} height={36} className="absolute inset-0 h-full w-full object-contain p-0.5" />
     </span>
   );
 }

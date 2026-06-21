@@ -67,12 +67,6 @@ export default async function AdminMatchPage({
                 <Badge tone="info">{view.attendees.length + view.replacements.filter(r => r.replacement).length} players in</Badge>
               </div>
             </div>
-
-            {!isPast && (
-              <div className="flex flex-wrap gap-2">
-                <DeleteMatchButton matchId={id} matchLabel={formatMatchDate(match.date)} />
-              </div>
-            )}
           </div>
         </CardHeader>
       </Card>
@@ -148,6 +142,20 @@ export default async function AdminMatchPage({
           />
         </CardBody>
       </Card>
+
+      {!isPast && (
+        <Card className="border-danger-line">
+          <CardHeader>
+            <h3 className="font-display text-xl tracking-wide text-danger-ink">Danger zone</h3>
+            <p className="text-xs text-muted">
+              Deletes this match, all its sign-ups and any generated teams. This cannot be undone.
+            </p>
+          </CardHeader>
+          <CardBody>
+            <DeleteMatchButton matchId={id} matchLabel={formatMatchDate(match.date)} />
+          </CardBody>
+        </Card>
+      )}
     </div>
   );
 }

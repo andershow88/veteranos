@@ -36,6 +36,8 @@ export function Avatar({
           src={src}
           alt={`${firstName}${safeLast ? ` ${safeLast}` : ""}`}
           className="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
           draggable={false}
         />
       </div>
