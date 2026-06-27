@@ -109,7 +109,7 @@ export function MatchCard({
             action={
               currentPlayer.role === "ADMIN" ? (
                 <a
-                  href={waShareUrl(buildReminderText(view.pendingAbos))}
+                  href={waShareUrl(buildReminderText(view.pendingAbos, `https://veteranos.club/matches/${view.id}`))}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded-md border border-success-line bg-success-surface px-2 py-0.5 text-[11px] font-semibold text-success-ink transition hover:opacity-80"
@@ -417,10 +417,11 @@ function StatusSummary({ view }: { view: MatchView }) {
 
 /**
  * Builds the WhatsApp reminder message for the pending subscribers:
- * one name per line, followed by a short reminder text. First names are
- * only extended with the last name when ambiguous; duplicates are removed.
+ * one name per line, followed by a short reminder text and the direct link to
+ * the match. First names are only extended with the last name when ambiguous;
+ * duplicates are removed.
  */
-function buildReminderText(pending: Player[]): string {
+function buildReminderText(pending: Player[], matchUrl: string): string {
   const firstCounts: Record<string, number> = {};
   for (const p of pending) firstCounts[p.firstName] = (firstCounts[p.firstName] ?? 0) + 1;
 
@@ -434,5 +435,5 @@ function buildReminderText(pending: Player[]): string {
     seen.add(key);
     names.push(name);
   }
-  return `${names.join("\n")}\n\nDon't forget to sign up or cancel for the next game.`;
+  return `${names.join("\n")}\n\nDon't forget to sign up or cancel for the next game.\n\n${matchUrl}`;
 }
