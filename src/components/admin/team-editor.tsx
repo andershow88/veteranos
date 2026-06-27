@@ -84,7 +84,12 @@ export function TeamEditor({
     if (!el) return;
     setCopying(true);
 
-    const imgOpts = { backgroundColor: "#0c1117", pixelRatio: 2 };
+    // Match the export canvas to the active theme. A hard-coded dark background
+    // made light-mode exports unreadable: the cards use dark text on a
+    // translucent surface, so on a near-black canvas it was dark-on-dark. Light
+    // mode now exports on white; dark mode keeps the original dark canvas.
+    const isDark = document.documentElement.classList.contains("dark");
+    const imgOpts = { backgroundColor: isDark ? "#0c1117" : "#ffffff", pixelRatio: 2 };
 
     const canClipboard =
       typeof navigator?.clipboard?.write === "function" &&
@@ -248,7 +253,7 @@ function EditorTeamCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border bg-surface/40 transition-all duration-200 ${
+      className={`relative overflow-hidden rounded-2xl border bg-bg-elevated dark:bg-surface/40 transition-all duration-200 ${
         isTargetTeam
           ? "border-pitch-400/60 shadow-lg shadow-pitch-500/10"
           : "border-border-strong/60"
