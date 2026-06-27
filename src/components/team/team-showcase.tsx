@@ -38,7 +38,7 @@ export function TeamShowcase({ teams }: { teams: TeamWithSlots[] }) {
 function TeamCard({ team }: { team: TeamWithSlots }) {
   const palette = TEAM_PALETTE[team.color as TeamColor];
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border-strong/60 bg-surface/40">
+    <div className="relative overflow-hidden rounded-2xl border border-border-strong/60 bg-bg-elevated dark:bg-surface/40">
       <div
         className={`relative px-5 py-4 bg-linear-to-br ${palette.chip} animate-shine`}
         style={{
