@@ -229,23 +229,12 @@ export function MatchCard({
               <span />
             )}
             {currentPlayer.role === "ADMIN" && (
-              <div className="flex items-center gap-3">
-                <a
-                  href={waShareUrl("Hey guys, just a reminder to sign up for the next game!\n\nhttps://veteranos.club")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-muted transition hover:text-success"
-                  title="Send WhatsApp reminder"
-                >
-                  <Share2 className="h-3 w-3" /> WhatsApp
-                </a>
-                <Link
-                  href={`/admin/matches/${view.id}`}
-                  className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
-                >
-                  Admin →
-                </Link>
-              </div>
+              <Link
+                href={`/admin/matches/${view.id}`}
+                className="text-xs uppercase tracking-widest text-muted hover:text-pitch-300 transition"
+              >
+                Admin →
+              </Link>
             )}
           </div>
         )}
